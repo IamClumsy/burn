@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { fresh, merge, payClient, setState, S, KEEP_RATE } from "./state";
-import { missionKeep, missionReward, bulkCost, clickVal, cps, credGain, heatMult, incomeMult, maxAfford, owned, succChance } from "./calc";
+import { REINSTATE_MIN, missionKeep, missionReward, bulkCost, clickVal, cps, credGain, heatMult, incomeMult, maxAfford, owned, succChance } from "./calc";
 import { GENS } from "./data/ops";
 import { fmt, money } from "./util";
 import type { Mission } from "./types";
@@ -49,9 +49,18 @@ describe("economy", () => {
   });
 
   it("credibility grows with the square root of the run", () => {
-    S.run = 4e6;
-    expect(credGain()).toBe(2);
-    S.run = 5e5;
+    S.run = 1e8;
+    expect(credGain()).toBe(3);
+    S.run = 4e8;
+    expect(credGain()).toBe(6);
+    S.run = 1e10;
+    expect(credGain()).toBe(31);
+  });
+
+  it("reinstating is locked until the minimum run earnings", () => {
+    S.run = REINSTATE_MIN - 1;
+    expect(credGain()).toBe(0);
+    S.run = 4e6; // used to qualify; now far too early
     expect(credGain()).toBe(0);
   });
 

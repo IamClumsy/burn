@@ -83,7 +83,10 @@ export const bribeCost = (): number => Math.max(100, cps() * 60) * (S.allies.bar
 export const contactPrice = (id: "seymour" | "simon"): number =>
   Math.max(500, cps() * 90) * Math.pow(1.12, id === "seymour" ? S.seymourBought : S.simonBought) * (S.allies.barry ? 0.75 : 1);
 export const perkCost = (id: string): number => Math.ceil(2 * Math.pow(1.5, perk(id)));
-export const credGain = (): number => Math.floor(Math.sqrt(S.run / 1e6));
+/** Earnings needed in a single run before Reinstate unlocks. Tune pacing here. */
+export const REINSTATE_MIN = 1e8;
+/** Credibility from a run: zero below the minimum, then the square root of earnings in units of $10M. */
+export const credGain = (): number => (S.run < REINSTATE_MIN ? 0 : Math.floor(Math.sqrt(S.run / 1e7)));
 
 // ---- missions
 /** Hired and actually around: Nate is only here when he hasn't wandered off. */

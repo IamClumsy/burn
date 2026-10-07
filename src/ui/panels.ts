@@ -1,6 +1,6 @@
 import { S } from "../state";
 import {
-  allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
+  REINSTATE_MIN, allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
@@ -172,7 +172,7 @@ function medals(): string {
 function reinstate(): string {
   const g = credGain();
   return `<p class="small">Call in the favor that gets you reinstated. You reset cash, ops, upgrades and missions. You keep allies, perks, medals, story and covers.</p>
-    <p>${g >= 1 ? `Reset for <b style="color:var(--gold)">+${g} Credibility</b> (each point +10% income, forever) and +${g} favors.` : `Earn $1M this run to qualify (${money(S.run)} so far).`}</p>
+    <p>${g >= 1 ? `Reset for <b style="color:var(--gold)">+${g} Credibility</b> (each point +10% income, forever) and +${g} favors.` : `Earn ${money(REINSTATE_MIN)} in a single run to qualify (${money(S.run)} so far).`}</p>
     <div class="btns"><button data-act="prestige" ${g < 1 ? "disabled" : ""}>Get Reinstated</button></div>`;
 }
 

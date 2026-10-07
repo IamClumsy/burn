@@ -83,9 +83,15 @@ function missions(): string {
   }
   h += `<h2 style="margin-top:12px">Board</h2>`;
   h += S.board.map(m => {
-    const al = ALLIES.find(a => a.id === m.ally)!, free = allyFree(m.ally);
+    const al = ALLIES.find(a => a.id === m.ally)!, free = allyFree(m.ally), first = al.name.split(" ")[0];
+    const out = S.active.find(a => a.sent === m.ally);
+    // Say exactly why the ally can't go, so a greyed-out button is never a mystery.
+    const why = !S.allies[m.ally] ? `Hire ${first} in Crew to send him (+25%)`
+      : out ? `${first} is out on "${out.n}", back in ${Math.ceil(out.left)}s`
+      : !allyHere(m.ally) ? `${first} has wandered off` : "";
     return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}</b><div class="small">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
-      <div class="btns">${S.allies[m.ally] ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Send ${al.name.split(" ")[0]} (+25%)${free ? "" : " — busy"}</button>` : ""}
+      ${why ? `<div class="small" style="margin-top:4px;color:var(--gold)">${why}</div>` : ""}
+      <div class="btns">${S.allies[m.ally] ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Send ${first} (+25%)</button>` : ""}
       <button data-act="start" data-arg="${m.uid}" ${S.active.length >= 3 ? "disabled" : ""}>Start mission</button></div></div>`;
   }).join("");
   return h;

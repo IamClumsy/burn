@@ -36,7 +36,8 @@ $("sections").addEventListener("mousedown", onAct);
 $("modalBody").addEventListener("mousedown", onAct);
 
 // ---- pop-ups
-$("toolbar").addEventListener("click", e => {
+// Pop-ups open from the toolbar and from the buttons inside The Loft.
+document.addEventListener("click", e => {
   const b = (e.target as HTMLElement).closest<HTMLElement>("[data-modal]");
   if (b) showModal(b.dataset.modal as TabId);
 });

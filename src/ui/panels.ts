@@ -20,14 +20,18 @@ export type TabId = "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "ro
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
-  ["mis", "Missions"], ["upg", "Upgrades"], ["ops", "Operations"], ["crew", "Crew"],
-  ["gad", "Gadgets"], ["cov", "Covers"], ["fav", "Favors"],
+  ["mis", "Missions"], ["upg", "Upgrades"], ["ops", "Operations"],
+  ["gad", "Gadgets"], ["fav", "Favors"],
 ];
 
 /** Reference and rare screens: opened as pop-ups from the toolbar. */
 export const MODALS: [TabId, string][] = [
+  ["crew", "Crew"], ["cov", "Covers"],
   ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"],
 ];
+
+/** Crew and Covers open from buttons in The Loft card, so they're left off the toolbar. */
+const LOFT_ONLY: TabId[] = ["crew", "cov"];
 
 export const titleOf = (id: TabId): string => [...SECTIONS, ...MODALS].find(([i]) => i === id)![1];
 
@@ -35,7 +39,8 @@ export const titleOf = (id: TabId): string => [...SECTIONS, ...MODALS].find(([i]
 export function buildLayout(host: HTMLElement, toolbar: HTMLElement): void {
   host.innerHTML = SECTIONS.map(([id, t]) =>
     `<div class="card sec sec-${id}"><h2>${t}</h2><div class="secbody" id="sec-${id}"></div></div>`).join("");
-  toolbar.innerHTML = MODALS.map(([id, t]) => `<button data-modal="${id}">${t}</button>`).join("");
+  toolbar.innerHTML = MODALS.filter(([id]) => !LOFT_ONLY.includes(id))
+    .map(([id, t]) => `<button data-modal="${id}">${t}</button>`).join("");
 }
 
 function item(act: string, arg: string | number, can: boolean, title: string, desc: string, right: string, cls = ""): string {

@@ -55,7 +55,7 @@ export const EVENTS: GameEvent[] = [
   {t:"Loan Sharks at the Door", d:"A cell-phone salesman invested in a fake nightclub, borrowed from the wrong people, and now they're at his door.", o:[
     ["Make the loan sharks go away", () => help(65, 1, 9, "You show the sharks why the salesman is not worth the trouble. He sends a thank-you fruit basket.")],
     ["Find the scammer who sold him the club", () => help(75, 2, 11, "Following the scam's money leads you to the real crook. The salesman gets his savings back. +2 favors.")]]},
-  {t:"A Friend's Friend", d:"Sam says an old teammate has been called a dirty cop and needs help clearing his name. 'Free football tickets,' Sam adds.", o:[
+  {t:"A Friend's Friend", d:"Sam says an old teammate has been framed as a dirty cop and needs help clearing his name. 'Free football tickets,' Sam adds.", o:[
     ["Dig into the case", () => help(70, 2, 8, "The cop was framed. The real culprit gets exposed. Sam gets his tickets. +2 favors.")],
     ["Bring Jesse in", () => help(80, 2, 10, "Jesse finds the paper trail. The cop gets his badge, and his name, back.")]]},
   {t:"A Father in Despair", d:"A man lost his savings on a 'miracle drug' for his sick son. He's out of options. You aren't.", o:[

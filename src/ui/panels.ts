@@ -47,7 +47,7 @@ const costAndOwn = (cost: string, own: string | number) =>
   `<div style="display:flex;gap:12px;align-items:center"><div class="cost">${cost}</div><div class="own">${own}</div></div>`;
 
 function ops(): string {
-  let h = `<div class="tabs">` + ([1, 10, "max"] as const).map(a =>
+  let h = `<div class="tabs">` + ([1, 10, 100, "max"] as const).map(a =>
     `<button class="tab ${S.buyAmt === a ? "active" : ""}" data-act="amt" data-arg="${a}">Buy ${a === "max" ? "max" : "×" + a}</button>`).join("") + `</div>`;
   GENS.forEach((g, i) => {
     if (i > 0 && S.life < GENS[i - 1].base * 0.5 && !owned(g.id)) return;

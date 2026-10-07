@@ -67,9 +67,13 @@ export const discount = (): number => 1 - 0.03 * perk("friends");
 export function bulkCost(g: Gen, n: number): number {
   return g.base * Math.pow(R, owned(g.id)) * discount() * (Math.pow(R, n) - 1) / (R - 1);
 }
+/** How many of an operation the cash covers (no cap): closed-form geometric sum, then fix rounding. */
 export function maxAfford(g: Gen): number {
-  let n = 0;
-  while (n < 500 && bulkCost(g, n + 1) <= S.cash) n++;
+  const first = g.base * Math.pow(R, owned(g.id)) * discount();
+  if (S.cash < first) return 0;
+  let n = Math.floor(Math.log(1 + (S.cash * (R - 1)) / first) / Math.log(R));
+  while (n > 0 && bulkCost(g, n) > S.cash) n--;
+  while (bulkCost(g, n + 1) <= S.cash && n < 1e6) n++;
   return n;
 }
 export const buyN = (g: Gen): number => (S.buyAmt === "max" ? Math.max(1, maxAfford(g)) : S.buyAmt);

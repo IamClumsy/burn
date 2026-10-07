@@ -38,6 +38,16 @@ describe("economy", () => {
     expect(bulkCost(GENS[0], n + 1)).toBeGreaterThan(5000);
   });
 
+  it("maxAfford has no cap and matches the real price", () => {
+    S.cash = 1e60;
+    const n = maxAfford(GENS[0]);
+    expect(n).toBeGreaterThan(500);
+    expect(bulkCost(GENS[0], n)).toBeLessThanOrEqual(1e60);
+    expect(bulkCost(GENS[0], n + 1)).toBeGreaterThan(1e60);
+    S.cash = 1;
+    expect(maxAfford(GENS[0])).toBe(0);
+  });
+
   it("credibility grows with the square root of the run", () => {
     S.run = 4e6;
     expect(credGain()).toBe(2);

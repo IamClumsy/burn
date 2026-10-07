@@ -70,7 +70,7 @@ export interface GameState {
   junk: Dict<number>;
   cover: string; coverCd: number; board: Mission[]; active: ActiveMission[]; uid: number;
   story: number; ach: string[]; stats: Stats;
-  buyAmt: 1 | 10 | "max"; mute: boolean; seymourBought: number; simonBought: number;
+  buyAmt: 1 | 10 | 100 | "max"; mute: boolean; seymourBought: number; simonBought: number;
   /** Nate wanders off and returns on a random timer. */
   nateAway: boolean; nateTimer: number;
   /** Story choices: beat index -> option index. */

@@ -20,7 +20,7 @@ export type TabId = "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "ro
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
-  ["ops", "Operations"], ["mis", "Missions"], ["upg", "Upgrades"], ["crew", "Crew"],
+  ["mis", "Missions"], ["upg", "Upgrades"], ["ops", "Operations"], ["crew", "Crew"],
   ["gad", "Gadgets"], ["cov", "Covers"], ["fav", "Favors"],
 ];
 

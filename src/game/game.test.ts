@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -9,7 +9,9 @@ import { buyFavorFrom, useAbility } from "./actions";
 import { arcAvailable, startArc } from "./arcs";
 import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
-import { choiceMult, choiceSucc, missionReward } from "../calc";
+import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missionReward } from "../calc";
+import { allBeaten, checkEnding, reduceGrip, simonTip, spawnErrand } from "./org";
+import { GRIP_PERKS, TIERS } from "../data/org";
 import { allyFree, allyHere, contactPrice, succChance } from "../calc";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { spawnBoss, strike } from "./bosses";
@@ -125,6 +127,96 @@ describe("case arcs", () => {
     S.active = [1, 2, 3].map(n => ({ uid: n, n: "x", dur: 10, succ: .5, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false, sent: null, left: 10, chance: .5, reward: 1 }));
     startArc(ARCS[0].id);
     expect(S.active.length).toBe(3);
+  });
+});
+
+describe("the Organization", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("attention has named stages that make things harder", () => {
+    S.att = 0; expect(attTier()).toBe(0);
+    const calm = heatMult();
+    S.att = 25; expect(attTier()).toBe(1);
+    S.att = 50; expect(attTier()).toBe(2);
+    S.att = 80; expect(attTier()).toBe(3);
+    expect(heatMult()).toBeCloseTo(calm * 1.3);
+    const m = { uid: 1, n: "t", dur: 1, succ: .5, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false };
+    expect(succChance(m)).toBeCloseTo(0.4);
+    // kids stay guaranteed no matter how hot it is
+    expect(succChance({ ...m, kid: true })).toBe(1);
+  });
+
+  it("wearing down their grip unlocks permanent perks", () => {
+    S.gens.inf = 20;
+    const base = incomeMult();
+    reduceGrip(30); // 70: Rattled
+    expect(S.grip).toBe(70);
+    expect(incomeMult()).toBeCloseTo(base * 1.05);
+    reduceGrip(50); // 20: past Losing Hold
+    expect(gripFixer()).toBe(0.5);
+    reduceGrip(500);
+    expect(S.grip).toBe(0); // never below zero
+  });
+
+  it("winning a boss crosses a name off the List and loosens their grip", () => {
+    S.life = 1e13; S.gens.inf = 5;
+    spawnBoss();
+    const id = S.boss!.id;
+    S.boss!.hp = 1;
+    strike();
+    expect(S.listKnown[id]).toBe(true);
+    expect(S.grip).toBe(95);
+  });
+
+  it("Simon sometimes passes you a name", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.1);
+    simonTip();
+    expect(Object.keys(S.listKnown).length).toBe(1);
+    vi.spyOn(Math, "random").mockReturnValue(0.9);
+    simonTip();
+    expect(Object.keys(S.listKnown).length).toBe(1);
+  });
+
+  it("completing the List lifts the burn once", () => {
+    S.gens.inf = 20;
+    for (const b of BOSSES) S.bossKills[b.id] = 1;
+    const before = incomeMult(); // already includes the per-boss bonuses
+    expect(allBeaten()).toBe(true);
+    checkEnding();
+    expect(S.cleanRecord).toBe(true);
+    expect(S.favors).toBe(15);
+    expect(incomeMult()).toBeCloseTo(before * 1.25);
+    checkEnding();
+    expect(S.favors).toBe(15);
+  });
+
+  it("handlers only call once they're watching, and you can refuse", () => {
+    S.att = 5; S.gens.inf = 10;
+    spawnErrand();
+    expect(document.getElementById("evt")!.style.display).not.toBe("flex");
+    S.att = 30;
+    spawnErrand();
+    expect(document.getElementById("evt")!.style.display).toBe("flex");
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>("#evtO button")];
+    expect(buttons.map(b => b.textContent)).toContain("Refuse");
+    buttons.find(b => b.textContent === "Refuse")!.click();
+    expect(S.favors).toBe(1);
+    expect(S.att).toBe(35);
+  });
+
+  it("doing the job as asked pays well but raises attention", () => {
+    S.att = 30; S.gens.inf = 10;
+    spawnErrand();
+    const cash = S.cash;
+    [...document.querySelectorAll<HTMLButtonElement>("#evtO button")].find(b => b.textContent === "Do the job as asked")!.click();
+    expect(S.cash).toBeGreaterThan(cash);
+    expect(S.att).toBe(40);
+    expect(S.stats.errands).toBe(1);
+  });
+
+  it("data is ordered sensibly", () => {
+    for (let i = 1; i < TIERS.length; i++) expect(TIERS[i].min).toBeGreaterThan(TIERS[i - 1].min);
+    for (let i = 1; i < GRIP_PERKS.length; i++) expect(GRIP_PERKS[i].at).toBeLessThan(GRIP_PERKS[i - 1].at);
   });
 });
 

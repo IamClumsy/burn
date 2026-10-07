@@ -58,7 +58,7 @@ export interface Stats {
   clicks: number; burns: number; mDone: number; mFail: number; crafted: number;
   ambush: number; reinstated: number; time: number; kidMissions: number;
   /** Favors bought from Seymour, across all runs. */
-  seymourFavors: number; simonFavors: number;
+  seymourFavors: number; simonFavors: number; errands: number;
   /** Total client money Michael handed back instead of keeping. */
   returned: number;
 }
@@ -73,6 +73,14 @@ export interface GameState {
   buyAmt: 1 | 10 | 100 | "max"; mute: boolean; seymourBought: number; simonBought: number;
   /** Nate wanders off and returns on a random timer. */
   nateAway: boolean; nateTimer: number;
+  /** The Organization's grip on you: starts at 100 and is worn down by wins. */
+  grip: number;
+  /** Names of people on the List that you know about (from wins or Simon's tips). */
+  listKnown: Dict<boolean>;
+  /** Highest Organization attention ever reached, which fills in their dossier on you. */
+  attPeak: number;
+  /** True once the List is complete and the burn is lifted. */
+  cleanRecord: boolean;
   /** Story choices: beat index -> option index. */
   choices: Dict<number>;
   /** Multi-step cases: current step per arc, and which are closed. */

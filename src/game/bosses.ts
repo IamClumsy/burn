@@ -6,6 +6,7 @@ import { money, pick } from "../util";
 import { floatText, hitBoss, say, shake, toast } from "../ui/fx";
 import { fmt } from "../util";
 import { checkBurn } from "./heat";
+import { learnName, reduceGrip } from "./org";
 
 export function spawnBoss(): void {
   const pool = BOSSES.filter(b => S.life >= b.at);
@@ -22,6 +23,7 @@ export function winBoss(): void {
   const reward = cps() * 200 * b.hpm + 500, fav = Math.ceil(2 * b.hpm);
   const first = !S.bossKills[b.id];
   earn(reward); S.favors += fav; S.bossKills[b.id] = (S.bossKills[b.id] || 0) + 1;
+  learnName(b.id); reduceGrip(5);
   S.boss = null; S.bossCd = 240 + Math.random() * 180;
   chime();
   toast(b.n + " defeated", `+${money(reward)}, +${fav} favors${first ? " · first win: +3% income forever" : ""}`);

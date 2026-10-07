@@ -31,5 +31,8 @@ export const MEDALS: Medal[] = [
   {id:"a24",n:"A Necessary Evil", d:"Buy 10 favors from your frienemies, Seymour and Simon", t:s=>s.stats.seymourFavors+s.stats.simonFavors>=10},
   {id:"a25",n:"Open and Shut",    d:"Close a multi-step case", t:s=>Object.keys(s.arcsDone).length>=1},
   {id:"a26",n:"Full Docket",      d:"Close every case", t:s=>ARCS.every(a=>s.arcsDone[a.id])},
+  {id:"a27",n:"Slipping Away",    d:"Wear the Organization's grip down to 50%", t:s=>s.grip<=50},
+  {id:"a28",n:"Clean Record",     d:"Complete the List and lift the burn", t:s=>s.cleanRecord},
+  {id:"a29",n:"Handled",          d:"Take on 5 errands for a handler", t:s=>s.stats.errands>=5},
   {id:"a21",n:"Case Files",       d:"Take on 25 missions",        t:s=>s.stats.mDone+s.stats.mFail>=25},
 ];

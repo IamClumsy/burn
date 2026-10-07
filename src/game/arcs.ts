@@ -3,6 +3,7 @@ import { allyFree, missionReward, succChance } from "../calc";
 import { ARCS } from "../data/arcs";
 import { beep, chime } from "../audio";
 import { say, toast } from "../ui/fx";
+import { reduceGrip } from "./org";
 import type { Arc, Mission } from "../types";
 
 export const arcStep = (a: Arc): number => S.arcStep[a.id] || 0;
@@ -32,6 +33,7 @@ export function advanceArc(id: string, step: number): void {
   if (step + 1 >= a.steps.length) {
     S.arcsDone[id] = true;
     S.favors += a.favors;
+    reduceGrip(8);
     chime();
     toast("Case closed: " + a.title, `+${a.favors} favors. ${a.epilogue}`);
     say(a.epilogue);

@@ -4,6 +4,7 @@ import { UPGS } from "./data/upgrades";
 import { COVERS } from "./data/covers";
 import { BOSSES } from "./data/bosses";
 import { STORY } from "./data/story";
+import { GRIP_PERKS, TIERS } from "./data/org";
 import type { Boss, ChoiceFx, Gen, Mission } from "./types";
 
 /** Fx from every story choice the player has made. */
@@ -19,6 +20,20 @@ export const choiceMult = (key: "inc" | "heat" | "att" | "mis"): number =>
   chosenFx().reduce((m, f) => m * (1 + (f[key] || 0)), 1);
 export const choiceSucc = (): number => chosenFx().reduce((s, f) => s + (f.succ || 0), 0);
 
+/** Current Organization attention stage (index into TIERS). */
+export function attTier(): number {
+  let t = 0;
+  TIERS.forEach((x, i) => { if (S.att >= x.min) t = i; });
+  return t;
+}
+export const tierDef = () => TIERS[attTier()];
+
+/** Perks unlocked by wearing down the Organization's grip. */
+export const gripPerks = () => GRIP_PERKS.filter(p => S.grip <= p.at);
+export const gripInc = (): number => gripPerks().reduce((m, p) => m * (1 + (p.inc || 0)), 1);
+export const gripAtt = (): number => gripPerks().reduce((m, p) => m * (1 + (p.att || 0)), 1);
+export const gripFixer = (): number => gripPerks().reduce((m, p) => m * (p.fixer ?? 1), 1);
+
 export const owned = (id: string): number => S.gens[id] || 0;
 export const totalOps = (): number => GENS.reduce((a, g) => a + owned(g.id), 0);
 export const cover = () => COVERS.find(c => c.id === S.cover) || COVERS[0];
@@ -29,7 +44,7 @@ export function incomeMult(): number {
   for (const u of UPGS) if (S.upgs[u.id] && u.kind === "all") m *= u.m!;
   if (S.fx.boost > 0) m *= 2;
   if (allyHere("nate")) m *= 1.15;
-  return m * choiceMult("inc");
+  return m * choiceMult("inc") * gripInc() * (S.cleanRecord ? 1.25 : 1);
 }
 
 export const genMult = (id: string): number =>
@@ -55,7 +70,7 @@ export function heatMult(): number {
   if (S.upgs.h1) m *= 0.6;
   if (S.allies.sam) m *= 0.85;
   m *= Math.max(0.3, 1 - 0.05 * perk("head"));
-  return m * choiceMult("heat");
+  return m * choiceMult("heat") * tierDef().heat;
 }
 
 export const layAmt = (): number => (S.upgs.h2 ? 60 : 35);
@@ -78,7 +93,7 @@ export function maxAfford(g: Gen): number {
 }
 export const buyN = (g: Gen): number => (S.buyAmt === "max" ? Math.max(1, maxAfford(g)) : S.buyAmt);
 
-export const bribeCost = (): number => Math.max(100, cps() * 60) * (S.allies.barry ? 0.5 : 1);
+export const bribeCost = (): number => Math.max(100, cps() * 60) * (S.allies.barry ? 0.5 : 1) * gripFixer();
 /** Frienemy favors get pricier with each purchase (resets on reinstatement). Barry negotiates a discount. */
 export const contactPrice = (id: "seymour" | "simon"): number =>
   Math.max(500, cps() * 90) * Math.pow(1.12, id === "seymour" ? S.seymourBought : S.simonBought) * (S.allies.barry ? 0.75 : 1);
@@ -94,7 +109,7 @@ export const allyHere = (id: string): boolean => !!S.allies[id] && !(id === "nat
 export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);
 export function succChance(m: Mission): number {
   if (m.kid) return 1; // Michael never fails when a kid is involved
-  const c = m.succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
+  const c = m.succ + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
   return Math.min(0.97, c);
 }
 /** What the client pays in total. Michael keeps KEEP_RATE of it. */

@@ -1,6 +1,6 @@
 import { S } from "../state";
 import {
-  REINSTATE_MIN, allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
+  REINSTATE_MIN, tierDef, allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
@@ -12,11 +12,12 @@ import { PERKS, JUNK, RECIPES } from "../data/perks";
 import { STORY } from "../data/story";
 import { MEDALS } from "../data/medals";
 import { ARCS } from "../data/arcs";
+import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS } from "../data/contacts";
 import { fmt, money } from "../util";
 
-export type TabId = "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "med" | "rep";
+export type TabId = "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "med" | "rep";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
@@ -27,7 +28,7 @@ export const SECTIONS: [TabId, string][] = [
 /** Reference and rare screens: opened as pop-ups from the toolbar. */
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"],
-  ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"],
+  ["list", "The List"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"],
 ];
 
 /** Crew and Covers open from buttons in The Loft card, so they're left off the toolbar. */
@@ -187,7 +188,35 @@ function reinstate(): string {
     <div class="btns"><button data-act="prestige" ${g < 1 ? "disabled" : ""}>Get Reinstated</button></div>`;
 }
 
+function theList(): string {
+  const next = GRIP_PERKS.find(p => S.grip > p.at);
+  let h = `<div class="small" style="margin-bottom:8px">The Organization burned you, and they still hold a grip on you. Wins wear it down: missions, bosses, closed cases, and dealing with handlers on your own terms.</div>
+    <div class="box"><div class="row"><b>Their grip on you</b><span class="small">${Math.ceil(S.grip)}%</span></div>
+      <div class="bar"><i style="width:${S.grip}%;background:linear-gradient(90deg,var(--sea),#7b5cff)"></i></div>
+      ${GRIP_PERKS.map(p => `<div class="small" style="color:${S.grip <= p.at ? "var(--gold)" : "var(--dim)"}">${S.grip <= p.at ? "✓" : "○"} At ${p.at}%: ${p.name}, ${p.desc}</div>`).join("")}
+      ${next ? `<div class="small" style="margin-top:4px">Next perk at ${next.at}%.</div>` : ""}</div>`;
+
+  const beaten = BOSSES.filter(b => S.bossKills[b.id]).length;
+  h += `<h2 style="margin-top:12px">The List (${beaten}/${BOSSES.length} crossed off)</h2>`;
+  h += BOSSES.map(b => {
+    const done = S.bossKills[b.id], known = S.listKnown[b.id];
+    const status = done ? "Crossed off" : known ? "Known, not yet faced" : "Unknown";
+    return `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : known ? "color:var(--text)" : "color:var(--dim)"}"><span>${done ? "✓ " : "○ "}${known || done ? b.n : "??????"}</span><span>${status}</span></div>`;
+  }).join("");
+  h += S.cleanRecord
+    ? `<div class="box" style="margin-top:8px;border-color:var(--gold)"><b>The burn is lifted.</b><div class="small" style="color:var(--text)">Every name is crossed off. You're clear, and your income is up 25% for good.</div></div>`
+    : `<div class="small" style="margin-top:6px">Beat each of them to cross them off. Simon sometimes passes you a name. Finish the List to lift the burn.</div>`;
+
+  const t = tierDef();
+  h += `<h2 style="margin-top:14px">Your file</h2><div class="small" style="margin-bottom:4px">Right now they have you as: <b style="color:var(--text)">${t.name}</b>. ${t.note}</div>`;
+  h += DOSSIER.map(d => S.attPeak >= d.peak
+    ? `<div class="dossier">${d.text}</div>`
+    : `<div class="dossier redacted">████████ ████ ██████ (reached at ${d.peak}% attention)</div>`).join("");
+  return h;
+}
+
 const VIEWS: Record<TabId, () => string> = {
+  list: theList,
   ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, story, med: medals, rep: reinstate,
 };
 

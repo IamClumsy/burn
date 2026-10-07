@@ -1,5 +1,5 @@
 import { S } from "../state";
-import { bossDef, bribeCost, clickVal, cover, cps, layAmt, strikeDmg } from "../calc";
+import { bossDef, bribeCost, clickVal, cover, cps, layAmt, strikeDmg, tierDef } from "../calc";
 import { FX_NAMES } from "../data/perks";
 import { fmt, money } from "../util";
 import { $ } from "./dom";
@@ -27,7 +27,9 @@ export function render(): void {
     .map(([k, v]) => `<span class="chip">${FX_NAMES[k]} ${Math.ceil(v)}s</span>`).join("");
   $("heatnum").textContent = Math.floor(S.heat) + "%";
   $("heatbar").style.width = Math.min(100, S.heat) + "%";
-  $("attnum").textContent = Math.floor(S.att) + "%";
+  setText($("attnum"), `${Math.floor(S.att)}% · ${tierDef().name}`);
+  setText($("gripnum"), Math.ceil(S.grip) + "%");
+  $("gripbar").style.width = S.grip + "%";
   $("attbar").style.width = Math.min(100, S.att) + "%";
   $("lay").textContent = S.layCd > 0 ? `Lay Low (${Math.ceil(S.layCd)}s)` : `Lay Low (−${layAmt()} heat)`;
   $<HTMLButtonElement>("lay").disabled = S.layCd > 0 || layBlocked();

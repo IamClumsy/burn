@@ -14,6 +14,7 @@ import { pick } from "../util";
 import { say, toast } from "../ui/fx";
 import { ABILITIES } from "./abilities";
 import { checkBurn } from "./heat";
+import { simonTip } from "./org";
 import { fillBoard, startMission } from "./missions";
 
 export function buyGen(id: string): void {
@@ -100,6 +101,7 @@ export function buyFavorFrom(id: string): void {
     say(pick(SEYMOUR_LINES));
   } else {
     S.simonBought++; S.stats.simonFavors++;
+    simonTip();
     S.att = Math.max(0, S.att - 10);
     if (Math.random() < 0.2) { S.heat += 15; say("Simon goes off script and does something loud. The intel was good. The heat is real."); }
     else say(pick(SIMON_LINES));
@@ -121,6 +123,7 @@ export function prestige(): void {
     cred: S.cred + gain, life: S.life, favors: S.favors + gain, perks: S.perks, allies: S.allies, ach: S.ach,
     stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, buyAmt: S.buyAmt, bossKills: S.bossKills,
     choices: S.choices, arcStep: S.arcStep, arcsDone: S.arcsDone,
+    grip: S.grip, listKnown: S.listKnown, attPeak: S.attPeak, cleanRecord: S.cleanRecord,
   };
   setState(Object.assign(fresh(), keep));
   S.stats.reinstated++;

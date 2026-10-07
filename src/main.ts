@@ -15,6 +15,7 @@ import { fillBoard, startMission } from "./game/missions";
 import { startArc } from "./game/arcs";
 import { strike } from "./game/bosses";
 import { scheduleClient, scheduleEvent } from "./game/events";
+import { scheduleErrand, syncTier } from "./game/org";
 import * as A from "./game/actions";
 
 // ---- card clicks (delegated on mousedown, since cards re-render constantly)
@@ -77,6 +78,8 @@ syncMute();
 say("Burned. No cash, no credit, no agency. Time to take a job.");
 scheduleClient();
 scheduleEvent();
+scheduleErrand();
+syncTier();
 render();
 
 let last = Date.now();
@@ -95,7 +98,7 @@ setInterval(() => say(pick(QUOTES)), 35000);
 
 // Dev-only console hook for manual testing (stripped from production builds).
 if (import.meta.env.DEV) {
-  import("./game/bosses").then(b => {
-    Object.assign(window, { __burn: { get S() { return S; }, spawnBoss: b.spawnBoss, tick, render } });
+  Promise.all([import("./game/bosses"), import("./game/org")]).then(([b, o]) => {
+    Object.assign(window, { __burn: { get S() { return S; }, spawnBoss: b.spawnBoss, spawnErrand: o.spawnErrand, tick, render } });
   });
 }

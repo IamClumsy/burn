@@ -120,6 +120,7 @@ export function prestige(): void {
   const keep = {
     cred: S.cred + gain, life: S.life, favors: S.favors + gain, perks: S.perks, allies: S.allies, ach: S.ach,
     stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, buyAmt: S.buyAmt, bossKills: S.bossKills,
+    choices: S.choices, arcStep: S.arcStep, arcsDone: S.arcsDone,
   };
   setState(Object.assign(fresh(), keep));
   S.stats.reinstated++;

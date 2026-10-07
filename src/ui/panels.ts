@@ -11,6 +11,8 @@ import { BOSSES } from "../data/bosses";
 import { PERKS, JUNK, RECIPES } from "../data/perks";
 import { STORY } from "../data/story";
 import { MEDALS } from "../data/medals";
+import { ARCS } from "../data/arcs";
+import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS } from "../data/contacts";
 import { fmt, money } from "../util";
 
@@ -64,8 +66,18 @@ function upgrades(): string {
 
 function missions(): string {
   let h = `<div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Clients pay well. Michael keeps what he needs for expenses and hands the rest back. Send an ally for +25% success, but they're busy until it ends.</div>`;
+  const open = ARCS.filter(arcAvailable);
+  if (open.length) {
+    h += `<h2>Open Cases</h2>` + open.map(a => {
+      const k = arcStep(a), st = a.steps[k];
+      return `<div class="box"><b>${a.title}</b> <span class="chip">Step ${k + 1} of ${a.steps.length}</span>
+        <div class="small">${a.blurb}</div>
+        <div class="small" style="color:var(--text)">Next: ${st.n} · ${st.dur}s · +${st.heat} heat${S.allies[a.ally] ? "" : ""}</div>
+        <div class="btns"><button data-act="arc" data-arg="${a.id}" ${S.active.length >= 3 ? "disabled" : ""}>Start this step</button></div></div>`;
+    }).join("");
+  }
   if (S.active.length) {
-    h += `<h2>In Progress</h2>` + S.active.map(m => `<div class="box"><div class="row"><b>${m.n}</b><span class="small">${Math.ceil(m.left)}s · ${Math.round(m.chance * 100)}%</span></div>
+    h += `<h2 style="margin-top:12px">In Progress</h2>` + S.active.map(m => `<div class="box"><div class="row"><b>${m.n}</b><span class="small">${Math.ceil(m.left)}s · ${Math.round(m.chance * 100)}%</span></div>
       <div class="bar"><i class="mbar" style="width:${(1 - m.left / m.dur) * 100}%"></i></div>
       <span class="small">Pays ${money(m.reward)} · +${m.fav} favor${m.sent ? " · " + ALLIES.find(a => a.id === m.sent)!.name + " is out" : ""}</span></div>`).join("");
   }
@@ -132,12 +144,19 @@ function rogues(): string {
     BOSSES.map(b => {
       const open = S.life >= b.at, k = S.bossKills[b.id] || 0;
       return `<div class="box" style="${open ? "" : "opacity:.5"}"><div class="row"><b>${open ? b.n : "???"}</b><span class="small">${open ? "Defeated " + k + "×" : "Appears at " + money(b.at) + " lifetime"}</span></div>
-        ${open ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">${b.mech}</div>` : ""}</div>`;
+        ${open ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">${b.mech}</div>
+          ${k > 0 ? `<div class="small" style="margin-top:6px;color:var(--text)"><b>File:</b> ${b.file}</div>` : `<div class="small" style="margin-top:6px">Beat them once to open their file.</div>`}` : ""}</div>`;
     }).join("");
 }
 
 function story(): string {
-  let h = STORY.slice(0, S.story).map((s, i) => `<div class="box"><b>${i + 1}. ${s.t}</b><div class="small" style="font-size:13px;color:var(--text)">${s.x}</div></div>`).join("");
+  let h = STORY.slice(0, S.story).map((s, i) => {
+    const k = S.choices[i], pick = s.choice && k !== undefined ? s.choice.options[k] : null;
+    return `<div class="box"><b>${i + 1}. ${s.t}</b><div class="small" style="font-size:13px;color:var(--text)">${s.x}</div>
+      ${pick ? `<div class="small" style="margin-top:6px;color:var(--gold)">You chose: ${pick.label}. ${pick.result}</div>` : ""}</div>`;
+  }).join("");
+  const closed = ARCS.filter(a => S.arcsDone[a.id]);
+  if (closed.length) h += `<h2 style="margin-top:12px">Closed Cases</h2>` + closed.map(a => `<div class="box"><b>${a.title}</b><div class="small" style="font-size:13px;color:var(--text)">${a.epilogue}</div></div>`).join("");
   if (S.story < STORY.length) h += `<div class="small">Next lead at ${money(STORY[S.story].at)} lifetime earnings.</div>`;
   else h += `<div class="small">The file is closed. The game isn't. Keep stacking.</div>`;
   return h || '<div class="small">Nothing yet. Earn some money and the story finds you.</div>';

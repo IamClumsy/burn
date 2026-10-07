@@ -18,6 +18,8 @@ export interface MissionTpl {
 export interface Mission {
   uid: number; n: string; dur: number; succ: number; heat: number; rm: number; fav: number;
   ally: string; kid: boolean; send: boolean;
+  /** Set when this mission is one step of a multi-step case. */
+  arc?: { id: string; step: number };
 }
 export interface ActiveMission extends Mission { sent: string | null; left: number; chance: number; reward: number }
 
@@ -26,6 +28,8 @@ export interface Cover { id: string; name: string; desc: string; job: number; in
 export type BossTag = "heat" | "att" | "steal" | "heal" | "fx" | "freeze" | "weak" | "rush" | "nolay";
 export interface Boss {
   id: string; n: string; title: string; at: number; hpm: number; m: BossTag[]; mech: string; intro: string;
+  /** Character file, unlocked by beating them once. */
+  file: string;
 }
 export interface ActiveBoss { id: string; hp: number; max: number; left: number }
 
@@ -34,7 +38,19 @@ export interface Contact { id: "seymour" | "simon"; name: string; kind: string; 
 
 export interface Perk { id: string; name: string; desc: string }
 export interface Recipe { id: string; name: string; desc: string; need: Dict<number> }
-export interface StoryBeat { at: number; t: string; fav: number; x: string }
+/** Permanent bonuses a story choice can grant. Values are fractions: inc 0.1 means +10% income. */
+export interface ChoiceFx { inc?: number; heat?: number; att?: number; mis?: number; succ?: number; favors?: number }
+export interface StoryChoice {
+  prompt: string;
+  options: { label: string; result: string; fx: ChoiceFx }[];
+}
+export interface StoryBeat { at: number; t: string; fav: number; x: string; choice?: StoryChoice }
+
+/** A multi-step case built from a story-heavy episode. Finish every step to close it. */
+export interface Arc {
+  id: string; title: string; at: number; ally: string; blurb: string; epilogue: string; favors: number;
+  steps: { n: string; dur: number; succ: number; heat: number; rm: number }[];
+}
 export interface Medal { id: string; n: string; d: string; t: (s: GameState) => boolean }
 export interface GameEvent { t: string; d: string; o: [label: string, run: () => string][] }
 
@@ -57,5 +73,9 @@ export interface GameState {
   buyAmt: 1 | 10 | "max"; mute: boolean; seymourBought: number; simonBought: number;
   /** Nate wanders off and returns on a random timer. */
   nateAway: boolean; nateTimer: number;
+  /** Story choices: beat index -> option index. */
+  choices: Dict<number>;
+  /** Multi-step cases: current step per arc, and which are closed. */
+  arcStep: Dict<number>; arcsDone: Dict<boolean>;
   boss: ActiveBoss | null; bossCd: number; bossKills: Dict<number>;
 }

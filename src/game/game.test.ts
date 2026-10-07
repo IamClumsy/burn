@@ -6,6 +6,10 @@ import { resolve } from "node:path";
 import { S, fresh, setState } from "../state";
 import { tick, tickNate } from "./tick";
 import { buyFavorFrom, useAbility } from "./actions";
+import { arcAvailable, startArc } from "./arcs";
+import { ARCS } from "../data/arcs";
+import { STORY } from "../data/story";
+import { choiceMult, choiceSucc, missionReward } from "../calc";
 import { allyFree, allyHere, contactPrice, succChance } from "../calc";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { spawnBoss, strike } from "./bosses";
@@ -57,6 +61,70 @@ describe("frienemies", () => {
     S.cash = 0;
     buyFavorFrom("seymour"); buyFavorFrom("simon");
     expect(S.favors).toBe(0);
+  });
+});
+
+describe("story choices", () => {
+  const idx = STORY.findIndex(b => b.t === "The Founder");
+
+  it("a choice applies a permanent bonus", () => {
+    S.gens.inf = 20;
+    const before = choiceMult("inc");
+    expect(before).toBe(1);
+    S.choices[idx] = 0; // take his deal: +15% income, +20% attention
+    expect(choiceMult("inc")).toBeCloseTo(1.15);
+    expect(choiceMult("att")).toBeCloseTo(1.2);
+  });
+
+  it("choices are independent and can stack", () => {
+    const carla = STORY.findIndex(b => b.t === "A Case Officer Named Carla");
+    const burned = STORY.findIndex(b => b.t === "Another Burned Spy");
+    const base = missionReward({ uid: 1, n: "t", dur: 1, succ: .5, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false });
+    S.choices[carla] = 0; S.choices[burned] = 0;
+    expect(choiceSucc()).toBeCloseTo(0.05);
+    const after = missionReward({ uid: 1, n: "t", dur: 1, succ: .5, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false });
+    expect(after / base).toBeCloseTo(1.15, 1);
+  });
+});
+
+describe("case arcs", () => {
+  it("are locked until you've earned enough", () => {
+    expect(arcAvailable(ARCS[0])).toBe(false);
+    S.life = ARCS[0].at;
+    expect(arcAvailable(ARCS[0])).toBe(true);
+  });
+
+  it("advance one step per success and close with the last", () => {
+    const a = ARCS[0];
+    S.life = a.at; S.gens.inf = 10;
+    for (let step = 0; step < a.steps.length; step++) {
+      startArc(a.id);
+      const m = S.active.find(x => x.arc?.id === a.id)!;
+      expect(m.arc!.step).toBe(step);
+      m.chance = 1;
+      resolveMission(m);
+    }
+    expect(S.arcsDone[a.id]).toBe(true);
+    expect(S.favors).toBeGreaterThanOrEqual(a.favors);
+    expect(arcAvailable(a)).toBe(false);
+  });
+
+  it("a failed step doesn't advance the case", () => {
+    const a = ARCS[0];
+    S.life = a.at;
+    startArc(a.id);
+    const m = S.active[0];
+    m.chance = 0;
+    resolveMission(m);
+    expect(S.arcStep[a.id] || 0).toBe(0);
+    expect(arcAvailable(a)).toBe(true);
+  });
+
+  it("won't start while all three mission slots are busy", () => {
+    S.life = ARCS[0].at;
+    S.active = [1, 2, 3].map(n => ({ uid: n, n: "x", dur: 10, succ: .5, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false, sent: null, left: 10, chance: .5, reward: 1 }));
+    startArc(ARCS[0].id);
+    expect(S.active.length).toBe(3);
   });
 });
 

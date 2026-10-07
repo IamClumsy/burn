@@ -12,6 +12,7 @@ import { loadGame, save, wipeSave, exportSave, importSave } from "./persist";
 import { tick } from "./game/tick";
 import { checkBurn, layLow } from "./game/heat";
 import { fillBoard, startMission } from "./game/missions";
+import { startArc } from "./game/arcs";
 import { strike } from "./game/bosses";
 import { scheduleClient, scheduleEvent } from "./game/events";
 import * as A from "./game/actions";
@@ -21,7 +22,7 @@ const ACT: Record<string, (arg: string) => void> = {
   amt: a => { S.buyAmt = a === "max" ? "max" : (+a as 1 | 10); },
   gen: A.buyGen, upg: A.buyUpg, hire: A.hireAlly, ability: A.useAbility,
   cover: A.setCover, perk: A.buyPerk, contact: A.buyFavorFrom, craft: A.craft,
-  start: a => startMission(+a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
+  start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
 };
 const onAct = (e: MouseEvent) => {
   const t = (e.target as HTMLElement).closest<HTMLElement>("[data-act]");

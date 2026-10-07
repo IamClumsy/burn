@@ -9,6 +9,7 @@ import { STORY } from "./story";
 import { MEDALS } from "./medals";
 import { RECIPES, JUNK, PERKS } from "./perks";
 import { EVENTS } from "./events";
+import { ARCS } from "./arcs";
 import { ABILITIES } from "../game/abilities";
 
 const unique = (a: string[]) => new Set(a).size === a.length;
@@ -54,6 +55,29 @@ describe("data integrity", () => {
   it("story and bosses unlock in ascending order", () => {
     for (let i = 1; i < STORY.length; i++) expect(STORY[i].at).toBeGreaterThan(STORY[i - 1].at);
     for (let i = 1; i < GENS.length; i++) expect(GENS[i].base).toBeGreaterThan(GENS[i - 1].base);
+  });
+
+  it("every boss has a character file", () => {
+    for (const b of BOSSES) expect(b.file.length, b.id).toBeGreaterThan(80);
+  });
+
+  it("story choices are real decisions with two options each", () => {
+    const withChoice = STORY.filter(b => b.choice);
+    expect(withChoice.length).toBeGreaterThanOrEqual(3);
+    for (const b of withChoice) {
+      expect(b.choice!.options.length, b.t).toBe(2);
+      for (const o of b.choice!.options) expect(Object.keys(o.fx).length, o.label).toBeGreaterThan(0);
+    }
+  });
+
+  it("case arcs are well formed", () => {
+    const allies = new Set(ALLIES.map(a => a.id));
+    expect(unique(ARCS.map(a => a.id))).toBe(true);
+    for (const a of ARCS) {
+      expect(allies.has(a.ally), a.id).toBe(true);
+      expect(a.steps.length, a.id).toBeGreaterThanOrEqual(3);
+      for (const st of a.steps) expect(st.succ, a.id).toBeLessThan(1);
+    }
   });
 
   it("every event offers at least two choices", () => {

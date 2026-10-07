@@ -5,6 +5,7 @@ import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
 import { money, pick } from "../util";
 import { say, toast } from "../ui/fx";
+import { advanceArc, failArcStep } from "./arcs";
 import type { ActiveMission, Mission } from "../types";
 
 export function newMission(): Mission {
@@ -38,12 +39,14 @@ export function resolveMission(m: ActiveMission): void {
   if (Math.random() < m.chance) {
     payClient(m.reward); S.favors += m.fav; S.heat += m.heat * heatMult(); S.stats.mDone++;
     if (m.kid) S.stats.kidMissions++;
+    if (m.arc) advanceArc(m.arc.id, m.arc.step);
     say(m.kid ? pick(KID_LINES) : pick(LINES.mOk));
     if (Math.random() < 0.4) say(pick(LINES.returned));
     toast("Mission complete: " + m.n, `Paid ${money(m.reward)}. Expenses covered, the rest went back to the people who needed it. +${m.fav} favor`);
     chime();
   } else {
     S.heat += m.heat * 1.5 * heatMult(); S.stats.mFail++;
+    if (m.arc) failArcStep(m.arc.id);
     say(pick(LINES.mBad));
     toast("Mission failed: " + m.n, "Extra heat, no pay.");
     beep(130, 0.3, "sawtooth", 0.06, -50);

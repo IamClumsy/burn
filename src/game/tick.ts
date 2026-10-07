@@ -1,5 +1,5 @@
 import { S, earn } from "../state";
-import { cps, heatMult, owned } from "../calc";
+import { choiceMult, cps, heatMult, owned } from "../calc";
 import { GENS } from "../data/ops";
 import { STORY } from "../data/story";
 import { MEDALS } from "../data/medals";
@@ -7,6 +7,7 @@ import { chime } from "../audio";
 import { pick } from "../util";
 import { say, toast } from "../ui/fx";
 import { LINES } from "../data/text";
+import { choiceBusy, showChoice } from "../ui/choice";
 import { checkAmbush, checkBurn, layLow } from "./heat";
 import { resolveMission } from "./missions";
 import { tickBoss } from "./bosses";
@@ -15,10 +16,19 @@ let sec = 0;
 
 export function milestones(): void {
   while (S.story < STORY.length && S.life >= STORY[S.story].at) {
-    const s = STORY[S.story];
+    const i = S.story, s = STORY[i];
+    // A decision needs the dialog free; try again next second if something else is open.
+    if (s.choice && choiceBusy()) break;
     S.story++; S.favors += s.fav;
     toast("Case File: " + s.t, s.x.slice(0, 90) + "… (+" + s.fav + " favors)");
     say(s.x); chime();
+    if (s.choice) {
+      showChoice(s.t, s.choice.prompt, s.choice.options.map((o, k): [string, () => string] => [o.label, () => {
+        S.choices[i] = k;
+        if (o.fx.favors) S.favors += o.fx.favors;
+        return o.result;
+      }]));
+    }
   }
   for (const a of MEDALS) {
     if (!S.ach.includes(a.id) && a.t(S)) {
@@ -46,7 +56,7 @@ export function tick(dt: number): void {
 
   const ops = GENS.reduce((a, g, i) => a + owned(g.id) * (1 + i * 0.3), 0);
   S.heat = Math.max(0, S.heat + (ops * 0.012 * heatMult() - 1.2) * dt);
-  S.att = Math.max(0, Math.min(100, S.att + (0.05 + S.heat * 0.004 - (S.heat < 20 ? 0.25 : 0)) * dt));
+  S.att = Math.max(0, Math.min(100, S.att + ((0.05 + S.heat * 0.004) * choiceMult("att") - (S.heat < 20 ? 0.25 : 0)) * dt));
 
   if (S.layCd > 0) S.layCd = Math.max(0, S.layCd - dt);
   if (S.coverCd > 0) S.coverCd = Math.max(0, S.coverCd - dt);

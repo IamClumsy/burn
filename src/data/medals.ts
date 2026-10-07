@@ -2,6 +2,7 @@ import type { Medal } from "../types";
 import { ALLIES } from "./allies";
 import { BOSSES } from "./bosses";
 import { STORY } from "./story";
+import { ARCS } from "./arcs";
 import { totalOps } from "../calc";
 
 export const MEDALS: Medal[] = [
@@ -28,5 +29,7 @@ export const MEDALS: Medal[] = [
   {id:"a22",n:"Giving Back",     d:"Return $100K to the people you help", t:s=>s.stats.returned>=1e5},
   {id:"a23",n:"A Real Hero",     d:"Return $1B to the people you help",   t:s=>s.stats.returned>=1e9},
   {id:"a24",n:"A Necessary Evil", d:"Buy 10 favors from your frienemies, Seymour and Simon", t:s=>s.stats.seymourFavors+s.stats.simonFavors>=10},
+  {id:"a25",n:"Open and Shut",    d:"Close a multi-step case", t:s=>Object.keys(s.arcsDone).length>=1},
+  {id:"a26",n:"Full Docket",      d:"Close every case", t:s=>ARCS.every(a=>s.arcsDone[a.id])},
   {id:"a21",n:"Case Files",       d:"Take on 25 missions",        t:s=>s.stats.mDone+s.stats.mFail>=25},
 ];

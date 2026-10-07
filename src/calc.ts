@@ -3,7 +3,21 @@ import { GENS } from "./data/ops";
 import { UPGS } from "./data/upgrades";
 import { COVERS } from "./data/covers";
 import { BOSSES } from "./data/bosses";
-import type { Boss, Gen, Mission } from "./types";
+import { STORY } from "./data/story";
+import type { Boss, ChoiceFx, Gen, Mission } from "./types";
+
+/** Fx from every story choice the player has made. */
+function chosenFx(): ChoiceFx[] {
+  const out: ChoiceFx[] = [];
+  STORY.forEach((b, i) => {
+    const k = S.choices[i];
+    if (b.choice && k !== undefined && b.choice.options[k]) out.push(b.choice.options[k].fx);
+  });
+  return out;
+}
+export const choiceMult = (key: "inc" | "heat" | "att" | "mis"): number =>
+  chosenFx().reduce((m, f) => m * (1 + (f[key] || 0)), 1);
+export const choiceSucc = (): number => chosenFx().reduce((s, f) => s + (f.succ || 0), 0);
 
 export const owned = (id: string): number => S.gens[id] || 0;
 export const totalOps = (): number => GENS.reduce((a, g) => a + owned(g.id), 0);
@@ -15,7 +29,7 @@ export function incomeMult(): number {
   for (const u of UPGS) if (S.upgs[u.id] && u.kind === "all") m *= u.m!;
   if (S.fx.boost > 0) m *= 2;
   if (allyHere("nate")) m *= 1.15;
-  return m;
+  return m * choiceMult("inc");
 }
 
 export const genMult = (id: string): number =>
@@ -41,7 +55,7 @@ export function heatMult(): number {
   if (S.upgs.h1) m *= 0.6;
   if (S.allies.sam) m *= 0.85;
   m *= Math.max(0.3, 1 - 0.05 * perk("head"));
-  return m;
+  return m * choiceMult("heat");
 }
 
 export const layAmt = (): number => (S.upgs.h2 ? 60 : 35);
@@ -73,11 +87,11 @@ export const allyHere = (id: string): boolean => !!S.allies[id] && !(id === "nat
 export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);
 export function succChance(m: Mission): number {
   if (m.kid) return 1; // Michael never fails when a kid is involved
-  const c = m.succ + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
+  const c = m.succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
   return Math.min(0.97, c);
 }
 /** What the client pays in total. Michael keeps KEEP_RATE of it. */
-export const missionReward = (m: Mission): number => Math.floor((cps() * 60 + 150) * m.rm * cover().mis / KEEP_RATE);
+export const missionReward = (m: Mission): number => Math.floor((cps() * 60 + 150) * m.rm * cover().mis * choiceMult("mis") / KEEP_RATE);
 export const missionKeep = (m: Mission): number => missionReward(m) * KEEP_RATE;
 
 // ---- bosses

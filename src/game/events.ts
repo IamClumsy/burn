@@ -4,32 +4,15 @@ import { EVENTS } from "../data/events";
 import { chime } from "../audio";
 import { money, pick } from "../util";
 import { $ } from "../ui/dom";
-import { say, toast } from "../ui/fx";
+import { say } from "../ui/fx";
+import { choiceBusy, showChoice } from "../ui/choice";
 import { render } from "../ui/render";
 import { checkBurn } from "./heat";
 
-let evtOpen = false;
-
 export function spawnEvent(): void {
-  if (evtOpen) { scheduleEvent(); return; }
+  if (choiceBusy()) { scheduleEvent(); return; }
   const ev = pick(EVENTS);
-  evtOpen = true;
-  $("evtT").textContent = ev.t;
-  $("evtD").textContent = ev.d;
-  $("evtO").innerHTML = "";
-  for (const [label, run] of ev.o) {
-    const b = document.createElement("button");
-    b.textContent = label;
-    b.onclick = () => {
-      const r = run();
-      say(r); toast(ev.t, r);
-      $("evt").style.display = "none";
-      evtOpen = false;
-      checkBurn(); render(); scheduleEvent();
-    };
-    $("evtO").appendChild(b);
-  }
-  $("evt").style.display = "flex";
+  showChoice(ev.t, ev.d, ev.o, () => { checkBurn(); render(); scheduleEvent(); });
 }
 
 export function scheduleEvent(): void { setTimeout(spawnEvent, 70000 + Math.random() * 60000); }

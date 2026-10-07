@@ -6,8 +6,8 @@ export const fresh = (): GameState => ({
   cash: 0, life: 0, run: 0, heat: 0, att: 0, gens: {}, upgs: {}, cred: 0, last: Date.now(), layCd: 0,
   favors: 0, perks: {}, allies: {}, allyCd: {}, fx: {}, junk: { tape: 0, wire: 0, bleach: 0, micro: 0 },
   cover: "con", coverCd: 0, board: [], active: [], uid: 1, story: 0, ach: [],
-  stats: { clicks: 0, burns: 0, mDone: 0, mFail: 0, crafted: 0, ambush: 0, reinstated: 0, time: 0, kidMissions: 0, returned: 0, seymourFavors: 0 },
-  buyAmt: 1, mute: false, seymourBought: 0, nateAway: false, nateTimer: 90, boss: null, bossCd: 150, bossKills: {},
+  stats: { clicks: 0, burns: 0, mDone: 0, mFail: 0, crafted: 0, ambush: 0, reinstated: 0, time: 0, kidMissions: 0, returned: 0, seymourFavors: 0, simonFavors: 0 },
+  buyAmt: 1, mute: false, seymourBought: 0, simonBought: 0, nateAway: false, nateTimer: 90, boss: null, bossCd: 150, bossKills: {},
 });
 
 // Live binding: importers always see the current state object.
@@ -32,9 +32,6 @@ export function payClient(gross: number): { keep: number; returned: number } {
 export function merge(saved: Partial<GameState>): GameState {
   const f = fresh();
   const o = Object.assign(f, saved);
-  // Saves from before the favor seller was renamed from Simon to Seymour.
-  const legacy = (saved as { simonBought?: number }).simonBought;
-  if (saved.seymourBought === undefined && legacy !== undefined) o.seymourBought = legacy;
   o.stats = Object.assign(fresh().stats, saved.stats || {});
   o.junk = Object.assign(fresh().junk, saved.junk || {});
   return o;

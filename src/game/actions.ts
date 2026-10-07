@@ -1,7 +1,7 @@
 import { S } from "../state";
 import { fresh, setState } from "../state";
 import {
-  allyHere, bribeCost, bulkCost, buyN, credGain, owned, perk, perkCost, seymourPrice,
+  allyHere, bribeCost, bulkCost, buyN, credGain, owned, perk, perkCost, contactPrice,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -76,17 +76,34 @@ export function craft(id: string): void {
 }
 
 const SEYMOUR_LINES = [
-  "Seymour talks for ten minutes about destiny, then names a price. The favor is worth it. Barely.",
+  "Seymour talks for ten minutes about destiny, then names a price. The gear is worth it. Barely.",
   "Seymour is thrilled to be involved. He's always thrilled. That's what makes him dangerous, and useful.",
   "Seymour never works for free, and he is never boring. Necessary, and best kept at arm's length.",
 ];
+const SIMON_LINES = [
+  "Simon hands over a name and a warning in the same breath. The intel is good. So is the warning.",
+  "Simon knows how the Organization thinks because he used to be it. You pay him and try not to think about that.",
+  "Simon smiles, and the favor is yours. Necessary, and worth keeping where you can see him.",
+];
 
-export function buyFavorFromSeymour(): void {
-  const c = seymourPrice();
+/** Buy a favor from a frienemy. Seymour sells hardware; Simon sells intel, with a volatile streak. */
+export function buyFavorFrom(id: string): void {
+  if (id !== "seymour" && id !== "simon") return;
+  const c = contactPrice(id);
   if (S.cash < c) return;
-  S.cash -= c; S.favors++; S.seymourBought++; S.stats.seymourFavors++; S.att = Math.min(100, S.att + 3);
+  S.cash -= c; S.favors++;
   beep(300, 0.1, "triangle", 0.05);
-  say(pick(SEYMOUR_LINES));
+  if (id === "seymour") {
+    S.seymourBought++; S.stats.seymourFavors++;
+    S.att = Math.min(100, S.att + 3);
+    for (let i = 0; i < 2; i++) S.junk[pick(Object.keys(S.junk))]++;
+    say(pick(SEYMOUR_LINES));
+  } else {
+    S.simonBought++; S.stats.simonFavors++;
+    S.att = Math.max(0, S.att - 10);
+    if (Math.random() < 0.2) { S.heat += 15; say("Simon goes off script and does something loud. The intel was good. The heat is real."); }
+    else say(pick(SIMON_LINES));
+  }
 }
 
 export function payOffFixer(): void {

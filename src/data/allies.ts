@@ -21,6 +21,6 @@ export const ALLIES: Ally[] = [
    perk:"+10% mission success", ab:"Fast Talk", abDesc:"Missions run 2× faster for 60s", cd:150},
   {id:"barry", name:"Barry Burkowski", cost:1e6,
    bio:"Miami's money launderer, the Yellow Pages for criminals. He always takes Michael's call.",
-   perk:"Fixer payoffs cost 50% less; Seymour's favor prices −25%",
+   perk:"Fixer payoffs cost 50% less; Seymour's and Simon's favor prices −25%",
    ab:"Follow the Money", abDesc:"Barry traces a payoff to a crook: gain 90s of income and −25 heat", cd:110},
 ];

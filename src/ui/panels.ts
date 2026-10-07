@@ -1,7 +1,7 @@
 import { S } from "../state";
 import {
   allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
-  seymourPrice, succChance,
+  contactPrice, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -11,7 +11,7 @@ import { BOSSES } from "../data/bosses";
 import { PERKS, JUNK, RECIPES } from "../data/perks";
 import { STORY } from "../data/story";
 import { MEDALS } from "../data/medals";
-import { SEYMOUR } from "../data/contacts";
+import { CONTACTS } from "../data/contacts";
 import { fmt, money } from "../util";
 
 export type TabId = "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "med" | "rep";
@@ -79,16 +79,16 @@ function missions(): string {
   return h;
 }
 
-function seymourItem(): string {
-  return item("seymour", "x", S.cash >= seymourPrice(), "Buy a favor from Seymour",
-    `${SEYMOUR.pitch}${S.allies.barry ? " Barry negotiates 25% off." : ""}`,
-    `<div class="cost">${money(seymourPrice())}</div>`);
+function contactItems(): string {
+  return CONTACTS.map(c => item("contact", c.id, S.cash >= contactPrice(c.id), `${c.name}: ${c.kind}`,
+    `${c.pitch}${S.allies.barry ? " Barry negotiates 25% off." : ""}`,
+    `<div class="cost">${money(contactPrice(c.id))}</div>`)).join("");
 }
 
 function crew(): string {
-  const contact = `<div class="box"><div class="row"><b>${SEYMOUR.name}</b><span class="small">Contact, not crew</span></div>
-    <div class="small">${SEYMOUR.bio}</div>
-    <div class="btns"><button data-act="seymour" data-arg="x" ${S.cash >= seymourPrice() ? "" : "disabled"}>Buy a favor — ${money(seymourPrice())}</button></div></div>`;
+  const contact = CONTACTS.map(c => `<div class="box"><div class="row"><b>${c.name}</b><span class="small">Frienemy: ${c.kind.toLowerCase()}</span></div>
+    <div class="small">${c.bio}</div>
+    <div class="btns"><button data-act="contact" data-arg="${c.id}" ${S.cash >= contactPrice(c.id) ? "" : "disabled"}>Buy a favor — ${money(contactPrice(c.id))}</button></div></div>`).join("");
   return contact + ALLIES.map(a => {
     if (!S.allies[a.id]) return item("hire", a.id, S.cash >= a.cost, "Hire " + a.name, `${a.bio} Perk: ${a.perk}`, `<div class="cost">${money(a.cost)}</div>`);
     const cd = Math.ceil(S.allyCd[a.id] || 0), busy = S.active.some(m => m.sent === a.id), here = allyHere(a.id);
@@ -122,7 +122,7 @@ function covers(): string {
 
 function favors(): string {
   return `<div class="small" style="margin-bottom:8px">Favors: <b style="color:var(--gold)">${S.favors}</b>. Perks last through every reinstatement.</div>` +
-    seymourItem() +
+    contactItems() +
     PERKS.map(p => item("perk", p.id, perk(p.id) < 10 && S.favors >= perkCost(p.id), p.name, p.desc,
       costAndOwn(perk(p.id) >= 10 ? "MAX" : perkCost(p.id) + " fav", perk(p.id)))).join("");
 }

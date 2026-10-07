@@ -20,7 +20,7 @@ import * as A from "./game/actions";
 const ACT: Record<string, (arg: string) => void> = {
   amt: a => { S.buyAmt = a === "max" ? "max" : (+a as 1 | 10); },
   gen: A.buyGen, upg: A.buyUpg, hire: A.hireAlly, ability: A.useAbility,
-  cover: A.setCover, perk: A.buyPerk, seymour: () => A.buyFavorFromSeymour(), craft: A.craft,
+  cover: A.setCover, perk: A.buyPerk, contact: A.buyFavorFrom, craft: A.craft,
   start: a => startMission(+a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
 };
 const onAct = (e: MouseEvent) => {

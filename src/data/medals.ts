@@ -27,6 +27,6 @@ export const MEDALS: Medal[] = [
   {id:"a20",n:"Good Samaritan",   d:"Complete 5 missions that involve a kid", t:s=>s.stats.kidMissions>=5},
   {id:"a22",n:"Giving Back",     d:"Return $100K to the people you help", t:s=>s.stats.returned>=1e5},
   {id:"a23",n:"A Real Hero",     d:"Return $1B to the people you help",   t:s=>s.stats.returned>=1e9},
-  {id:"a24",n:"A Necessary Evil", d:"Buy 10 favors from Seymour", t:s=>s.stats.seymourFavors>=10},
+  {id:"a24",n:"A Necessary Evil", d:"Buy 10 favors from your frienemies, Seymour and Simon", t:s=>s.stats.seymourFavors+s.stats.simonFavors>=10},
   {id:"a21",n:"Case Files",       d:"Take on 25 missions",        t:s=>s.stats.mDone+s.stats.mFail>=25},
 ];

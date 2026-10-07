@@ -29,6 +29,9 @@ export interface Boss {
 }
 export interface ActiveBoss { id: string; hp: number; max: number; left: number }
 
+/** A frienemy: not crew, sells a specific kind of necessary favor for cash. */
+export interface Contact { id: "seymour" | "simon"; name: string; kind: string; bio: string; pitch: string }
+
 export interface Perk { id: string; name: string; desc: string }
 export interface Recipe { id: string; name: string; desc: string; need: Dict<number> }
 export interface StoryBeat { at: number; t: string; fav: number; x: string }
@@ -39,7 +42,7 @@ export interface Stats {
   clicks: number; burns: number; mDone: number; mFail: number; crafted: number;
   ambush: number; reinstated: number; time: number; kidMissions: number;
   /** Favors bought from Seymour, across all runs. */
-  seymourFavors: number;
+  seymourFavors: number; simonFavors: number;
   /** Total client money Michael handed back instead of keeping. */
   returned: number;
 }
@@ -51,7 +54,7 @@ export interface GameState {
   junk: Dict<number>;
   cover: string; coverCd: number; board: Mission[]; active: ActiveMission[]; uid: number;
   story: number; ach: string[]; stats: Stats;
-  buyAmt: 1 | 10 | "max"; mute: boolean; seymourBought: number;
+  buyAmt: 1 | 10 | "max"; mute: boolean; seymourBought: number; simonBought: number;
   /** Nate wanders off and returns on a random timer. */
   nateAway: boolean; nateTimer: number;
   boss: ActiveBoss | null; bossCd: number; bossKills: Dict<number>;

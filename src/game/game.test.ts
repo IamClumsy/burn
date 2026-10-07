@@ -5,8 +5,8 @@ import { resolve } from "node:path";
 
 import { S, fresh, setState } from "../state";
 import { tick, tickNate } from "./tick";
-import { buyFavorFromSeymour, useAbility } from "./actions";
-import { allyFree, allyHere, succChance } from "../calc";
+import { buyFavorFrom, useAbility } from "./actions";
+import { allyFree, allyHere, contactPrice, succChance } from "../calc";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { spawnBoss, strike } from "./bosses";
 import { strikeDmg } from "../calc";
@@ -26,28 +26,37 @@ beforeAll(() => {
 
 beforeEach(() => { setState(fresh()); fillBoard(); });
 
-describe("Seymour", () => {
-  it("sells a favor for cash, and the price climbs", () => {
+describe("frienemies", () => {
+  it("Seymour sells a favor and some gear, and the price climbs", () => {
     S.cash = 1e6; S.gens.inf = 20;
-    const before = S.cash;
-    buyFavorFromSeymour();
+    const before = S.cash, junk = Object.values(S.junk).reduce((x, y) => x + y, 0);
+    buyFavorFrom("seymour");
     expect(S.favors).toBe(1);
-    expect(S.cash).toBeLessThan(before);
     expect(S.stats.seymourFavors).toBe(1);
+    expect(Object.values(S.junk).reduce((x, y) => x + y, 0)).toBe(junk + 2);
     const second = S.cash;
-    buyFavorFromSeymour();
-    expect(before - second).toBeLessThan(second - S.cash); // second favor costs more
+    buyFavorFrom("seymour");
+    expect(before - second).toBeLessThan(second - S.cash);
   });
 
-  it("does nothing if you can't afford him", () => {
+  it("Simon sells a favor and lowers the Organization's attention", () => {
+    S.cash = 1e6; S.gens.inf = 20; S.att = 50;
+    buyFavorFrom("simon");
+    expect(S.favors).toBe(1);
+    expect(S.stats.simonFavors).toBe(1);
+    expect(S.att).toBe(40);
+  });
+
+  it("each frienemy keeps their own price", () => {
+    S.cash = 1e6; S.gens.inf = 20;
+    buyFavorFrom("seymour"); buyFavorFrom("seymour");
+    expect(contactPrice("simon")).toBeLessThan(contactPrice("seymour"));
+  });
+
+  it("does nothing if you can't afford them", () => {
     S.cash = 0;
-    buyFavorFromSeymour();
+    buyFavorFrom("seymour"); buyFavorFrom("simon");
     expect(S.favors).toBe(0);
-  });
-
-  it("old saves keep their favor price after the Simon to Seymour rename", () => {
-    const m = merge({ simonBought: 7 } as never);
-    expect(m.seymourBought).toBe(7);
   });
 });
 

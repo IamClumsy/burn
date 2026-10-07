@@ -1,7 +1,7 @@
 import { S } from "../state";
 import { fresh, setState } from "../state";
 import {
-  allyHere, bribeCost, bulkCost, buyN, credGain, owned, perk, perkCost, simonPrice,
+  allyHere, bribeCost, bulkCost, buyN, credGain, owned, perk, perkCost, seymourPrice,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -75,18 +75,18 @@ export function craft(id: string): void {
   chime(); say("Held together with tape and optimism. It works.");
 }
 
-const SIMON_LINES = [
-  "Simon takes the envelope without counting it. He's a friend, the way a loaded gun on the table is a friend.",
-  "Simon smiles, and the favor is yours. You tell yourself he's useful. You don't tell yourself the rest.",
-  "Simon never works for free, and never works badly. Necessary, and worth keeping at arm's length.",
+const SEYMOUR_LINES = [
+  "Seymour talks for ten minutes about destiny, then names a price. The favor is worth it. Barely.",
+  "Seymour is thrilled to be involved. He's always thrilled. That's what makes him dangerous, and useful.",
+  "Seymour never works for free, and he is never boring. Necessary, and best kept at arm's length.",
 ];
 
-export function buyFavorFromSimon(): void {
-  const c = simonPrice();
+export function buyFavorFromSeymour(): void {
+  const c = seymourPrice();
   if (S.cash < c) return;
-  S.cash -= c; S.favors++; S.simonBought++; S.att = Math.min(100, S.att + 3);
+  S.cash -= c; S.favors++; S.seymourBought++; S.stats.seymourFavors++; S.att = Math.min(100, S.att + 3);
   beep(300, 0.1, "triangle", 0.05);
-  say(pick(SIMON_LINES));
+  say(pick(SEYMOUR_LINES));
 }
 
 export function payOffFixer(): void {

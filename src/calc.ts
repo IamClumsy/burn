@@ -61,8 +61,8 @@ export function maxAfford(g: Gen): number {
 export const buyN = (g: Gen): number => (S.buyAmt === "max" ? Math.max(1, maxAfford(g)) : S.buyAmt);
 
 export const bribeCost = (): number => Math.max(100, cps() * 60) * (S.allies.barry ? 0.5 : 1);
-export const simonPrice = (): number =>
-  Math.max(500, cps() * 90) * Math.pow(1.12, S.simonBought) * (S.allies.barry ? 0.75 : 1);
+export const seymourPrice = (): number =>
+  Math.max(500, cps() * 90) * Math.pow(1.12, S.seymourBought) * (S.allies.barry ? 0.75 : 1);
 export const perkCost = (id: string): number => Math.ceil(2 * Math.pow(1.5, perk(id)));
 export const credGain = (): number => Math.floor(Math.sqrt(S.run / 1e6));
 

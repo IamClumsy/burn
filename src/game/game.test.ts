@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 import { S, fresh, setState } from "../state";
 import { tick, tickNate } from "./tick";
-import { useAbility } from "./actions";
+import { buyFavorFromSeymour, useAbility } from "./actions";
 import { allyFree, allyHere, succChance } from "../calc";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { spawnBoss, strike } from "./bosses";
@@ -25,6 +25,31 @@ beforeAll(() => {
 });
 
 beforeEach(() => { setState(fresh()); fillBoard(); });
+
+describe("Seymour", () => {
+  it("sells a favor for cash, and the price climbs", () => {
+    S.cash = 1e6; S.gens.inf = 20;
+    const before = S.cash;
+    buyFavorFromSeymour();
+    expect(S.favors).toBe(1);
+    expect(S.cash).toBeLessThan(before);
+    expect(S.stats.seymourFavors).toBe(1);
+    const second = S.cash;
+    buyFavorFromSeymour();
+    expect(before - second).toBeLessThan(second - S.cash); // second favor costs more
+  });
+
+  it("does nothing if you can't afford him", () => {
+    S.cash = 0;
+    buyFavorFromSeymour();
+    expect(S.favors).toBe(0);
+  });
+
+  it("old saves keep their favor price after the Simon to Seymour rename", () => {
+    const m = merge({ simonBought: 7 } as never);
+    expect(m.seymourBought).toBe(7);
+  });
+});
 
 describe("Nate", () => {
   it("is only available when he hasn't wandered off", () => {

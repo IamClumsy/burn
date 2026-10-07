@@ -38,6 +38,8 @@ export interface GameEvent { t: string; d: string; o: [label: string, run: () =>
 export interface Stats {
   clicks: number; burns: number; mDone: number; mFail: number; crafted: number;
   ambush: number; reinstated: number; time: number; kidMissions: number;
+  /** Favors bought from Seymour, across all runs. */
+  seymourFavors: number;
   /** Total client money Michael handed back instead of keeping. */
   returned: number;
 }
@@ -49,7 +51,7 @@ export interface GameState {
   junk: Dict<number>;
   cover: string; coverCd: number; board: Mission[]; active: ActiveMission[]; uid: number;
   story: number; ach: string[]; stats: Stats;
-  buyAmt: 1 | 10 | "max"; mute: boolean; simonBought: number;
+  buyAmt: 1 | 10 | "max"; mute: boolean; seymourBought: number;
   /** Nate wanders off and returns on a random timer. */
   nateAway: boolean; nateTimer: number;
   boss: ActiveBoss | null; bossCd: number; bossKills: Dict<number>;

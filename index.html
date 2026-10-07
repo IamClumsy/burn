@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Burned: Miami Idle</title>
+<meta name="description" content="An idle game about a burned spy rebuilding his life in Miami.">
+<meta name="theme-color" content="#240a3d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2748%27 fill=%27%23ff2d8a%27/%3E%3Ctext x=%2750%27 y=%2768%27 font-size=%2760%27 text-anchor=%27middle%27%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#0f0716; --panel:#1a0f26; --panel2:#251634; --line:#3f2a57;
+    --text:#f6ecf7; --dim:#a995b8; --pink:#ff4fa3; --orange:#ff9a3c; --gold:#ffd166;
+    --sea:#2ee6d6; --good:#5fe59a; --bad:#ff4d5e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 "Avenir Next",Helvetica,Arial,sans-serif;min-height:100vh}
+  body.shake{animation:shake .5s}
+  @keyframes shake{10%,50%,90%{transform:translate(-6px,3px)}30%,70%{transform:translate(6px,-3px)}}
+  header{position:relative;overflow:hidden;padding:16px 20px 22px;background:linear-gradient(180deg,#240a3d 0,#6b1a68 55%,#ff5e62 120%);border-bottom:2px solid var(--pink)}
+  header::before{content:"";position:absolute;right:90px;bottom:-60px;width:150px;height:150px;border-radius:50%;background:linear-gradient(#ffd166,#ff5e62);opacity:.85}
+  h1{position:relative;margin:0;font-size:26px;letter-spacing:5px;text-transform:uppercase;color:#fff;
+     text-shadow:0 0 6px var(--pink),0 0 18px var(--pink),0 0 30px #ff2d8a}
+  h1 small{color:var(--sea);font-size:12px;letter-spacing:3px;margin-left:10px;text-shadow:0 0 8px var(--sea)}
+  .sub{position:relative;color:#f3d6ee;font-size:13px}
+  .palm{position:absolute;right:10px;bottom:0;width:90px;height:90px}
+  main{display:grid;grid-template-columns:minmax(290px,360px) 1fr;gap:14px;padding:14px 20px;max-width:1250px;margin:auto}
+  @media(max-width:850px){main{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+  .card h2{margin:0 0 10px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+  .big{font-size:34px;font-weight:700;color:var(--gold)}
+  .rate{color:var(--good);font-size:13px}
+  button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;transition:.1s}
+  button:hover:not(:disabled){border-color:var(--pink);transform:translateY(-1px)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  #job{width:100%;padding:18px;font-size:18px;font-weight:700;background:linear-gradient(#ff7a59,#ff2d8a);color:#fff;border:none;letter-spacing:2px;box-shadow:0 0 18px #ff2d8a66}
+  #job:active{transform:scale(.98)}
+  .bar{height:14px;background:#0b0610;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:6px 0}
+  .bar i{display:block;height:100%;width:0;transition:width .15s}
+  #heatbar{background:linear-gradient(90deg,var(--sea),var(--gold),var(--bad))}
+  #attbar{background:linear-gradient(90deg,#7b5cff,#c23bff)}
+  .mbar{background:linear-gradient(90deg,var(--sea),var(--good))}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .tab.active{background:var(--pink);border-color:var(--pink);color:#1a0618;font-weight:700}
+  .item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 10px;margin-bottom:7px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;cursor:pointer;user-select:none}
+  .item.can{border-color:#8a3a78}
+  .item.can:hover{border-color:var(--pink)}
+  .item.no{opacity:.5;cursor:not-allowed}
+  .item.on{border-color:var(--sea);box-shadow:0 0 0 1px var(--sea) inset}
+  .item b{display:block}
+  .item span,.small{color:var(--dim);font-size:12px}
+  .cost{color:var(--gold);font-weight:700;white-space:nowrap;text-align:right}
+  .own{color:var(--sea);font-size:20px;font-weight:700;min-width:30px;text-align:right}
+  .box{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}
+  .box .btns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .box button.on{border-color:var(--sea);color:var(--sea)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .medal{padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);opacity:.4;font-size:12px}
+  .medal.got{opacity:1;border-color:var(--gold)}
+  .medal b{display:block;font-size:13px}
+  .chip{display:inline-block;background:var(--sea);color:#04201d;border-radius:12px;padding:1px 9px;font-size:12px;font-weight:700;margin:2px 4px 2px 0}
+  #log{height:160px;overflow:auto;font-size:13px;color:var(--dim);font-style:italic}
+  #log p{margin:0 0 7px;padding-left:8px;border-left:2px solid var(--line)}
+  #log p:first-child{color:var(--text);border-color:var(--pink)}
+  #client{display:none;position:fixed;right:20px;bottom:20px;z-index:9;background:var(--sea);color:#04201d;font-weight:700;padding:14px 18px;border-radius:10px;box-shadow:0 8px 30px #000a;cursor:pointer;animation:pop .4s}
+  @keyframes pop{from{transform:scale(.6);opacity:0}}
+  #burned{display:none;position:fixed;inset:0;background:#b00020cc;z-index:20;align-items:center;justify-content:center;text-align:center;font-size:44px;font-weight:900;letter-spacing:6px;text-transform:uppercase}
+  #burned small{display:block;font-size:15px;letter-spacing:1px;font-weight:400;margin-top:10px}
+  #evt{display:none;position:fixed;inset:0;background:#000a;z-index:15;align-items:center;justify-content:center;padding:20px}
+  #evt .dlg{background:var(--panel);border:2px solid var(--pink);border-radius:12px;padding:20px;max-width:440px;width:100%}
+  #evt h3{margin:0 0 6px;color:var(--pink);letter-spacing:2px;text-transform:uppercase}
+  #evt button{display:block;width:100%;margin-top:8px}
+  #toasts{position:fixed;top:14px;right:14px;z-index:30;display:flex;flex-direction:column;gap:8px;max-width:300px}
+  .toast{background:var(--panel);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:13px;animation:pop .3s;box-shadow:0 6px 20px #000a}
+  .toast b{color:var(--gold);display:block}
+  .float{position:fixed;pointer-events:none;color:var(--gold);font-weight:700;animation:up .9s forwards;z-index:5}
+  @keyframes up{to{transform:translateY(-60px);opacity:0}}
+  .boss{border:2px solid var(--bad);box-shadow:0 0 22px #ff4d5e55;display:none}
+  .boss h2{color:var(--bad)}
+  #strike{width:100%;padding:14px;font-weight:700;letter-spacing:2px;background:linear-gradient(#ff4d5e,#a3122a);border:none;color:#fff}
+  .bossbar{background:linear-gradient(90deg,#ff4d5e,#ff9a3c)}
+  .foot{text-align:center;color:var(--dim);font-size:12px;padding:10px 10px 30px}
+  .foot a{color:var(--dim);cursor:pointer;text-decoration:underline;margin:0 6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Burned<small>MIAMI IDLE</small></h1>
+  <div class="sub">No agency. No money. A very bad reputation. Fix that.</div>
+  <svg class="palm" viewBox="0 0 100 100" fill="none" stroke="#12051c" stroke-linecap="round">
+    <path d="M52 100 C50 70 54 45 60 28" stroke-width="5"/>
+    <path d="M60 28 C40 14 22 20 8 38" stroke-width="4"/><path d="M60 28 C46 10 30 8 18 14" stroke-width="4"/>
+    <path d="M60 28 C74 12 90 14 98 30" stroke-width="4"/><path d="M60 28 C80 24 92 40 94 52" stroke-width="4"/>
+    <path d="M60 28 C58 12 62 4 70 0" stroke-width="4"/>
+  </svg>
+</header>
+
+<main>
+  <section>
+    <div class="card boss" id="bosscard">
+      <h2>Boss Encounter</h2>
+      <div class="big" id="bossname" style="font-size:24px;color:var(--text)"></div>
+      <div class="small" id="bossmech"></div>
+      <div class="bar" style="height:20px"><i class="bossbar" id="bosshp"></i></div>
+      <div class="row small" style="margin-bottom:8px"><span id="bosshptxt"></span><span id="bosstime"></span></div>
+      <button id="strike">STRIKE</button>
+      <div class="small" style="margin-top:6px">Your operations chip away automatically, but striking hits much harder. Run out the clock and it costs you.</div>
+    </div>
+    <div class="card">
+      <h2>Cash</h2>
+      <div class="big" id="cash">$0</div>
+      <div class="rate" id="rate"></div>
+      <div class="small" id="cred"></div>
+      <div id="fx" style="margin-top:6px"></div>
+      <div style="height:12px"></div>
+      <button id="job">TAKE A JOB</button>
+      <div class="row small" style="margin-top:12px"><span>HEAT</span><span id="heatnum">0%</span></div>
+      <div class="bar"><i id="heatbar"></i></div>
+      <button id="lay" style="width:100%">Lay Low</button>
+      <div class="row small" style="margin-top:12px"><span>THE ORGANIZATION'S ATTENTION</span><span id="attnum">0%</span></div>
+      <div class="bar"><i id="attbar"></i></div>
+      <button id="bribe" style="width:100%">Pay Off a Fixer</button>
+      <div class="small" style="margin-top:6px">100% heat burns you (lose half your cash). 100% attention gets you ambushed (lose a quarter, missions fail).</div>
+    </div>
+    <div class="card">
+      <h2>Narration</h2>
+      <div id="log"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="card">
+      <div class="tabs" id="tabs"></div>
+      <div id="panel"></div>
+    </div>
+  </section>
+</main>
+
+<div class="foot">
+  <span id="saveinfo">Autosaves every 2s</span> ·
+  <a id="mute">sound: on</a> · <a id="export">export save</a> · <a id="import">import save</a> · <a id="wipe">wipe save</a>
+</div>
+<div id="client"></div>
+<div id="burned"><div id="burnedTxt">BURNED<small>Half your cash is gone. Heat reset. Walk it off.</small></div></div>
+<div id="evt"><div class="dlg"><h3 id="evtT"></h3><p id="evtD"></p><div id="evtO"></div></div></div>
+<div id="toasts"></div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const SAVE_KEY = "burnedMiamiIdle_v2";
+
+// ===================== DATA =====================
+const GENS = [
+  {id:"inf",  name:"Street Informant",       desc:"Hears things. Sells them.",             base:15,     cps:0.5},
+  {id:"tape", name:"Duct-Tape Gadgets",      desc:"Household items, weaponized. Also yields junk.", base:110, cps:3},
+  {id:"sam",  name:"Sam's Barstool Network", desc:"Free mojitos, free intel.",             base:1200,   cps:16},
+  {id:"fi",   name:"Fiona's Demolitions",    desc:"Problems become craters.",              base:13000,  cps:85},
+  {id:"mad",  name:"Mom's Phone Tree",       desc:"Madeline knows everyone's business.",   base:140000, cps:470},
+  {id:"safe", name:"Safehouse Network",      desc:"A couch in every zip code.",            base:1.5e6,  cps:2700},
+  {id:"spook",name:"Spook Contacts",         desc:"Old friends with new agendas.",         base:2.2e7,  cps:16000},
+  {id:"burn", name:"Burn-List Takedown",     desc:"Find who burned you. Return the favor.",base:3.5e8,  cps:110000},
+];
+const UPGS = [
+  {id:"u1", name:"Better Cover Story",   desc:"Jobs pay ×2",              cost:100,   kind:"click", m:2},
+  {id:"u2", name:"Fake Credentials",     desc:"Jobs pay ×3",              cost:2500,  kind:"click", m:3},
+  {id:"u3", name:"Network of Clients",   desc:"Jobs pay ×5",              cost:90000, kind:"click", m:5},
+  {id:"g1", name:"Prepaid Burners",      desc:"Informants ×2",            cost:500,   kind:"gen", g:"inf",  m:2},
+  {id:"g2", name:"Bigger Roll of Tape",  desc:"Gadgets ×2",               cost:3000,  kind:"gen", g:"tape", m:2},
+  {id:"g3", name:"Bar Tab on the House", desc:"Sam's network ×2",         cost:25000, kind:"gen", g:"sam",  m:2},
+  {id:"g4", name:"Shaped Charges",       desc:"Fiona's demolitions ×2",   cost:260000,kind:"gen", g:"fi",   m:2},
+  {id:"g5", name:"Family Dinner Rota",   desc:"Phone tree ×2",            cost:2.8e6, kind:"gen", g:"mad",  m:2},
+  {id:"g6", name:"Couch Upgrades",       desc:"Safehouses ×2",            cost:3e7,   kind:"gen", g:"safe", m:2},
+  {id:"g7", name:"Deep Cover Moles",     desc:"Spook contacts ×2",        cost:4e8,   kind:"gen", g:"spook",m:2},
+  {id:"a1", name:"Everything ×1.5",      desc:"All income ×1.5",          cost:50000, kind:"all", m:1.5},
+  {id:"a2", name:"Everything ×2",        desc:"All income ×2",            cost:5e6,   kind:"all", m:2},
+  {id:"a3", name:"Everything ×3",        desc:"All income ×3",            cost:6e8,   kind:"all", m:3},
+  {id:"h1", name:"Quiet Methods",        desc:"Heat gain −40%",           cost:20000, kind:"heat"},
+  {id:"h2", name:"Fiona Cleans Up",      desc:"Lay Low removes 60 heat",  cost:150000,kind:"lay"},
+  {id:"h3", name:"Hands-Off Handler",    desc:"Auto Lay Low at 90% heat", cost:800000,kind:"auto"},
+];
+const ALLIES = [
+  {id:"sam",     name:"Sam Axe",         cost:5000,  perk:"Heat gain −15%",
+   ab:"Free Mojito Tab",   abDesc:"Instantly gain 60s of income",        cd:90,
+   run(){ earn(cps()*60+50); }},
+  {id:"fiona",   name:"Fiona Glenanne",  cost:50000, perk:"Jobs pay ×1.5",
+   ab:"Blow Something Up", abDesc:"Gain 120s of income, +15 heat",       cd:120,
+   run(){ earn(cps()*120+100); S.heat+=15; shake(); beep(90,.4,"sawtooth",.08,-50); }},
+  {id:"madeline",name:"Madeline Westen", cost:400000,perk:"Lay Low cools down twice as fast; auto Lay Low at 95% heat",
+   ab:"Family Dinner",     abDesc:"−50 heat, −30 Organization attention",       cd:100,
+   run(){ S.heat=Math.max(0,S.heat-50); S.att=Math.max(0,S.att-30); }},
+  {id:"jesse",   name:"Jesse Porter",    cost:3e6,   perk:"+10% mission success",
+   ab:"Fast Talk",         abDesc:"Missions run 2× faster for 60s",      cd:150,
+   run(){ S.fx.fast=60; }},
+  {id:"barry",   name:"Barry Burkowski", cost:1e6,  perk:"Fixer payoffs cost 50% less; Simon's favor prices −25%",
+   ab:"Follow the Money",  abDesc:"Barry traces a payoff to a crook: gain 90s of income and −25 heat", cd:110,
+   run(){ earn(cps()*90+100); S.heat=Math.max(0,S.heat-25); }},
+];
+const BIO = {
+  sam:"Retired Navy SEAL, Michael's best friend, and a man who loves a free drink.",
+  fiona:"Michael's on-and-off partner, a former IRA operative who solves problems with explosives.",
+  madeline:"Michael's mother. Chain-smoking, sharp, and always three phone calls ahead.",
+  jesse:"A former counterintelligence agent who got burned himself and now works with Michael.",
+  barry:"Miami's money launderer, the Yellow Pages for criminals. He always takes Michael's call.",
+};
+const MISSIONS = [
+  {n:"Stakeout a Shady Dealer",                 dur:30,  succ:.9,  heat:5,  rm:1.0, fav:1, ally:"sam"},
+  {n:"Shake a Tail Across Miami",               dur:40,  succ:.85, heat:6,  rm:1.2, fav:1, ally:"sam"},
+  {n:"Recover Stolen Art for a Wrongly Accused Man", dur:45, succ:.85, heat:6, rm:1.5, fav:1, ally:"barry"},
+  {n:"Out-Con a Con Artist Who Scammed a Friend", dur:40, succ:.85, heat:5,  rm:1.3, fav:1, ally:"madeline"},
+  {n:"Protect a Waitress from a Drug Dealer",   dur:45,  succ:.8,  heat:8,  rm:1.4, fav:1, ally:"sam"},
+  {n:"Retrieve a Boat from Island Gangsters",   dur:60,  succ:.75, heat:12, rm:2.0, fav:2, ally:"fiona"},
+  {n:"Infiltrate a Family of Gunrunners",       dur:60,  succ:.7,  heat:14, rm:2.2, fav:2, ally:"jesse"},
+  {n:"Pull a Salesman Out from Under Loan Sharks", dur:45, succ:.8, heat:8,  rm:1.6, fav:1, ally:"barry"},
+  {n:"Keep a Reformed Driver Out of a Jewel Heist", dur:55, succ:.75, heat:12, rm:2.0, fav:2, ally:"jesse"},
+  {n:"Track Down Stolen Pharmaceuticals",       dur:50,  succ:.8,  heat:9,  rm:1.7, fav:1, ally:"sam"},
+  {n:"Pose as a Disgruntled Bodyguard",         dur:55,  succ:.7,  heat:12, rm:2.0, fav:2, ally:"fiona"},
+  {n:"Protect a Football Player from a Gangster", dur:45, succ:.85, heat:7,  rm:1.4, fav:1, ally:"sam"},
+  {n:"Investigate Odd Logins at an Art Gallery", dur:50, succ:.8,  heat:8,  rm:1.6, fav:1, ally:"jesse"},
+  {n:"Survive a Bank Robbery from the Inside",  dur:55,  succ:.7,  heat:15, rm:2.2, fav:2, ally:"sam"},
+  {n:"Trace a Hitman's Payroll Through the Caymans", dur:60, succ:.75, heat:10, rm:2.4, fav:2, ally:"barry"},
+  {n:"Help a Widow Dodge Violent Con Men",      dur:50,  succ:.8,  heat:8,  rm:1.7, fav:1, ally:"madeline"},
+  {n:"Bring In a Fugitive from a Lawless Barrio", dur:75, succ:.6, heat:22, rm:3.2, fav:3, ally:"sam"},
+  {n:"Clear a Dirty Cop's Name",                dur:60,  succ:.75, heat:10, rm:2.2, fav:2, ally:"sam"},
+  {n:"Entrap a Gang with a Weapons Scheme",     dur:70,  succ:.65, heat:20, rm:3.0, fav:3, ally:"fiona"},
+  {n:"Go Undercover as Security Consultants",   dur:55,  succ:.75, heat:9,  rm:1.9, fav:2, ally:"fiona"},
+  {n:"Keep an Asset from Talking in Bed",       dur:45,  succ:.8,  heat:7,  rm:1.6, fav:1, ally:"madeline"},
+  {n:"Frame a Corrupt Bureaucrat for Treason",  dur:70,  succ:.65, heat:14, rm:3.0, fav:3, ally:"madeline"},
+  {n:"Find the Thief Who Framed Barry's Brother", dur:50, succ:.8, heat:7,  rm:1.8, fav:2, ally:"barry"},
+  {n:"Follow a Scammer's Money Trail",          dur:35,  succ:.85, heat:4,  rm:1.4, fav:1, ally:"barry"},
+  {n:"Expose a Crooked Boat Loan Scheme",       dur:70,  succ:.7,  heat:12, rm:2.6, fav:2, ally:"barry"},
+  {n:"Plant a Bug at a Yacht Club",             dur:45,  succ:.8,  heat:8,  rm:1.6, fav:1, ally:"jesse"},
+  {n:"Con a Corrupt Developer",                 dur:50,  succ:.8,  heat:10, rm:1.8, fav:2, ally:"madeline"},
+  {n:"Intercept a Weapons Shipment",            dur:90,  succ:.6,  heat:25, rm:4.0, fav:4, ally:"fiona"},
+  {n:"Rescue a Scientist from a Warlord",       dur:100, succ:.55, heat:28, rm:5.0, fav:5, ally:"fiona"},
+  {n:"Extract a Defector",                      dur:120, succ:.5,  heat:30, rm:6.0, fav:6, ally:"jesse"},
+  {n:"Rescue a Kidnapped Nephew",               dur:60,  succ:1,   heat:15, rm:2.2, fav:2, ally:"fiona",    kid:true},
+  {n:"Find a Couple's Kidnapped Son",           dur:65,  succ:1,   heat:16, rm:2.4, fav:3, ally:"sam",      kid:true},
+  {n:"Find a Missing Teenager",                 dur:55,  succ:1,   heat:10, rm:2.0, fav:2, ally:"sam",      kid:true},
+  {n:"Track a Child Taken by an Estranged Parent", dur:60, succ:1,  heat:12, rm:2.3, fav:2, ally:"jesse",    kid:true},
+  {n:"Help a Boy Escape an Abusive Stepfather", dur:50,  succ:1,   heat:10, rm:1.9, fav:2, ally:"madeline", kid:true},
+  {n:"Rescue a Sick Boy from an Armed Compound", dur:80, succ:1,   heat:22, rm:3.2, fav:3, ally:"sam",      kid:true},
+  {n:"Win Back a Father's Savings for His Sick Son", dur:55, succ:1, heat:8, rm:2.0, fav:2, ally:"barry",    kid:true},
+  {n:"Bring a Daughter Home from a Criminal Ring", dur:70, succ:1,  heat:18, rm:2.8, fav:3, ally:"fiona",    kid:true},
+  {n:"Protect a Kid from a Loan Shark's Crew",  dur:75,  succ:1,   heat:20, rm:3.0, fav:3, ally:"fiona",    kid:true},
+];
+const COVERS = [
+  {id:"con",  name:"Contractor",  desc:"Jobs ×1.3",                       job:1.3,inc:1,  heat:1,  mis:1,   unlock:0},
+  {id:"tour", name:"Tourist",     desc:"Heat −30%, income ×0.9",          job:1,  inc:.9, heat:.7, mis:1,   unlock:1e4},
+  {id:"jour", name:"Journalist",  desc:"Mission rewards ×1.5, income ×0.9",job:1, inc:.9, heat:1,  mis:1.5, unlock:1e5},
+  {id:"arms", name:"Arms Dealer", desc:"Income ×1.4, heat +40%",          job:1,  inc:1.4,heat:1.4,mis:1,   unlock:1e6},
+];
+const BOSSES = [
+  {id:"paxson", n:"Detective Paxson", title:"A Miami police detective who put a tail on you and wants your operation shut down", at:5e3, hpm:1, m:["heat"],
+   mech:"Round-the-clock tail: your heat climbs steadily while she's on you.",
+   intro:"Detective Paxson has noticed the unusual activity around you, Fiona and Sam. She's come to end it."},
+  {id:"carla",  n:"Carla Baxter", title:"The Organization's case officer, the one who ordered your burn so she could use you", at:1e5, hpm:1.6, m:["rush"],
+   mech:"Deadlines: she sets brutal ones, so the clock runs 50% faster.",
+   intro:"Carla has an errand for you. Several, actually. And a reminder of who else could get hurt if you're late."},
+  {id:"cowan",  n:"Phillip Cowan", title:"Ordered to burn you, and he knows the reason is bigger than either of you", at:1e6, hpm:1.9, m:["freeze"],
+   mech:"Silenced: your allies' ability cooldowns freeze while he's here.",
+   intro:"Phillip Cowan says the reason you were burned is bigger than both of you. He'll tell you. Maybe. If nobody shoots first."},
+  {id:"larry",  n:"Larry Sizemore", title:"Your former mentor, a hired killer who's convinced he can turn you into him", at:5e6, hpm:2.2, m:["heal"],
+   mech:"Unkillable: he recovers health while you fight, just like the day he was declared dead.",
+   intro:"Larry Sizemore shows up unannounced, all smiles. He wants a father-and-son thing, and he'll burn the city down to get it."},
+  {id:"brennen",n:"Tyler Brennen", title:"A rogue ex-CIA officer turned arms dealer, and he's good at hostages", at:3e7, hpm:2.6, m:["weak"],
+   mech:"Leverage: he holds someone you care about, so your operations hit at a third of their strength.",
+   intro:"Tyler Brennen holds up a photo and a list of demands. He's been planning this for a year."},
+  {id:"strickler",n:"Tom Strickler", title:"A self-styled agent for spies who sells contacts for money and favors", at:1e8, hpm:3.0, m:["steal"],
+   mech:"Broker's cut: he skims your cash every second.",
+   intro:"Tom Strickler offers his services. It's a good price. It's always a good price, until the bill comes."},
+  {id:"gilroy", n:"Mason Gilroy",  title:"A former MI6 spy turned freelancer who arranges coups for a living", at:4e8, hpm:3.4, m:["fx"],
+   mech:"Sabotage: your gadget boosts are stripped away.",
+   intro:"Mason Gilroy arrives in town to 'clean things up'. The method looks a lot like a list of unsolved crimes."},
+  {id:"barrett",n:"John Barrett",  title:"CEO of Drake Technologies, with money, mercenaries, and a plan to take out the Organization", at:1.5e9, hpm:3.8, m:["att","weak"],
+   mech:"Corporate muscle: Organization attention climbs and your operations are weakened.",
+   intro:"John Barrett brings an army to a negotiation. He wants Simon's Bible, and he doesn't plan to leave empty-handed."},
+  {id:"anson",  n:"Anson Fullerton", title:"The original founder of the Organization, hiding in plain sight as a psychiatrist", at:6e9, hpm:4.2, m:["att"],
+   mech:"Surveillance: the Organization's attention climbs fast.",
+   intro:"Anson Fullerton sits in your loft like a guest. He's already framed Fiona. Now he wants a favor."},
+  {id:"vaughn", n:"Vaughn Anderson", title:"The Organization's handler, who arrives with a tactical team", at:2.5e10, hpm:4.6, m:["heat","att"],
+   mech:"Dragnet: heat and Organization attention both climb.",
+   intro:"Vaughn Anderson says he's your new handler. His tactical team says otherwise."},
+  {id:"card",   n:"Tom Card",      title:"Your ex-CIA mentor and trainer, who's been pulling strings the entire time", at:1e11, hpm:5.2, m:["steal","weak"],
+   mech:"Shakedown: he skims your cash and your operations are less effective.",
+   intro:"Tom Card has a mission for you in Panama. He calls it routine. It is not routine."},
+  {id:"gray",   n:"Tyler Gray",    title:"A CIA operative and former Marine sniper working on Card's orders", at:4e11, hpm:6.0, m:["nolay","heat"],
+   mech:"Pinned down: you can't Lay Low and your heat climbs.",
+   intro:"Tyler Gray is somewhere you can't see. You can feel the scope on you anyway."},
+  {id:"riley",  n:"Olivia Riley",  title:"A senior CIA counterintelligence officer, a legend at hitting where it hurts", at:1.5e12, hpm:7.0, m:["rush","att","nolay"],
+   mech:"Endgame: shorter clock, rising attention, and no Lay Low.",
+   intro:"Olivia Riley has put you at the top of her list. She notices small details. She's already noticed yours."},
+];
+const PERKS = [
+  {id:"cars",    name:"Reliable Getaway Car", desc:"+25% job pay per level"},
+  {id:"insider", name:"Inside Source",        desc:"+3% mission success per level"},
+  {id:"head",    name:"Cooler Head",          desc:"−5% heat gain per level"},
+  {id:"friends", name:"Old Friends",          desc:"−3% operation prices per level"},
+];
+const JUNK = {tape:"Duct tape", wire:"Wire", bleach:"Bleach", micro:"Microwave"};
+const RECIPES = [
+  {id:"smoke", name:"Smoke Bomb",       desc:"Instantly −30 heat",              need:{bleach:1,tape:1}},
+  {id:"jam",   name:"Door-Cam Jammer",  desc:"No heat gain for 45s",            need:{wire:2,tape:1}},
+  {id:"boost", name:"Signal Booster",   desc:"Income ×2 for 30s",               need:{wire:2,micro:1}},
+  {id:"jobs",  name:"Fake ID Kit",      desc:"Jobs ×4 for 30s",                 need:{tape:2,wire:1}},
+];
+const FX_NAMES = {jam:"Jammer",boost:"Booster ×2",jobs:"Fake IDs ×4",fast:"Fast Talk"};
+const STORY = [
+  {at:1e3,  t:"The Phone Call",       fav:1,  x:"A voice you almost recognize says the burn notice came from inside your own file. Somebody wanted you gone. Nobody will say who."},
+  {at:2.5e4,t:"A Name, Half Scratched Out",fav:2, x:"A fixer in Little Havana remembers a name from the paperwork. It starts with a K. He won't say more for free."},
+  {at:4e5,  t:"The Ledger",           fav:2,  x:"Sam turns up an old ledger. Payments from a shell company, dated the week before your burn. Same shell, again and again."},
+  {at:5e6,  t:"A Friend on the Payroll",fav:3, x:"Your old handler is on the shell's books. He says he did it to keep you breathing. You decide not to believe him yet."},
+  {at:8e7,  t:"The Offshore Vault",   fav:4,  x:"Fiona opens a vault that wasn't meant to open. Inside: a file with your name on it and a second file with a stranger's."},
+  {at:1.2e9,t:"The Offer",            fav:5,  x:"The people who burned you offer your old job back, with a raise. You tell them you'll think about it. You will not."},
+  {at:2e10, t:"Kestrel",              fav:6,  x:"You finally have the name. It belongs to someone who once covered for you in a fight. That makes this worse."},
+  {at:3e11, t:"Clean Slate",          fav:10, x:"The file is rewritten. The burn notice is gone. Miami, however, still has problems, and your phone is already ringing."},
+];
+const ACH = [
+  {id:"a1", n:"First Job",        d:"Take a job",                 t:s=>s.stats.clicks>=1},
+  {id:"a2", n:"Hustler",          d:"100 jobs",                   t:s=>s.stats.clicks>=100},
+  {id:"a3", n:"Workaholic",       d:"1,000 jobs",                 t:s=>s.stats.clicks>=1000},
+  {id:"a4", n:"Pocket Money",     d:"Earn $1K lifetime",          t:s=>s.life>=1e3},
+  {id:"a5", n:"Millionaire",      d:"Earn $1M lifetime",          t:s=>s.life>=1e6},
+  {id:"a6", n:"Billionaire",      d:"Earn $1B lifetime",          t:s=>s.life>=1e9},
+  {id:"a7", n:"Burned (Again)",   d:"Get burned",                 t:s=>s.stats.burns>=1},
+  {id:"a8", n:"Fireproof? No.",   d:"Get burned 5 times",         t:s=>s.stats.burns>=5},
+  {id:"a9", n:"Small Business",   d:"Own 50 operations",          t:s=>totalOps()>=50},
+  {id:"a10",n:"Empire",           d:"Own 200 operations",         t:s=>totalOps()>=200},
+  {id:"a11",n:"On the Case",      d:"Complete a mission",         t:s=>s.stats.mDone>=1},
+  {id:"a12",n:"Case Closer",      d:"Complete 10 missions",       t:s=>s.stats.mDone>=10},
+  {id:"a13",n:"The Team",         d:"Hire all four allies",       t:s=>ALLIES.every(a=>s.allies[a.id])},
+  {id:"a14",n:"Reinstated",       d:"Get Reinstated once",        t:s=>s.stats.reinstated>=1},
+  {id:"a15",n:"MacGyver Who?",    d:"Craft a gadget",             t:s=>s.stats.crafted>=1},
+  {id:"a16",n:"Ambushed",         d:"Get ambushed by your rival", t:s=>s.stats.ambush>=1},
+  {id:"a17",n:"Case Closed",      d:"Finish the story",           t:s=>s.story>=STORY.length},
+  {id:"a18",n:"Dodged a Bullet",  d:"Beat your first boss",       t:s=>Object.keys(s.bossKills).length>=1},
+  {id:"a19",n:"Rogues' Gallery",  d:"Beat every boss",            t:s=>BOSSES.every(b=>s.bossKills[b.id])},
+];
+const QUOTES = [
+  "When you're burned, favors are the only currency that never inflates.",
+  "A good cover is boring. Boring keeps you alive in Miami.",
+  "Duct tape fixes almost anything. The rest, you improvise.",
+  "Never trust a client who pays in advance and smiles too much.",
+  "Heat is like humidity here. You don't fight it. You manage it.",
+  "Spies spend more time waiting than shooting. Waiting pays surprisingly well.",
+  "Friends are great. Friends with boats are better.",
+  "The trick to a surveillance job is a comfortable chair and low expectations.",
+  "If the plan is working perfectly, check what you missed.",
+];
+const LINES = {
+  burn:   ["Somebody talked. You're burned again, and your wallet knows it.","The phone goes dead. Not a good sign. Never a good sign.","A burn is just a bad review from people with guns."],
+  big:    ["The operation is getting big enough to have its own problems.","More people means more mouths. Choose them carefully.","Nobody notices a crowd. That's the whole idea."],
+  prest:  ["A voice says you're clean. For now. Back to Miami.","They call it a fresh start. It smells like old coffee."],
+  mOk:    ["Clean in, clean out. The best kind of job.","The client smiles. You count the cash twice.","It went to plan. That's a little suspicious."],
+  mBad:   ["That went sideways in under a minute. A personal best.","You walked away, but not quietly.","A plan is just a suggestion you make to the universe."],
+  ambush: ["The Organization finally came knocking. Rude, and effective.","They found you. The envelopes weren't enough."],
+};
+
+// ===================== STATE =====================
+const fresh = () => ({
+  cash:0, life:0, run:0, heat:0, att:0, gens:{}, upgs:{}, cred:0, last:Date.now(), layCd:0,
+  favors:0, perks:{}, allies:{}, allyCd:{}, fx:{}, junk:{tape:0,wire:0,bleach:0,micro:0},
+  cover:"con", coverCd:0, board:[], active:[], uid:1, story:0, ach:[],
+  stats:{clicks:0,burns:0,mDone:0,mFail:0,crafted:0,ambush:0,reinstated:0,time:0},
+  buyAmt:1, mute:false, simonBought:0, boss:null, bossCd:150, bossKills:{}
+});
+let S = fresh();
+let tab = "ops";
+
+// ===================== HELPERS =====================
+function fmt(n){
+  if(!isFinite(n)) return "∞";
+  if(n<1000) return n<10 && n%1 ? n.toFixed(1) : Math.floor(n).toString();
+  const s=["","K","M","B","T","Qa","Qi","Sx"]; let i=0;
+  while(n>=1000 && i<s.length-1){n/=1000;i++}
+  return n.toFixed(n<10?2:n<100?1:0)+s[i];
+}
+const money = n => "$"+fmt(n);
+const owned = id => S.gens[id]||0;
+const totalOps = () => GENS.reduce((a,g)=>a+owned(g.id),0);
+const cover = () => COVERS.find(c=>c.id===S.cover)||COVERS[0];
+const perk = id => S.perks[id]||0;
+function say(t){
+  const p=document.createElement("p"); p.textContent=t; $("log").prepend(p);
+  while($("log").children.length>40) $("log").lastChild.remove();
+}
+function toast(title,msg){
+  const d=document.createElement("div"); d.className="toast"; d.innerHTML=`<b>${title}</b>${msg||""}`;
+  $("toasts").appendChild(d); setTimeout(()=>d.remove(),5000);
+}
+function earn(n){S.cash+=n;S.life+=n;S.run+=n}
+function shake(){document.body.classList.remove("shake");void document.body.offsetWidth;document.body.classList.add("shake")}
+function floatText(txt,x,y){
+  const e=document.createElement("div"); e.className="float"; e.textContent=txt;
+  e.style.left=x+"px"; e.style.top=y+"px"; document.body.appendChild(e); setTimeout(()=>e.remove(),900);
+}
+let AC=null;
+function beep(f,d=.08,type="square",v=.04,slide=0){
+  if(S.mute) return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(), g=AC.createGain(), t=AC.currentTime;
+    o.type=type; o.frequency.setValueAtTime(f,t);
+    if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t+d);
+    g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g); g.connect(AC.destination); o.start(); o.stop(t+d);
+  }catch(e){}
+}
+const chime = () => [520,660,880].forEach((f,i)=>setTimeout(()=>beep(f,.12,"triangle",.05),i*90));
+
+// ===================== MULTIPLIERS =====================
+function incomeMult(){
+  let m=(1+S.cred*0.1)*(1+0.02*S.ach.length)*(1+0.03*Object.keys(S.bossKills).length)*cover().inc;
+  for(const u of UPGS) if(S.upgs[u.id]&&u.kind==="all") m*=u.m;
+  if(S.fx.boost>0) m*=2;
+  return m;
+}
+const genMult = id => UPGS.filter(u=>S.upgs[u.id]&&u.kind==="gen"&&u.g===id).reduce((a,u)=>a*u.m,1);
+function cps(){
+  let t=0; for(const g of GENS) t+=owned(g.id)*g.cps*genMult(g.id);
+  return t*incomeMult();
+}
+function clickVal(){
+  const m=UPGS.filter(u=>S.upgs[u.id]&&u.kind==="click").reduce((a,u)=>a*u.m,1);
+  let v=(1+cps()*0.05)*m*cover().job*(1+0.25*perk("cars"));
+  if(S.allies.fiona) v*=1.5;
+  if(S.fx.jobs>0) v*=4;
+  return v*(1+S.cred*0.1)*(1+0.02*S.ach.length);
+}
+function heatMult(){
+  if(S.fx.jam>0) return 0;
+  let m=cover().heat;
+  if(S.upgs.h1) m*=0.6;
+  if(S.allies.sam) m*=0.85;
+  m*=Math.max(0.3,1-0.05*perk("head"));
+  return m;
+}
+const layAmt = () => S.upgs.h2 ? 60 : 35;
+const layCdMax = () => S.allies.madeline ? 4 : 8;
+
+// ===================== COSTS =====================
+const R=1.15;
+const discount = () => 1-0.03*perk("friends");
+function bulkCost(g,n){ return g.base*Math.pow(R,owned(g.id))*discount()*(Math.pow(R,n)-1)/(R-1); }
+function maxAfford(g){ let n=0; while(n<500 && bulkCost(g,n+1)<=S.cash) n++; return n; }
+const buyN = g => S.buyAmt==="max" ? Math.max(1,maxAfford(g)) : S.buyAmt;
+
+// ===================== ACTIONS =====================
+$("job").addEventListener("click",e=>{
+  const v=clickVal(); earn(v); S.heat+=4*heatMult(); S.stats.clicks++;
+  if(Math.random()<0.15){ const k=pick(Object.keys(S.junk)); S.junk[k]++; }
+  floatText("+"+money(v), e.clientX-20, e.clientY-20); beep(500+Math.random()*120,.05,"square",.025);
+  checkBurn(); render();
+});
+const layBlocked = () => S.boss && bossDef().m.includes("nolay");
+function layLow(){
+  if(S.layCd>0 || layBlocked()) return;
+  S.heat=Math.max(0,S.heat-layAmt()); S.layCd=layCdMax();
+  say("You swap cars twice and eat lunch somewhere with no windows. Heat drops.");
+}
+$("lay").addEventListener("click",()=>{layLow();render()});
+const bribeCost = () => Math.max(100,cps()*60)*(S.allies.barry?0.5:1);
+const simonPrice = () => Math.max(500,cps()*90)*Math.pow(1.12,S.simonBought)*(S.allies.barry?0.75:1);
+function buyFavorFromSimon(){
+  const c=simonPrice(); if(S.cash<c) return;
+  S.cash-=c; S.favors++; S.simonBought++; S.att=Math.min(100,S.att+3);
+  beep(300,.1,"triangle",.05); say(pick([
+    "Simon takes the envelope without counting it. He's a friend, the way a loaded gun on the table is a friend.",
+    "Simon smiles, and the favor is yours. You tell yourself he's useful. You don't tell yourself the rest.",
+    "Simon never works for free, and never works badly. Necessary, and worth keeping at arm's length."]));
+}
+$("bribe").addEventListener("click",()=>{
+  const c=bribeCost(); if(S.cash<c) return;
+  S.cash-=c; S.att=Math.max(0,S.att-40); say("A fat envelope reaches the right desk. Your rival loses interest for now."); render();
+});
+
+function checkBurn(){
+  if(S.heat>=100){
+    S.cash*=0.5; S.heat=30; S.layCd=0; S.stats.burns++;
+    $("burnedTxt").firstChild.textContent="BURNED";
+    $("burned").style.display="flex"; setTimeout(()=>$("burned").style.display="none",1500);
+    shake(); beep(150,.6,"sawtooth",.08,-100); say(pick(LINES.burn));
+  }
+}
+function checkAmbush(){
+  if(S.att>=100){
+    S.cash*=0.75; S.att=35; S.active=[]; S.stats.ambush++; fillBoard();
+    $("burnedTxt").firstChild.textContent="AMBUSHED";
+    $("burned").style.display="flex"; setTimeout(()=>$("burned").style.display="none",1500);
+    shake(); beep(110,.7,"sawtooth",.08,-60); say(pick(LINES.ambush));
+  }
+}
+
+function buyGen(id){
+  const g=GENS.find(x=>x.id===id), n=buyN(g), c=bulkCost(g,n);
+  if(S.cash<c) return;
+  const before=owned(id);
+  S.cash-=c; S.gens[id]=before+n; beep(660,.07,"triangle",.05);
+  if([10,25,50,100,150].some(m=>before<m&&before+n>=m)) say(pick(LINES.big));
+}
+function buyUpg(id){
+  const u=UPGS.find(x=>x.id===id);
+  if(S.upgs[id]||S.cash<u.cost) return;
+  S.cash-=u.cost; S.upgs[id]=true; say("Acquired: "+u.name+"."); beep(780,.1,"triangle",.05);
+}
+function hireAlly(id){
+  const a=ALLIES.find(x=>x.id===id);
+  if(S.allies[id]||S.cash<a.cost) return;
+  S.cash-=a.cost; S.allies[id]=true; chime(); toast(a.name+" joins you", a.perk);
+  say(a.name+" is on the team. Try not to get them killed.");
+}
+function useAbility(id){
+  const a=ALLIES.find(x=>x.id===id);
+  if(!S.allies[id]||(S.allyCd[id]||0)>0) return;
+  a.run(); S.allyCd[id]=a.cd; chime(); checkBurn();
+}
+function setCover(id){
+  const c=COVERS.find(x=>x.id===id);
+  if(S.cover===id||S.life<c.unlock||S.coverCd>0) return;
+  S.cover=id; S.coverCd=20; say("New name, new wardrobe. You're "+c.name.toLowerCase()+" now.");
+}
+const perkCost = id => Math.ceil(2*Math.pow(1.5,perk(id)));
+function buyPerk(id){
+  const c=perkCost(id);
+  if(perk(id)>=10||S.favors<c) return;
+  S.favors-=c; S.perks[id]=perk(id)+1; beep(700,.1,"triangle",.05);
+}
+function craft(id){
+  const r=RECIPES.find(x=>x.id===id);
+  if(!Object.entries(r.need).every(([k,v])=>S.junk[k]>=v)) return;
+  for(const [k,v] of Object.entries(r.need)) S.junk[k]-=v;
+  if(id==="smoke") S.heat=Math.max(0,S.heat-30);
+  if(id==="jam") S.fx.jam=45;
+  if(id==="boost") S.fx.boost=30;
+  if(id==="jobs") S.fx.jobs=30;
+  S.stats.crafted++; chime(); say("Held together with tape and optimism. It works.");
+}
+
+// ----- missions -----
+function newMission(){
+  const t=pick(MISSIONS);
+  return {uid:S.uid++, n:t.n, dur:t.dur, succ:t.succ, heat:t.heat, rm:t.rm, fav:t.fav, ally:t.ally, kid:!!t.kid, send:false};
+}
+function fillBoard(){ while(S.board.length<3) S.board.push(newMission()); }
+const allyFree = id => S.allies[id] && !S.active.some(a=>a.sent===id);
+function succChance(m){
+  if(m.kid) return 1; // Michael never fails when a kid is involved
+  let c=m.succ+0.03*perk("insider")+(S.allies.jesse?0.1:0)+(m.send&&allyFree(m.ally)?0.25:0);
+  return Math.min(0.97,c);
+}
+const missionReward = m => Math.floor((cps()*60+150)*m.rm*cover().mis);
+function startMission(uid){
+  if(S.active.length>=3) return;
+  const i=S.board.findIndex(m=>m.uid===uid); if(i<0) return;
+  const m=S.board.splice(i,1)[0];
+  const sent=m.send&&allyFree(m.ally)?m.ally:null;
+  S.active.push({...m, sent, left:m.dur, chance:succChance(m)+0, reward:missionReward(m)});
+  fillBoard(); beep(400,.08,"triangle",.05);
+}
+function resolveMission(m){
+  S.active=S.active.filter(x=>x.uid!==m.uid);
+  S.att=Math.min(100,S.att+8);
+  if(Math.random()<m.chance){
+    earn(m.reward); S.favors+=m.fav; S.heat+=m.heat*heatMult(); S.stats.mDone++;
+    say(m.kid ? pick(["Kids are the one job that never goes wrong. It's not luck; it's a rule.","You don't lose when there's a kid involved. You just don't."]) : pick(LINES.mOk)); toast("Mission complete: "+m.n, `+${money(m.reward)}, +${m.fav} favor`); chime();
+  } else {
+    S.heat+=m.heat*1.5*heatMult(); S.stats.mFail++;
+    say(pick(LINES.mBad)); toast("Mission failed: "+m.n,"Extra heat, no pay."); beep(130,.3,"sawtooth",.06,-50);
+  }
+}
+
+// ----- bosses -----
+const bossDef = () => S.boss && BOSSES.find(b=>b.id===S.boss.id);
+const bossHP = b => (cps()*400+clickVal()*200+500)*b.hpm;
+const strikeDmg = () => clickVal()*8+cps()*2;
+function spawnBoss(){
+  const pool=BOSSES.filter(b=>S.life>=b.at);
+  if(!pool.length){ S.bossCd=60; return; }
+  const b=pick(pool), max=bossHP(b);
+  S.boss={id:b.id,hp:max,max,left:75};
+  shake(); beep(100,.5,"sawtooth",.08,-40); toast("BOSS: "+b.n,b.title); say(b.intro);
+}
+function winBoss(){
+  const b=bossDef(), reward=cps()*200*b.hpm+500, fav=Math.ceil(2*b.hpm);
+  const first=!S.bossKills[b.id];
+  earn(reward); S.favors+=fav; S.bossKills[b.id]=(S.bossKills[b.id]||0)+1;
+  S.boss=null; S.bossCd=240+Math.random()*180; chime();
+  toast(b.n+" defeated", `+${money(reward)}, +${fav} favors${first?" · first win: +3% income forever":""}`);
+  say(b.n+" walks away with nothing, which is the best outcome you can ask for.");
+}
+function loseBoss(){
+  const b=bossDef();
+  S.cash*=0.92; S.heat+=15; S.att=Math.min(99,S.att+20);
+  S.boss=null; S.bossCd=240+Math.random()*180;
+  beep(130,.4,"sawtooth",.06,-50); toast(b.n+" got away","−8% cash, extra heat and attention.");
+  say(b.n+" slips out with what they came for. You'll see them again.");
+}
+$("strike").addEventListener("click",()=>{
+  if(!S.boss) return;
+  S.boss.hp-=strikeDmg(); S.heat+=2*heatMult(); beep(220,.05,"sawtooth",.04);
+  checkBurn(); if(S.boss&&S.boss.hp<=0) winBoss(); render();
+});
+
+// ----- prestige -----
+const credGain = () => Math.floor(Math.sqrt(S.run/1e6));
+$("tabs").addEventListener("click",e=>{ const b=e.target.closest("[data-tab]"); if(b){tab=b.dataset.tab;render();} });
+function prestige(){
+  const gain=credGain(); if(gain<1) return;
+  if(!confirm(`Get reinstated? You reset cash, ops, upgrades and missions, but gain ${gain} Credibility (+${gain*10}% income) and ${gain} favors. Allies, perks, medals and story are kept.`)) return;
+  const keep={cred:S.cred+gain, life:S.life, favors:S.favors+gain, perks:S.perks, allies:S.allies, ach:S.ach,
+    stats:S.stats, story:S.story, cover:S.cover, mute:S.mute, buyAmt:S.buyAmt, bossKills:S.bossKills};
+  S=Object.assign(fresh(),keep); S.stats.reinstated++; fillBoard();
+  say(pick(LINES.prest)); toast("Reinstated","+"+gain+" Credibility");
+}
+
+// ===================== RANDOM EVENTS =====================
+const EVENTS = [
+  {t:"Pulled Over", d:"A Miami cop taps your window. Your trunk is not boring.", o:[
+    ["Slip him a bribe", ()=>{S.cash=Math.max(0,S.cash-cps()*30-20);S.heat=Math.max(0,S.heat-10);return "He forgets your face. It cost you.";}],
+    ["Bluff your way out", ()=>{ if(Math.random()<.6){S.favors++;return "You sound like a man with nothing to hide. +1 favor.";} S.heat+=25;return "He doesn't buy it. Heat climbs."; }],
+    ["Floor it", ()=>{S.heat+=30;shake();return "You lose him in traffic, and your anonymity with him.";}]]},
+  {t:"A Stranger's Offer", d:"A man in a linen suit offers cash for a job, no questions.", o:[
+    ["Accept", ()=>{earn(cps()*90+100);S.heat+=15;S.att=Math.min(100,S.att+10);return "Easy money. The kind that comes back around.";}],
+    ["Counter-offer", ()=>{ if(Math.random()<.5){earn(cps()*150+150);return "He folds and pays more.";} S.heat+=20;return "He leaves angry. People notice.";}],
+    ["Decline", ()=>"You watch him go. Nothing happens, which is its own kind of lucky."]]},
+  {t:"Old Contact Calls", d:"A voice from your past wants twenty minutes of your time.", o:[
+    ["Hear them out", ()=>{S.favors+=2;S.att=Math.min(100,S.att+5);return "They owe you now. +2 favors.";}],
+    ["Hang up", ()=>"Some doors stay closed for good reason."]]},
+  {t:"Stray Informant", d:"A nervous kid says he has tips and no employer.", o:[
+    ["Hire him ($)", ()=>{ const c=cps()*20+20; if(S.cash<c) return "You can't afford him. He leaves."; S.cash-=c; const g=pick(GENS.filter(x=>owned(x.id)>0)||[GENS[0]]); const id=(g||GENS[0]).id; S.gens[id]=owned(id)+1; return "He's on the books. You gain a free "+GENS.find(x=>x.id===id).name+"."; }],
+    ["Send him away", ()=>"He shrugs and finds another buyer."]]},
+];
+let evtOpen=false;
+function spawnEvent(){
+  if(evtOpen){ return scheduleEvent(); }
+  const ev=pick(EVENTS); evtOpen=true;
+  $("evtT").textContent=ev.t; $("evtD").textContent=ev.d; $("evtO").innerHTML="";
+  ev.o.forEach(([label,fn])=>{
+    const b=document.createElement("button"); b.textContent=label;
+    b.onclick=()=>{ const r=fn(); say(r); toast(ev.t,r); $("evt").style.display="none"; evtOpen=false; checkBurn(); render(); scheduleEvent(); };
+    $("evtO").appendChild(b);
+  });
+  $("evt").style.display="flex";
+}
+function scheduleEvent(){ setTimeout(spawnEvent, 70000+Math.random()*60000); }
+
+// ===================== CLIENT POPUP =====================
+let clientTimer=null;
+function scheduleClient(){ setTimeout(spawnClient, 45000+Math.random()*60000); }
+function spawnClient(){
+  const reward=Math.max(50,cps()*45+clickVal()*10), el=$("client");
+  el.style.display="block"; el.textContent=`📞 A client is at the door! Take the case (+${money(reward)})`;
+  const done=()=>{el.style.display="none";clearTimeout(clientTimer);el.onclick=null;scheduleClient()};
+  el.onclick=()=>{earn(reward);S.heat+=10*heatMult();say("The client's problem is yours now. So is their money.");chime();checkBurn();done();render()};
+  clientTimer=setTimeout(done,12000);
+}
+
+// ===================== RENDER =====================
+function item(act,arg,can,title,desc,right,cls=""){
+  return `<div class="item ${can?"can":"no"} ${cls}" data-act="${act}" data-arg="${arg}">
+    <div><b>${title}</b><span>${desc}</span></div><div style="text-align:right">${right}</div></div>`;
+}
+const TABS=[["ops","Operations"],["upg","Upgrades"],["mis","Missions"],["crew","Crew"],["gad","Gadgets"],["cov","Covers"],["fav","Favors"],["rogue","Rogues"],["story","Case File"],["med","Medals"],["rep","Reinstate"]];
+function renderTabs(){
+  const h=TABS.map(([id,n])=>`<button class="tab ${tab===id?"active":""}" data-tab="${id}">${n}</button>`).join("");
+  if(renderTabs.last!==h+tab){ $("tabs").innerHTML=h; renderTabs.last=h+tab; }
+}
+function panelHTML(){
+  if(tab==="ops"){
+    let h=`<div class="tabs">`+[1,10,"max"].map(a=>`<button class="tab ${S.buyAmt===a?"active":""}" data-act="amt" data-arg="${a}">Buy ${a==="max"?"max":"×"+a}</button>`).join("")+`</div>`;
+    GENS.forEach((g,i)=>{
+      if(i>0 && S.life < GENS[i-1].base*0.5 && !owned(g.id)) return;
+      const n=buyN(g), c=bulkCost(g,n);
+      h+=item("gen",g.id,S.cash>=c,g.name,`${g.desc} · ${fmt(g.cps*genMult(g.id)*incomeMult())}/s each`,
+        `<div style="display:flex;gap:12px;align-items:center"><div class="cost">${n>1?"×"+n+" · ":""}${money(c)}</div><div class="own">${owned(g.id)}</div></div>`);
+    });
+    return h;
+  }
+  if(tab==="upg"){
+    const av=UPGS.filter(u=>!S.upgs[u.id] && S.life>=u.cost*0.3).slice(0,9);
+    if(!av.length) return '<div class="small">Nothing on the table yet. Keep earning.</div>';
+    return av.map(u=>item("upg",u.id,S.cash>=u.cost,u.name,u.desc,`<div class="cost">${money(u.cost)}</div>`)).join("");
+  }
+  if(tab==="mis"){
+    let h=`<div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Send an ally for +25% success, but they're busy until it ends.</div>`;
+    if(S.active.length){
+      h+=`<h2>In Progress</h2>`+S.active.map(m=>`<div class="box"><div class="row"><b>${m.n}</b><span class="small">${Math.ceil(m.left)}s · ${Math.round(m.chance*100)}%</span></div>
+        <div class="bar"><i class="mbar" style="width:${(1-m.left/m.dur)*100}%"></i></div>
+        <span class="small">Reward ${money(m.reward)} · +${m.fav} favor${m.sent?" · "+ALLIES.find(a=>a.id===m.sent).name+" is out":""}</span></div>`).join("");
+    }
+    h+=`<h2 style="margin-top:12px">Board</h2>`;
+    h+=S.board.map(m=>{
+      const al=ALLIES.find(a=>a.id===m.ally), free=allyFree(m.ally);
+      return `<div class="box"><b>${m.n}${m.kid?' <span class="chip">Never fails</span>':""}</b><div class="small">${Math.round(succChance(m)*100)}% success · ${m.dur}s · ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
+        <div class="btns">${S.allies[m.ally]?`<button class="${m.send&&free?"on":""}" data-act="send" data-arg="${m.uid}" ${free?"":"disabled"}>${m.send&&free?"☑":"☐"} Send ${al.name.split(" ")[0]} (+25%)${free?"":" — busy"}</button>`:""}
+        <button data-act="start" data-arg="${m.uid}" ${S.active.length>=3?"disabled":""}>Start mission</button></div></div>`;
+    }).join("");
+    return h;
+  }
+  if(tab==="crew"){
+    return ALLIES.map(a=>{
+      if(!S.allies[a.id]) return item("hire",a.id,S.cash>=a.cost,"Hire "+a.name,`${BIO[a.id]} Perk: ${a.perk}`,`<div class="cost">${money(a.cost)}</div>`);
+      const cd=Math.ceil(S.allyCd[a.id]||0), busy=S.active.some(m=>m.sent===a.id);
+      return `<div class="box"><div class="row"><b>${a.name}</b><span class="small">${busy?"On a mission":"Available"}</span></div>
+        <div class="small">${BIO[a.id]}</div><div class="small">Perk: ${a.perk}</div>
+        <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd>0?"disabled":""}>${a.ab} — ${cd>0?cd+"s":"Ready"}</button></div>
+        <div class="small" style="margin-top:4px">${a.abDesc}</div></div>`;
+    }).join("");
+  }
+  if(tab==="gad"){
+    let h=`<div class="small">Junk drops from jobs and Duct-Tape Gadgets.</div><div style="margin:8px 0 12px">`+
+      Object.entries(JUNK).map(([k,n])=>`<span class="chip">${n}: ${S.junk[k]}</span>`).join("")+`</div>`;
+    h+=RECIPES.map(r=>{
+      const ok=Object.entries(r.need).every(([k,v])=>S.junk[k]>=v);
+      return item("craft",r.id,ok,r.name,r.desc,`<span class="small">${Object.entries(r.need).map(([k,v])=>v+" "+JUNK[k].toLowerCase()).join(", ")}</span>`);
+    }).join("");
+    return h;
+  }
+  if(tab==="cov"){
+    return `<div class="small" style="margin-bottom:8px">Change cover anytime (20s between changes${S.coverCd>0?`, ${Math.ceil(S.coverCd)}s left`:""}).</div>`+
+      COVERS.map(c=>{
+        const locked=S.life<c.unlock;
+        return item("cover",c.id,!locked&&S.cover!==c.id&&S.coverCd<=0,c.name,c.desc,
+          locked?`<span class="small">Unlocks at ${money(c.unlock)}</span>`:(S.cover===c.id?'<span class="cost">Active</span>':""),S.cover===c.id?"on":"");
+      }).join("");
+  }
+  if(tab==="fav"){
+    return `<div class="small" style="margin-bottom:8px">Favors: <b style="color:var(--gold)">${S.favors}</b>. Perks last through every reinstatement.</div>`+
+      item("simon","x",S.cash>=simonPrice(),"Buy a favor from Simon",`Simon Escher, once the Organization's best assassin, now a reluctant ally. A necessary evil: he gets things done, and he always names a price. It rises with each favor (resets on reinstatement), and dealing with him draws a little Organization attention.${S.allies.barry?" Barry negotiates 25% off.":""}`,`<div class="cost">${money(simonPrice())}</div>`)+
+      PERKS.map(p=>item("perk",p.id,perk(p.id)<10&&S.favors>=perkCost(p.id),p.name,p.desc,
+        `<div style="display:flex;gap:12px;align-items:center"><div class="cost">${perk(p.id)>=10?"MAX":perkCost(p.id)+" fav"}</div><div class="own">${perk(p.id)}</div></div>`)).join("");
+  }
+  if(tab==="rogue"){
+    return `<div class="small" style="margin-bottom:8px">Bosses turn up every few minutes. Beat each one once for a permanent +3% income. Next one in about ${Math.ceil(Math.max(0,S.bossCd)/60)} min.</div>`+
+      BOSSES.map(b=>{
+        const open=S.life>=b.at, k=S.bossKills[b.id]||0;
+        return `<div class="box" style="${open?"":"opacity:.5"}"><div class="row"><b>${open?b.n:"???"}</b><span class="small">${open?"Defeated "+k+"×":"Appears at "+money(b.at)+" lifetime"}</span></div>
+          ${open?`<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">${b.mech}</div>`:""}</div>`;
+      }).join("");
+  }
+  if(tab==="story"){
+    let h=STORY.slice(0,S.story).map((s,i)=>`<div class="box"><b>${i+1}. ${s.t}</b><div class="small" style="font-size:13px;color:var(--text)">${s.x}</div></div>`).join("");
+    if(S.story<STORY.length) h+=`<div class="small">Next lead at ${money(STORY[S.story].at)} lifetime earnings.</div>`;
+    else h+=`<div class="small">The file is closed. The game isn't. Keep stacking.</div>`;
+    return h||'<div class="small">Nothing yet. Earn some money and the story finds you.</div>';
+  }
+  if(tab==="med"){
+    const st=S.stats, t=Math.floor(st.time/60);
+    return `<div class="grid">`+ACH.map(a=>`<div class="medal ${S.ach.includes(a.id)?"got":""}"><b>${a.n}</b>${a.d}</div>`).join("")+`</div>
+      <p class="small">Each medal gives +2% income. ${S.ach.length}/${ACH.length} earned.</p>
+      <p class="small">Jobs ${st.clicks} · Burns ${st.burns} · Missions won ${st.mDone}/lost ${st.mFail} · Ambushes ${st.ambush} · Gadgets ${st.crafted} · Lifetime ${money(S.life)} · Played ${t} min</p>`;
+  }
+  if(tab==="rep"){
+    const g=credGain();
+    return `<p class="small">Call in the favor that gets you reinstated. You reset cash, ops, upgrades and missions. You keep allies, perks, medals, story and covers.</p>
+      <p>${g>=1?`Reset for <b style="color:var(--gold)">+${g} Credibility</b> (each point +10% income, forever) and +${g} favors.`:`Earn $1M this run to qualify (${money(S.run)} so far).`}</p>
+      <div class="btns"><button data-act="prestige" ${g<1?"disabled":""}>Get Reinstated</button></div>`;
+  }
+  return "";
+}
+const ACT = {
+  amt:a=>{S.buyAmt=a==="max"?"max":+a}, gen:buyGen, upg:buyUpg, hire:hireAlly, ability:useAbility,
+  cover:setCover, perk:buyPerk, simon:buyFavorFromSimon, craft, start:a=>startMission(+a), prestige,
+  send:a=>{const m=S.board.find(x=>x.uid===+a); if(m) m.send=!m.send;}
+};
+$("panel").addEventListener("mousedown",e=>{
+  const t=e.target.closest("[data-act]");
+  if(!t||t.classList.contains("no")||t.disabled) return;
+  e.preventDefault(); ACT[t.dataset.act](t.dataset.arg); render();
+});
+
+function render(){
+  $("cash").textContent=money(S.cash);
+  $("rate").textContent="+"+money(cps())+"/s  ·  job: "+money(clickVal());
+  $("cred").textContent=S.cred? `Credibility ${S.cred} · ${cover().name} cover`:`${cover().name} cover`;
+  $("fx").innerHTML=Object.entries(S.fx).filter(([k,v])=>v>0).map(([k,v])=>`<span class="chip">${FX_NAMES[k]} ${Math.ceil(v)}s</span>`).join("");
+  $("heatnum").textContent=Math.floor(S.heat)+"%"; $("heatbar").style.width=Math.min(100,S.heat)+"%";
+  $("attnum").textContent=Math.floor(S.att)+"%";   $("attbar").style.width=Math.min(100,S.att)+"%";
+  $("lay").textContent=S.layCd>0?`Lay Low (${Math.ceil(S.layCd)}s)`:`Lay Low (−${layAmt()} heat)`;
+  $("lay").disabled=S.layCd>0 || !!layBlocked();
+  $("bribe").textContent=`Pay Off a Fixer (${money(bribeCost())}, −40)`;
+  $("bribe").disabled=S.cash<bribeCost();
+  const bc=$("bosscard"), bd=bossDef();
+  bc.style.display=bd?"block":"none";
+  if(bd){
+    $("bossname").textContent=bd.n; $("bossmech").textContent=bd.mech;
+    $("bosshp").style.width=Math.max(0,S.boss.hp/S.boss.max*100)+"%";
+    $("bosshptxt").textContent=Math.max(0,Math.round(S.boss.hp/S.boss.max*100))+"% health";
+    $("bosstime").textContent=Math.ceil(S.boss.left)+"s left";
+    $("strike").textContent=`STRIKE (${fmt(strikeDmg())} dmg)`;
+  }
+  renderTabs();
+  const h=panelHTML();
+  if(render.last!==h){ $("panel").innerHTML=h; render.last=h; }
+}
+
+// ===================== LOOP =====================
+let lastTick=Date.now(), sec=0;
+function tick(dt){
+  earn(cps()*dt);
+  S.stats.time+=dt;
+  const ops=GENS.reduce((a,g,i)=>a+owned(g.id)*(1+i*0.3),0);
+  S.heat=Math.max(0,S.heat+(ops*0.012*heatMult()-1.2)*dt);
+  S.att=Math.max(0,Math.min(100,S.att+(0.05+S.heat*0.004-(S.heat<20?0.25:0))*dt));
+  if(S.layCd>0) S.layCd=Math.max(0,S.layCd-dt);
+  if(S.coverCd>0) S.coverCd=Math.max(0,S.coverCd-dt);
+  for(const k in S.fx) if(S.fx[k]>0) S.fx[k]=Math.max(0,S.fx[k]-dt);
+  for(const k in S.allyCd) if(S.allyCd[k]>0) S.allyCd[k]=Math.max(0,S.allyCd[k]-dt);
+  const speed=S.fx.fast>0?2:1;
+  for(const m of [...S.active]){ m.left-=dt*speed; if(m.left<=0) resolveMission(m); }
+  if(Math.random()<Math.min(0.02,owned("tape")*0.0004)) S.junk[pick(Object.keys(S.junk))]++;
+  if(S.boss){
+    const b=S.boss, m=bossDef().m, has=t=>m.includes(t);
+    b.hp-=cps()*(has("weak")?0.5:1.5)*dt; b.left-=dt*(has("rush")?1.5:1);
+    const mult=has("heat")&&has("att")?0.6:1;
+    if(has("heat")) S.heat+=1.5*mult*heatMult()*dt;
+    if(has("att"))  S.att=Math.min(100,S.att+1.2*mult*dt);
+    if(has("steal")) S.cash=Math.max(0,S.cash-S.cash*0.008*dt);
+    if(has("heal"))  b.hp=Math.min(b.max,b.hp+b.max*0.015*dt);
+    if(has("fx"))    { S.fx.boost=0; S.fx.jobs=0; S.fx.jam=0; }
+    if(has("freeze")) for(const k in S.allyCd) if(S.allyCd[k]>0) S.allyCd[k]+=dt;
+    if(b.hp<=0) winBoss(); else if(b.left<=0) loseBoss();
+  } else {
+    S.bossCd-=dt; if(S.bossCd<=0) spawnBoss();
+  }
+  if(S.upgs.h3 && S.heat>=90) layLow();
+  if(S.allies.madeline && S.heat>=95) layLow();
+  checkBurn(); checkAmbush();
+  sec+=dt;
+  if(sec>=1){ sec=0; milestones(); }
+}
+function milestones(){
+  while(S.story<STORY.length && S.life>=STORY[S.story].at){
+    const s=STORY[S.story]; S.story++; S.favors+=s.fav;
+    toast("Case File: "+s.t, s.x.slice(0,90)+"… (+"+s.fav+" favors)"); say(s.x); chime();
+  }
+  for(const a of ACH) if(!S.ach.includes(a.id) && a.t(S)){ S.ach.push(a.id); toast("Medal: "+a.n,a.d); chime(); }
+}
+setInterval(()=>{
+  const now=Date.now(), dt=Math.min(1,(now-lastTick)/1000); lastTick=now;
+  tick(dt); render();
+},100);
+
+// ===================== SAVE / SETTINGS =====================
+// Saves to localStorage, sessionStorage and window.name; the newest copy wins on load.
+// window.name survives reloads even where localStorage is blocked (previews, data: pages).
+const WN="BMI2:";
+let noSave=false;
+function save(){
+  if(noSave) return;
+  S.last=Date.now();
+  let j; try{ j=JSON.stringify(S); }catch(e){ return; }
+  let ls=false, ss=false, wn=false;
+  try{ localStorage.setItem(SAVE_KEY,j); ls=localStorage.getItem(SAVE_KEY)===j; }catch(e){}
+  try{ sessionStorage.setItem(SAVE_KEY,j); ss=true; }catch(e){}
+  try{ window.name=WN+j; wn=true; }catch(e){}
+  const el=$("saveinfo");
+  if(el){
+    const t=new Date().toLocaleTimeString();
+    el.textContent = ls ? `Saved ${t}` : (ss||wn ? `Saved ${t} (temporary only: open the file in Chrome or Safari for a permanent save, or use export)` : "Could not save: use export save");
+    el.style.color = ls ? "" : "var(--gold)";
+  }
+}
+function readSave(){
+  const raws=[];
+  try{ raws.push(localStorage.getItem(SAVE_KEY)); }catch(e){}
+  try{ raws.push(sessionStorage.getItem(SAVE_KEY)); }catch(e){}
+  try{ if(window.name.startsWith(WN)) raws.push(window.name.slice(WN.length)); }catch(e){}
+  let best=null;
+  for(const r of raws){
+    if(!r) continue;
+    try{ const o=JSON.parse(r); if(!best||(o.last||0)>(best.last||0)) best=o; }catch(e){}
+  }
+  return best;
+}
+setInterval(save,2000);
+window.addEventListener("beforeunload",save);
+window.addEventListener("pagehide",save);
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) save(); });
+setInterval(()=>say(pick(QUOTES)),35000);
+
+function merge(saved){
+  const f=fresh(); const o=Object.assign(f,saved);
+  o.stats=Object.assign(f.stats,saved.stats||{}); o.junk=Object.assign(fresh().junk,saved.junk||{});
+  return o;
+}
+$("mute").addEventListener("click",()=>{S.mute=!S.mute;$("mute").textContent="sound: "+(S.mute?"off":"on")});
+$("wipe").addEventListener("click",()=>{
+  if(!confirm("Wipe your save and start over?")) return;
+  noSave=true;
+  try{localStorage.removeItem(SAVE_KEY)}catch(e){}
+  try{sessionStorage.removeItem(SAVE_KEY)}catch(e){}
+  try{window.name=""}catch(e){}
+  location.reload();
+});
+$("export").addEventListener("click",()=>{
+  save(); const code=btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+  (navigator.clipboard?navigator.clipboard.writeText(code):Promise.reject()).then(()=>toast("Save copied","It's on your clipboard.")).catch(()=>prompt("Copy your save code:",code));
+});
+$("import").addEventListener("click",()=>{
+  const c=prompt("Paste your save code:"); if(!c) return;
+  try{ S=merge(JSON.parse(decodeURIComponent(escape(atob(c.trim()))))); fillBoard(); save(); toast("Save imported",""); render(); }
+  catch(e){ alert("That code didn't work."); }
+});
+
+(function load(){
+  try{
+    const saved=readSave();
+    if(saved){
+      S=merge(saved);
+      const away=Math.min(8*3600,(Date.now()-S.last)/1000);
+      if(away>30){
+        const e=cps()*away*0.5; earn(e); S.heat=Math.max(0,S.heat-away*0.5); S.att=Math.max(0,S.att-away*0.05);
+        S.active.forEach(m=>m.left=Math.min(m.left,0.1));
+        say(`You were off the grid ${Math.round(away/60)} min. Your people earned ${money(e)} while you were gone.`);
+      }
+      $("mute").textContent="sound: "+(S.mute?"off":"on");
+    }
+  }catch(e){}
+  fillBoard();
+  say("Burned. No cash, no credit, no agency. Time to take a job.");
+  scheduleClient(); scheduleEvent(); render();
+})();
+</script>
+</body>
+</html>

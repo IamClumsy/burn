@@ -5,8 +5,8 @@ import { pick, money } from "./util";
 import { QUOTES } from "./data/text";
 import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
-import { render, setTab } from "./ui/render";
-import type { TabId } from "./ui/panels";
+import { render, showModal } from "./ui/render";
+import { buildLayout, type TabId } from "./ui/panels";
 import { beep } from "./audio";
 import { loadGame, save, wipeSave, exportSave, importSave } from "./persist";
 import { tick } from "./game/tick";
@@ -16,24 +16,32 @@ import { strike } from "./game/bosses";
 import { scheduleClient, scheduleEvent } from "./game/events";
 import * as A from "./game/actions";
 
-// ---- panel clicks (delegated on mousedown, since the panel re-renders constantly)
+// ---- card clicks (delegated on mousedown, since cards re-render constantly)
 const ACT: Record<string, (arg: string) => void> = {
   amt: a => { S.buyAmt = a === "max" ? "max" : (+a as 1 | 10); },
   gen: A.buyGen, upg: A.buyUpg, hire: A.hireAlly, ability: A.useAbility,
   cover: A.setCover, perk: A.buyPerk, simon: () => A.buyFavorFromSimon(), craft: A.craft,
   start: a => startMission(+a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
 };
-$("panel").addEventListener("mousedown", e => {
+const onAct = (e: MouseEvent) => {
   const t = (e.target as HTMLElement).closest<HTMLElement>("[data-act]");
   if (!t || t.classList.contains("no") || (t as HTMLButtonElement).disabled) return;
   e.preventDefault();
   ACT[t.dataset.act!](t.dataset.arg!);
   render();
+};
+buildLayout($("sections"), $("toolbar"));
+$("sections").addEventListener("mousedown", onAct);
+$("modalBody").addEventListener("mousedown", onAct);
+
+// ---- pop-ups
+$("toolbar").addEventListener("click", e => {
+  const b = (e.target as HTMLElement).closest<HTMLElement>("[data-modal]");
+  if (b) showModal(b.dataset.modal as TabId);
 });
-$("tabs").addEventListener("click", e => {
-  const b = (e.target as HTMLElement).closest<HTMLElement>("[data-tab]");
-  if (b) { setTab(b.dataset.tab as TabId); render(); }
-});
+$("modalClose").addEventListener("click", () => showModal(null));
+$("modal").addEventListener("mousedown", e => { if (e.target === $("modal")) showModal(null); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") showModal(null); });
 
 // ---- always-on controls
 $("job").addEventListener("click", e => {

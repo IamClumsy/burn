@@ -4,13 +4,20 @@ import { FX_NAMES } from "../data/perks";
 import { fmt, money } from "../util";
 import { $ } from "./dom";
 import { setText } from "./fx";
-import { TABS, panelHTML, type TabId } from "./panels";
+import { SECTIONS, panelHTML, titleOf, type TabId } from "./panels";
 import { layBlocked } from "../game/heat";
 
-let tab: TabId = "ops";
-export const setTab = (t: TabId): void => { tab = t; };
+let openModal: TabId | null = null;
+export function showModal(id: TabId | null): void {
+  openModal = id;
+  $("modal").classList.toggle("open", id !== null);
+  if (id) $("modalTitle").textContent = titleOf(id);
+  lastModal = "";
+  render();
+}
 
-let lastTabs = "", lastPanel = "";
+const last = new Map<string, string>();
+let lastModal = "";
 
 export function render(): void {
   $("cash").textContent = money(S.cash);
@@ -38,9 +45,13 @@ export function render(): void {
     setText($("strike"), `STRIKE (${fmt(strikeDmg())} dmg)`);
   }
 
-  const tabsHTML = TABS.map(([id, n]) => `<button class="tab ${tab === id ? "active" : ""}" data-tab="${id}">${n}</button>`).join("");
-  if (tabsHTML !== lastTabs) { $("tabs").innerHTML = tabsHTML; lastTabs = tabsHTML; }
-
-  const h = panelHTML(tab);
-  if (h !== lastPanel) { $("panel").innerHTML = h; lastPanel = h; }
+  // Only touch a card's DOM when its content changed.
+  for (const [id] of SECTIONS) {
+    const h = panelHTML(id);
+    if (last.get(id) !== h) { $("sec-" + id).innerHTML = h; last.set(id, h); }
+  }
+  if (openModal) {
+    const h = panelHTML(openModal);
+    if (h !== lastModal) { $("modalBody").innerHTML = h; lastModal = h; }
+  }
 }

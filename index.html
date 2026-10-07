@@ -20,6 +20,7 @@
   </svg>
 </header>
 
+<nav class="toolbar" id="toolbar" aria-label="More"></nav>
 <main>
   <section>
     <div class="card boss" id="bosscard">
@@ -53,12 +54,7 @@
     </div>
   </section>
 
-  <section>
-    <div class="card">
-      <div class="tabs" id="tabs"></div>
-      <div id="panel"></div>
-    </div>
-  </section>
+  <section id="sections" class="sections"></section>
 </main>
 
 <div class="foot">
@@ -68,6 +64,7 @@
 <div id="client"></div>
 <div id="burned"><div id="burnedTxt">BURNED<small>Half your cash is gone. Heat reset. Walk it off.</small></div></div>
 <div id="evt"><div class="dlg"><h3 id="evtT"></h3><p id="evtD"></p><div id="evtO"></div></div></div>
+<div id="modal" class="modal"><div class="mdlg"><div class="mhead"><h3 id="modalTitle"></h3><button id="modalClose" aria-label="Close">✕</button></div><div id="modalBody"></div></div></div>
 <div id="toasts"></div>
 
 <script type="module" src="/src/main.ts"></script>

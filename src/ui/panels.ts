@@ -15,10 +15,25 @@ import { fmt, money } from "../util";
 
 export type TabId = "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "med" | "rep";
 
-export const TABS: [TabId, string][] = [
-  ["ops", "Operations"], ["upg", "Upgrades"], ["mis", "Missions"], ["crew", "Crew"], ["gad", "Gadgets"],
-  ["cov", "Covers"], ["fav", "Favors"], ["rogue", "Rogues"], ["story", "Case File"], ["med", "Medals"], ["rep", "Reinstate"],
+/** Everyday play: always visible as cards. */
+export const SECTIONS: [TabId, string][] = [
+  ["ops", "Operations"], ["mis", "Missions"], ["upg", "Upgrades"], ["crew", "Crew"],
+  ["gad", "Gadgets"], ["cov", "Covers"], ["fav", "Favors"],
 ];
+
+/** Reference and rare screens: opened as pop-ups from the toolbar. */
+export const MODALS: [TabId, string][] = [
+  ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"],
+];
+
+export const titleOf = (id: TabId): string => [...SECTIONS, ...MODALS].find(([i]) => i === id)![1];
+
+/** Build the static card shells and the toolbar once at startup. */
+export function buildLayout(host: HTMLElement, toolbar: HTMLElement): void {
+  host.innerHTML = SECTIONS.map(([id, t]) =>
+    `<div class="card sec sec-${id}"><h2>${t}</h2><div class="secbody" id="sec-${id}"></div></div>`).join("");
+  toolbar.innerHTML = MODALS.map(([id, t]) => `<button data-modal="${id}">${t}</button>`).join("");
+}
 
 function item(act: string, arg: string | number, can: boolean, title: string, desc: string, right: string, cls = ""): string {
   return `<div class="item ${can ? "can" : "no"} ${cls}" data-act="${act}" data-arg="${arg}">

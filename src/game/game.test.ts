@@ -14,11 +14,12 @@ import { EVENTS } from "../data/events";
 import { MISSIONS } from "../data/missions";
 import { merge } from "../state";
 import { render } from "../ui/render";
-import { TABS, panelHTML } from "../ui/panels";
+import { MODALS, SECTIONS, buildLayout, panelHTML } from "../ui/panels";
 
 beforeAll(() => {
   const html = readFileSync(resolve(__dirname, "../../index.html"), "utf8");
   document.body.innerHTML = html.split("<body>")[1].split("<script")[0];
+  buildLayout(document.getElementById("sections")!, document.getElementById("toolbar")!);
 });
 
 beforeEach(() => { setState(fresh()); fillBoard(); });
@@ -84,10 +85,11 @@ describe("game loop (headless)", () => {
     for (const e of EVENTS) for (const [, run] of e.o) expect(typeof run()).toBe("string");
   });
 
-  it("every tab renders without throwing", () => {
+  it("every card and pop-up renders without throwing", () => {
     S.life = 1e12; S.cash = 1e9;
-    for (const [id] of TABS) expect(() => panelHTML(id)).not.toThrow();
+    for (const [id] of [...SECTIONS, ...MODALS]) expect(() => panelHTML(id)).not.toThrow();
     expect(() => render()).not.toThrow();
+    for (const [id] of SECTIONS) expect(document.getElementById("sec-" + id)!.innerHTML.length).toBeGreaterThan(0);
   });
 
   it("old saves load into the current shape", () => {

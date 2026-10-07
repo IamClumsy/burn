@@ -1,4 +1,4 @@
-import { S, earn } from "../state";
+import { S, KEEP_RATE, payClient } from "../state";
 import { clickVal, cps, heatMult } from "../calc";
 import { EVENTS } from "../data/events";
 import { chime } from "../audio";
@@ -40,13 +40,13 @@ let clientTimer: ReturnType<typeof setTimeout> | undefined;
 export function scheduleClient(): void { setTimeout(spawnClient, 45000 + Math.random() * 60000); }
 
 function spawnClient(): void {
-  const reward = Math.max(50, cps() * 45 + clickVal() * 10), el = $("client");
+  const reward = Math.max(500, (cps() * 45 + clickVal() * 10) / KEEP_RATE), el = $("client");
   el.style.display = "block";
-  el.textContent = `📞 A client is at the door! Take the case (+${money(reward)})`;
+  el.textContent = `📞 A client is at the door! Fee ${money(reward)}, you keep ${money(reward * KEEP_RATE)}`;
   const done = () => { el.style.display = "none"; clearTimeout(clientTimer); el.onclick = null; scheduleClient(); };
   el.onclick = () => {
-    earn(reward); S.heat += 10 * heatMult();
-    say("The client's problem is yours now. So is their money.");
+    const { keep, returned } = payClient(reward); S.heat += 10 * heatMult();
+    say("The client's problem is yours now. You keep " + money(keep) + " and return " + money(returned) + " to those who need it.");
     chime(); checkBurn(); done(); render();
   };
   clientTimer = setTimeout(done, 12000);

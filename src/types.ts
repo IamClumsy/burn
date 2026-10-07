@@ -36,6 +36,8 @@ export interface GameEvent { t: string; d: string; o: [label: string, run: () =>
 export interface Stats {
   clicks: number; burns: number; mDone: number; mFail: number; crafted: number;
   ambush: number; reinstated: number; time: number; kidMissions: number;
+  /** Total client money Michael handed back instead of keeping. */
+  returned: number;
 }
 
 export interface GameState {

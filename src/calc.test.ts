@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { fresh, merge, setState, S } from "./state";
-import { bulkCost, clickVal, cps, credGain, heatMult, incomeMult, maxAfford, owned, succChance } from "./calc";
+import { fresh, merge, payClient, setState, S, KEEP_RATE } from "./state";
+import { missionKeep, missionReward, bulkCost, clickVal, cps, credGain, heatMult, incomeMult, maxAfford, owned, succChance } from "./calc";
 import { GENS } from "./data/ops";
 import { fmt, money } from "./util";
 import type { Mission } from "./types";
@@ -67,6 +67,25 @@ describe("missions", () => {
     S.allies.sam = true;
     expect(succChance(mission({ send: true }))).toBeCloseTo(0.97);
     expect(succChance(mission({ succ: 0.5, send: true }))).toBeCloseTo(0.75);
+  });
+});
+
+describe("client payouts", () => {
+  it("Michael keeps 10% and returns the rest", () => {
+    const { keep, returned } = payClient(10000);
+    expect(keep).toBeCloseTo(1000);
+    expect(returned).toBeCloseTo(9000);
+    expect(S.cash).toBeCloseTo(1000);
+    expect(S.stats.returned).toBeCloseTo(9000);
+  });
+
+  it("mission fees are 10x bigger but his cut equals the old payout", () => {
+    S.gens.inf = 20;
+    const m = mission({ rm: 2 });
+    const oldReward = Math.floor((cps() * 60 + 150) * 2);
+    expect(missionReward(m)).toBeGreaterThan(oldReward * 9);
+    expect(missionKeep(m)).toBeCloseTo(oldReward, -1);
+    expect(KEEP_RATE).toBe(0.1);
   });
 });
 

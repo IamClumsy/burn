@@ -1,19 +1,21 @@
 import type { GameEvent } from "../types";
-import { S, earn } from "../state";
+import { S, earn, payClient } from "../state";
 import { cps, owned } from "../calc";
+import { KEEP_RATE } from "../state";
 import { GENS } from "./ops";
-import { pick } from "../util";
+import { money, pick } from "../util";
 import { shake } from "../ui/fx";
 
 const att = (n: number) => { S.att = Math.min(100, S.att + n); };
 
 /** Help a client: payout scaled to income, plus favors and heat. Kid cases never fail. */
 function help(secs: number, fav: number, heat: number, line: string, kid = false): string {
-  earn(cps() * secs + 100);
+  const fee = (cps() * secs + 100) / KEEP_RATE;
+  const { keep, returned } = payClient(fee);
   S.favors += fav;
   S.heat += heat;
   if (kid) S.stats.kidMissions++;
-  return line;
+  return `${line} Fee ${money(fee)}: you kept ${money(keep)} and returned ${money(returned)}.`;
 }
 
 export const EVENTS: GameEvent[] = [

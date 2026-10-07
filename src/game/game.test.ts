@@ -46,6 +46,7 @@ describe("game loop (headless)", () => {
     expect(S.stats.mDone).toBe(1);
     expect(S.stats.kidMissions).toBe(1);
     expect(S.favors).toBe(kid.fav);
+    expect(S.stats.returned).toBeGreaterThan(0); // most of the fee went back to the client
   });
 
   it("a boss can be spawned, struck down, and counts as defeated", () => {

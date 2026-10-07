@@ -1,6 +1,6 @@
-import { S } from "../state";
+import { S, KEEP_RATE } from "../state";
 import {
-  allyFree, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
+  allyFree, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionKeep, missionReward, owned, perk, perkCost,
   simonPrice, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
@@ -47,16 +47,16 @@ function upgrades(): string {
 }
 
 function missions(): string {
-  let h = `<div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Send an ally for +25% success, but they're busy until it ends.</div>`;
+  let h = `<div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Clients pay a full fee. Michael keeps 10% and hands the rest back. Send an ally for +25% success, but they're busy until it ends.</div>`;
   if (S.active.length) {
     h += `<h2>In Progress</h2>` + S.active.map(m => `<div class="box"><div class="row"><b>${m.n}</b><span class="small">${Math.ceil(m.left)}s · ${Math.round(m.chance * 100)}%</span></div>
       <div class="bar"><i class="mbar" style="width:${(1 - m.left / m.dur) * 100}%"></i></div>
-      <span class="small">Reward ${money(m.reward)} · +${m.fav} favor${m.sent ? " · " + ALLIES.find(a => a.id === m.sent)!.name + " is out" : ""}</span></div>`).join("");
+      <span class="small">Fee ${money(m.reward)} (keep ${money(m.reward * KEEP_RATE)}) · +${m.fav} favor${m.sent ? " · " + ALLIES.find(a => a.id === m.sent)!.name + " is out" : ""}</span></div>`).join("");
   }
   h += `<h2 style="margin-top:12px">Board</h2>`;
   h += S.board.map(m => {
     const al = ALLIES.find(a => a.id === m.ally)!, free = allyFree(m.ally);
-    return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}</b><div class="small">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
+    return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}</b><div class="small">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · fee ${money(missionReward(m))}, keep ${money(missionKeep(m))} · +${m.fav} favor · +${m.heat} heat</div>
       <div class="btns">${S.allies[m.ally] ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Send ${al.name.split(" ")[0]} (+25%)${free ? "" : " — busy"}</button>` : ""}
       <button data-act="start" data-arg="${m.uid}" ${S.active.length >= 3 ? "disabled" : ""}>Start mission</button></div></div>`;
   }).join("");
@@ -123,7 +123,7 @@ function medals(): string {
   const st = S.stats, t = Math.floor(st.time / 60);
   return `<div class="grid">` + MEDALS.map(a => `<div class="medal ${S.ach.includes(a.id) ? "got" : ""}"><b>${a.n}</b>${a.d}</div>`).join("") + `</div>
     <p class="small">Each medal gives +2% income. ${S.ach.length}/${MEDALS.length} earned.</p>
-    <p class="small">Jobs ${st.clicks} · Burns ${st.burns} · Missions won ${st.mDone}/lost ${st.mFail} · Kid cases ${st.kidMissions} · Ambushes ${st.ambush} · Gadgets ${st.crafted} · Lifetime ${money(S.life)} · Played ${t} min</p>`;
+    <p class="small">Jobs ${st.clicks} · Burns ${st.burns} · Missions won ${st.mDone}/lost ${st.mFail} · Returned to clients ${money(st.returned)} · Kid cases ${st.kidMissions} · Ambushes ${st.ambush} · Gadgets ${st.crafted} · Lifetime ${money(S.life)} · Played ${t} min</p>`;
 }
 
 function reinstate(): string {

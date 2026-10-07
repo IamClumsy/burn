@@ -1,4 +1,4 @@
-import { S } from "./state";
+import { S, KEEP_RATE } from "./state";
 import { GENS } from "./data/ops";
 import { UPGS } from "./data/upgrades";
 import { COVERS } from "./data/covers";
@@ -72,7 +72,9 @@ export function succChance(m: Mission): number {
   const c = m.succ + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
   return Math.min(0.97, c);
 }
-export const missionReward = (m: Mission): number => Math.floor((cps() * 60 + 150) * m.rm * cover().mis);
+/** What the client pays in total. Michael keeps KEEP_RATE of it. */
+export const missionReward = (m: Mission): number => Math.floor((cps() * 60 + 150) * m.rm * cover().mis / KEEP_RATE);
+export const missionKeep = (m: Mission): number => missionReward(m) * KEEP_RATE;
 
 // ---- bosses
 export const bossDef = (): Boss | null => (S.boss ? BOSSES.find(b => b.id === S.boss!.id) || null : null);

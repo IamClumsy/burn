@@ -1,0 +1,46 @@
+import { S } from "../state";
+import { bossDef, bribeCost, clickVal, cover, cps, layAmt, strikeDmg } from "../calc";
+import { FX_NAMES } from "../data/perks";
+import { fmt, money } from "../util";
+import { $ } from "./dom";
+import { setText } from "./fx";
+import { TABS, panelHTML, type TabId } from "./panels";
+import { layBlocked } from "../game/heat";
+
+let tab: TabId = "ops";
+export const setTab = (t: TabId): void => { tab = t; };
+
+let lastTabs = "", lastPanel = "";
+
+export function render(): void {
+  $("cash").textContent = money(S.cash);
+  $("rate").textContent = "+" + money(cps()) + "/s  ·  job: " + money(clickVal());
+  $("cred").textContent = S.cred ? `Credibility ${S.cred} · ${cover().name} cover` : `${cover().name} cover`;
+  $("fx").innerHTML = Object.entries(S.fx).filter(([, v]) => v > 0)
+    .map(([k, v]) => `<span class="chip">${FX_NAMES[k]} ${Math.ceil(v)}s</span>`).join("");
+  $("heatnum").textContent = Math.floor(S.heat) + "%";
+  $("heatbar").style.width = Math.min(100, S.heat) + "%";
+  $("attnum").textContent = Math.floor(S.att) + "%";
+  $("attbar").style.width = Math.min(100, S.att) + "%";
+  $("lay").textContent = S.layCd > 0 ? `Lay Low (${Math.ceil(S.layCd)}s)` : `Lay Low (−${layAmt()} heat)`;
+  $<HTMLButtonElement>("lay").disabled = S.layCd > 0 || layBlocked();
+  $("bribe").textContent = `Pay Off a Fixer (${money(bribeCost())}, −40)`;
+  $<HTMLButtonElement>("bribe").disabled = S.cash < bribeCost();
+
+  const bd = bossDef();
+  $("bosscard").style.display = bd ? "block" : "none";
+  if (bd && S.boss) {
+    setText($("bossname"), bd.n);
+    setText($("bossmech"), bd.mech);
+    $("bosshp").style.width = Math.max(0, S.boss.hp / S.boss.max * 100) + "%";
+    setText($("bosshptxt"), `${fmt(Math.max(0, S.boss.hp))} / ${fmt(S.boss.max)} health`);
+    setText($("bosstime"), Math.ceil(S.boss.left) + "s left");
+    setText($("strike"), `STRIKE (${fmt(strikeDmg())} dmg)`);
+  }
+
+  const tabsHTML = TABS.map(([id, n]) => `<button class="tab ${tab === id ? "active" : ""}" data-tab="${id}">${n}</button>`).join("");
+  if (tabsHTML !== lastTabs) { $("tabs").innerHTML = tabsHTML; lastTabs = tabsHTML; }
+
+  const h = panelHTML(tab);
+  if (h !== lastPanel) { $("panel").innerHTML = h; lastPanel = h; }
+}

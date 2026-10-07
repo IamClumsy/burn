@@ -1,0 +1,33 @@
+import type { StoryBeat } from "../types";
+
+// Beats follow the show's arc, in order. Each unlocks at a lifetime-earnings milestone.
+export const STORY: StoryBeat[] = [
+  {at:1e3,   fav:1,  t:"Dumped in Miami",
+   x:"You were burned on a job in Nigeria and left in Miami with no money, no credit and no agency. The first door you knock on is your mother's."},
+  {at:2.5e4, fav:2,  t:"The Man Who Burned You",
+   x:"Phillip Cowan was ordered to burn you. He says the reason is bigger than either of you. Before he can explain, a sniper makes sure he never will."},
+  {at:2e5,   fav:2,  t:"A Case Officer Named Carla",
+   x:"A woman named Carla tells you she's from the Organization, and that she ordered your burn so she could use you. Now she hands you errands, and every one comes with a threat to someone you love."},
+  {at:1.5e6, fav:3,  t:"Lesser Evil",
+   x:"You find out what Carla did to the man who went rogue. You set her up to be undone by her own bosses. She sees it coming. Fiona gets there first."},
+  {at:1e7,   fav:3,  t:"Detective on Your Tail",
+   x:"A Miami detective notices the pattern around you, Fiona and Sam. She's not a spy. She's a cop with a case, and she's patient. You give her one of Miami's worst men to get her off your back."},
+  {at:6e7,   fav:4,  t:"Agents, Brokers and Psychopaths",
+   x:"A broker offers you contacts for a price. Then he's gone, and someone far worse arrives to 'clean things up'. The method looks like a list of unsolved crimes."},
+  {at:3e8,   fav:4,  t:"Simon's Bible",
+   x:"The Organization's best assassin went rogue and wrote down every member in a book code. A CEO with an army wants it. You'd like to stay alive and know the names."},
+  {at:2e9,   fav:5,  t:"Another Burned Spy",
+   x:"A counterintelligence agent turns up as burned as you. You help him because it's right and because he's good. Soon he's not leaving."},
+  {at:1.2e10,fav:5,  t:"The NOC List",
+   x:"A list of everyone who helped burn you exists, and everyone wants it. A rogue arms dealer gets there first. So does your old mentor, who loves a good bonfire."},
+  {at:6e10,  fav:6,  t:"The Founder",
+   x:"The man you thought was a helpless hostage is the Organization's founder. He frames Fiona and says he'll lift the burn if you do him a favor. He's the first liar who's ever made you feel like a student."},
+  {at:2.5e11,fav:6,  t:"Brothers and Strings",
+   x:"Your brother is killed in the crossfire of a shot meant for someone else. The orders came from the man who taught you everything. You suspect it before you can prove it."},
+  {at:7e11,  fav:8,  t:"The Mentor's Last Lesson",
+   x:"Your mentor sends you and your team to Panama on a mission he calls routine. It's built to fail. You come back anyway, and he doesn't get another chance."},
+  {at:2e12,  fav:8,  t:"Hunted by the Best",
+   x:"A senior counterintelligence officer is assigned to take you down. She notices small details and hits where it hurts. You stay a step ahead and don't enjoy it."},
+  {at:6e12,  fav:12, t:"Clean Slate",
+   x:"The file is rewritten. The burn notice is gone, or close enough. Miami still has problems, and your phone is already ringing."},
+];

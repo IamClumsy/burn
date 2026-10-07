@@ -1,0 +1,56 @@
+import { $ } from "./dom";
+
+export function say(t: string): void {
+  const log = $("log");
+  const p = document.createElement("p");
+  p.textContent = t;
+  log.prepend(p);
+  while (log.children.length > 40) log.lastChild!.remove();
+}
+
+export function toast(title: string, msg = ""): void {
+  const d = document.createElement("div");
+  d.className = "toast";
+  const b = document.createElement("b");
+  b.textContent = title;
+  d.append(b, document.createTextNode(msg));
+  $("toasts").appendChild(d);
+  setTimeout(() => d.remove(), 5000);
+}
+
+export function shake(): void {
+  document.body.classList.remove("shake");
+  void document.body.offsetWidth;
+  document.body.classList.add("shake");
+}
+
+export function floatText(txt: string, x: number, y: number): void {
+  const e = document.createElement("div");
+  e.className = "float";
+  e.textContent = txt;
+  e.style.left = x + "px";
+  e.style.top = y + "px";
+  document.body.appendChild(e);
+  setTimeout(() => e.remove(), 900);
+}
+
+/** Full-screen red banner for burns and ambushes. */
+export function flashBanner(word: string, sub: string): void {
+  const el = $("burned");
+  $("burnedTxt").innerHTML = `${word}<small>${sub}</small>`;
+  el.style.display = "flex";
+  setTimeout(() => (el.style.display = "none"), 1500);
+}
+
+/** Brief flash on the boss card so every strike is visibly felt. */
+export function hitBoss(): void {
+  const el = $("bosscard");
+  el.classList.remove("hit");
+  void el.offsetWidth;
+  el.classList.add("hit");
+}
+
+/** Set text only when it changed, so buttons aren't rebuilt under the player's cursor. */
+export function setText(el: HTMLElement, text: string): void {
+  if (el.textContent !== text) el.textContent = text;
+}

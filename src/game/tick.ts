@@ -1,0 +1,56 @@
+import { S, earn } from "../state";
+import { cps, heatMult, owned } from "../calc";
+import { GENS } from "../data/ops";
+import { STORY } from "../data/story";
+import { MEDALS } from "../data/medals";
+import { chime } from "../audio";
+import { pick } from "../util";
+import { say, toast } from "../ui/fx";
+import { checkAmbush, checkBurn, layLow } from "./heat";
+import { resolveMission } from "./missions";
+import { tickBoss } from "./bosses";
+
+let sec = 0;
+
+export function milestones(): void {
+  while (S.story < STORY.length && S.life >= STORY[S.story].at) {
+    const s = STORY[S.story];
+    S.story++; S.favors += s.fav;
+    toast("Case File: " + s.t, s.x.slice(0, 90) + "… (+" + s.fav + " favors)");
+    say(s.x); chime();
+  }
+  for (const a of MEDALS) {
+    if (!S.ach.includes(a.id) && a.t(S)) {
+      S.ach.push(a.id);
+      toast("Medal: " + a.n, a.d); chime();
+    }
+  }
+}
+
+export function tick(dt: number): void {
+  earn(cps() * dt);
+  S.stats.time += dt;
+
+  const ops = GENS.reduce((a, g, i) => a + owned(g.id) * (1 + i * 0.3), 0);
+  S.heat = Math.max(0, S.heat + (ops * 0.012 * heatMult() - 1.2) * dt);
+  S.att = Math.max(0, Math.min(100, S.att + (0.05 + S.heat * 0.004 - (S.heat < 20 ? 0.25 : 0)) * dt));
+
+  if (S.layCd > 0) S.layCd = Math.max(0, S.layCd - dt);
+  if (S.coverCd > 0) S.coverCd = Math.max(0, S.coverCd - dt);
+  for (const k in S.fx) if (S.fx[k] > 0) S.fx[k] = Math.max(0, S.fx[k] - dt);
+  for (const k in S.allyCd) if (S.allyCd[k] > 0) S.allyCd[k] = Math.max(0, S.allyCd[k] - dt);
+
+  const speed = S.fx.fast > 0 ? 2 : 1;
+  for (const m of [...S.active]) { m.left -= dt * speed; if (m.left <= 0) resolveMission(m); }
+
+  if (Math.random() < Math.min(0.02, owned("tape") * 0.0004)) S.junk[pick(Object.keys(S.junk))]++;
+
+  tickBoss(dt);
+
+  if (S.upgs.h3 && S.heat >= 90) layLow();
+  if (S.allies.madeline && S.heat >= 95) layLow();
+  checkBurn(); checkAmbush();
+
+  sec += dt;
+  if (sec >= 1) { sec = 0; milestones(); }
+}

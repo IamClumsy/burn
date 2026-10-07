@@ -11,11 +11,11 @@ const att = (n: number) => { S.att = Math.min(100, S.att + n); };
 /** Help a client: payout scaled to income, plus favors and heat. Kid cases never fail. */
 function help(secs: number, fav: number, heat: number, line: string, kid = false): string {
   const fee = (cps() * secs + 100) / KEEP_RATE;
-  const { keep, returned } = payClient(fee);
+  payClient(fee);
   S.favors += fav;
   S.heat += heat;
   if (kid) S.stats.kidMissions++;
-  return `${line} Fee ${money(fee)}: you kept ${money(keep)} and returned ${money(returned)}.`;
+  return `${line} Paid ${money(fee)}. You keep what you need for expenses and the rest goes back to the people who needed it.`;
 }
 
 export const EVENTS: GameEvent[] = [

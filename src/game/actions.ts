@@ -1,7 +1,7 @@
 import { S } from "../state";
 import { fresh, setState } from "../state";
 import {
-  bribeCost, bulkCost, buyN, credGain, owned, perk, perkCost, simonPrice,
+  allyHere, bribeCost, bulkCost, buyN, credGain, owned, perk, perkCost, simonPrice,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -43,7 +43,7 @@ export function hireAlly(id: string): void {
 
 export function useAbility(id: string): void {
   const a = ALLIES.find(x => x.id === id)!;
-  if (!S.allies[id] || (S.allyCd[id] || 0) > 0) return;
+  if (!allyHere(id) || (S.allyCd[id] || 0) > 0) return;
   ABILITIES[id]();
   S.allyCd[id] = a.cd;
   chime(); checkBurn();

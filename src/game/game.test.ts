@@ -4,7 +4,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { S, fresh, setState } from "../state";
-import { tick } from "./tick";
+import { tick, tickNate } from "./tick";
+import { useAbility } from "./actions";
+import { allyFree, allyHere, succChance } from "../calc";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { spawnBoss, strike } from "./bosses";
 import { strikeDmg } from "../calc";
@@ -23,6 +25,48 @@ beforeAll(() => {
 });
 
 beforeEach(() => { setState(fresh()); fillBoard(); });
+
+describe("Nate", () => {
+  it("is only available when he hasn't wandered off", () => {
+    S.allies.nate = true; S.nateAway = false;
+    expect(allyHere("nate")).toBe(true);
+    S.nateAway = true;
+    expect(allyHere("nate")).toBe(false);
+    expect(allyFree("nate")).toBe(false);
+  });
+
+  it("can't use his ability, or be sent on a mission, while away", () => {
+    S.allies.nate = true; S.nateAway = true; S.cash = 0;
+    useAbility("nate");
+    expect(S.allyCd.nate || 0).toBe(0);
+    const m = { uid: 1, n: "t", dur: 10, succ: 0.5, heat: 1, rm: 1, fav: 1, ally: "nate", kid: false, send: true };
+    expect(succChance(m)).toBeCloseTo(0.5); // no +25% when he's gone
+    S.nateAway = false;
+    expect(succChance(m)).toBeCloseTo(0.75);
+  });
+
+  it("his ability pays out when he's around", () => {
+    S.allies.nate = true; S.nateAway = false; S.gens.inf = 20;
+    useAbility("nate");
+    expect(S.allyCd.nate).toBeGreaterThan(0);
+  });
+
+  it("wanders off and comes back on his own", () => {
+    S.allies.nate = true; S.nateAway = false; S.nateTimer = 0;
+    tickNate(0.1);
+    expect(S.nateAway).toBe(true);
+    expect(S.nateTimer).toBeGreaterThan(40);
+    S.nateTimer = 0;
+    tickNate(0.1);
+    expect(S.nateAway).toBe(false);
+  });
+
+  it("does nothing until he's hired", () => {
+    S.nateTimer = 0;
+    tickNate(1);
+    expect(S.nateAway).toBe(false);
+  });
+});
 
 describe("game loop (headless)", () => {
   it("earns money over time", () => {

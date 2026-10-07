@@ -6,6 +6,7 @@ import { MEDALS } from "../data/medals";
 import { chime } from "../audio";
 import { pick } from "../util";
 import { say, toast } from "../ui/fx";
+import { LINES } from "../data/text";
 import { checkAmbush, checkBurn, layLow } from "./heat";
 import { resolveMission } from "./missions";
 import { tickBoss } from "./bosses";
@@ -27,6 +28,18 @@ export function milestones(): void {
   }
 }
 
+/** Nate wanders off and wanders back on a random timer, because it's Nate. */
+export function tickNate(dt: number): void {
+  if (!S.allies.nate) return;
+  S.nateTimer -= dt;
+  if (S.nateTimer > 0) return;
+  S.nateAway = !S.nateAway;
+  S.nateTimer = S.nateAway ? 45 + Math.random() * 105 : 60 + Math.random() * 120;
+  const line = pick(S.nateAway ? LINES.nateAway : LINES.nateBack);
+  toast(S.nateAway ? "Nate wandered off" : "Nate's back", line);
+  say(line);
+}
+
 export function tick(dt: number): void {
   earn(cps() * dt);
   S.stats.time += dt;
@@ -46,6 +59,7 @@ export function tick(dt: number): void {
   if (Math.random() < Math.min(0.02, owned("tape") * 0.0004)) S.junk[pick(Object.keys(S.junk))]++;
 
   tickBoss(dt);
+  tickNate(dt);
 
   if (S.upgs.h3 && S.heat >= 90) layLow();
   if (S.allies.madeline && S.heat >= 95) layLow();

@@ -10,6 +10,12 @@ export const QUOTES: string[] = [
   "If the plan is working perfectly, check what you missed.",
 ];
 export const LINES: Record<string, string[]> = {
+  nateAway: ["Nate has wandered off. Something about a girl, a boat, or both.",
+             "Nate's phone goes straight to voicemail. Typical Nate.",
+             "Nate says he'll be right back. He is not right back."],
+  nateBack: ["Nate's back, like nothing happened. He's brought snacks.",
+             "Nate strolls in and asks what he missed. Everything.",
+             "Nate's around again. Try not to rely on it."],
   returned: ["Most of the fee goes straight back to the people who needed it. Michael's cut covers gas and gadgets.",
              "He keeps enough to stay in business and hands the rest back. Some people don't have a lawyer. They have Michael.",
              "The client counts the cash twice, then looks up at you. You tell them to keep it. Mostly."],

@@ -1,6 +1,6 @@
-import { S, KEEP_RATE } from "../state";
+import { S } from "../state";
 import {
-  allyFree, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionKeep, missionReward, owned, perk, perkCost,
+  allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   simonPrice, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
@@ -62,16 +62,16 @@ function upgrades(): string {
 }
 
 function missions(): string {
-  let h = `<div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Clients pay a full fee. Michael keeps 10% and hands the rest back. Send an ally for +25% success, but they're busy until it ends.</div>`;
+  let h = `<div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Clients pay well. Michael keeps what he needs for expenses and hands the rest back. Send an ally for +25% success, but they're busy until it ends.</div>`;
   if (S.active.length) {
     h += `<h2>In Progress</h2>` + S.active.map(m => `<div class="box"><div class="row"><b>${m.n}</b><span class="small">${Math.ceil(m.left)}s · ${Math.round(m.chance * 100)}%</span></div>
       <div class="bar"><i class="mbar" style="width:${(1 - m.left / m.dur) * 100}%"></i></div>
-      <span class="small">Fee ${money(m.reward)} (keep ${money(m.reward * KEEP_RATE)}) · +${m.fav} favor${m.sent ? " · " + ALLIES.find(a => a.id === m.sent)!.name + " is out" : ""}</span></div>`).join("");
+      <span class="small">Pays ${money(m.reward)} · +${m.fav} favor${m.sent ? " · " + ALLIES.find(a => a.id === m.sent)!.name + " is out" : ""}</span></div>`).join("");
   }
   h += `<h2 style="margin-top:12px">Board</h2>`;
   h += S.board.map(m => {
     const al = ALLIES.find(a => a.id === m.ally)!, free = allyFree(m.ally);
-    return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}</b><div class="small">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · fee ${money(missionReward(m))}, keep ${money(missionKeep(m))} · +${m.fav} favor · +${m.heat} heat</div>
+    return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}</b><div class="small">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
       <div class="btns">${S.allies[m.ally] ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Send ${al.name.split(" ")[0]} (+25%)${free ? "" : " — busy"}</button>` : ""}
       <button data-act="start" data-arg="${m.uid}" ${S.active.length >= 3 ? "disabled" : ""}>Start mission</button></div></div>`;
   }).join("");
@@ -81,10 +81,11 @@ function missions(): string {
 function crew(): string {
   return ALLIES.map(a => {
     if (!S.allies[a.id]) return item("hire", a.id, S.cash >= a.cost, "Hire " + a.name, `${a.bio} Perk: ${a.perk}`, `<div class="cost">${money(a.cost)}</div>`);
-    const cd = Math.ceil(S.allyCd[a.id] || 0), busy = S.active.some(m => m.sent === a.id);
-    return `<div class="box"><div class="row"><b>${a.name}</b><span class="small">${busy ? "On a mission" : "Available"}</span></div>
+    const cd = Math.ceil(S.allyCd[a.id] || 0), busy = S.active.some(m => m.sent === a.id), here = allyHere(a.id);
+    const status = !here ? "Wandered off. No idea when he'll be back" : busy ? "On a mission" : "Available";
+    return `<div class="box"${here ? "" : ' style="opacity:.6"'}><div class="row"><b>${a.name}</b><span class="small">${status}</span></div>
       <div class="small">${a.bio}</div><div class="small">Perk: ${a.perk}</div>
-      <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd > 0 ? "disabled" : ""}>${a.ab} — ${cd > 0 ? cd + "s" : "Ready"}</button></div>
+      <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd > 0 || !here ? "disabled" : ""}>${a.ab} — ${!here ? "Away" : cd > 0 ? cd + "s" : "Ready"}</button></div>
       <div class="small" style="margin-top:4px">${a.abDesc}</div></div>`;
   }).join("");
 }

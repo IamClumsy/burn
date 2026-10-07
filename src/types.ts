@@ -8,6 +8,8 @@ export interface Upgrade { id: string; name: string; desc: string; cost: number;
 export interface Ally {
   id: string; name: string; bio: string; cost: number; perk: string;
   ab: string; abDesc: string; cd: number;
+  /** Unreliable ally who comes and goes on his own schedule. */
+  flaky?: boolean;
 }
 
 export interface MissionTpl {
@@ -48,5 +50,7 @@ export interface GameState {
   cover: string; coverCd: number; board: Mission[]; active: ActiveMission[]; uid: number;
   story: number; ach: string[]; stats: Stats;
   buyAmt: 1 | 10 | "max"; mute: boolean; simonBought: number;
+  /** Nate wanders off and returns on a random timer. */
+  nateAway: boolean; nateTimer: number;
   boss: ActiveBoss | null; bossCd: number; bossKills: Dict<number>;
 }

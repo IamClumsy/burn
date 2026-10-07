@@ -36,11 +36,11 @@ export function resolveMission(m: ActiveMission): void {
   S.active = S.active.filter(x => x.uid !== m.uid);
   S.att = Math.min(100, S.att + 8);
   if (Math.random() < m.chance) {
-    const { keep, returned } = payClient(m.reward); S.favors += m.fav; S.heat += m.heat * heatMult(); S.stats.mDone++;
+    payClient(m.reward); S.favors += m.fav; S.heat += m.heat * heatMult(); S.stats.mDone++;
     if (m.kid) S.stats.kidMissions++;
     say(m.kid ? pick(KID_LINES) : pick(LINES.mOk));
     if (Math.random() < 0.4) say(pick(LINES.returned));
-    toast("Mission complete: " + m.n, `Client paid ${money(m.reward)}. You kept ${money(keep)}, returned ${money(returned)}. +${m.fav} favor`);
+    toast("Mission complete: " + m.n, `Paid ${money(m.reward)}. Expenses covered, the rest went back to the people who needed it. +${m.fav} favor`);
     chime();
   } else {
     S.heat += m.heat * 1.5 * heatMult(); S.stats.mFail++;

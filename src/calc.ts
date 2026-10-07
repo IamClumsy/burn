@@ -14,6 +14,7 @@ export function incomeMult(): number {
   let m = (1 + S.cred * 0.1) * (1 + 0.02 * S.ach.length) * (1 + 0.03 * Object.keys(S.bossKills).length) * cover().inc;
   for (const u of UPGS) if (S.upgs[u.id] && u.kind === "all") m *= u.m!;
   if (S.fx.boost > 0) m *= 2;
+  if (allyHere("nate")) m *= 1.15;
   return m;
 }
 
@@ -66,7 +67,9 @@ export const perkCost = (id: string): number => Math.ceil(2 * Math.pow(1.5, perk
 export const credGain = (): number => Math.floor(Math.sqrt(S.run / 1e6));
 
 // ---- missions
-export const allyFree = (id: string): boolean => !!S.allies[id] && !S.active.some(a => a.sent === id);
+/** Hired and actually around: Nate is only here when he hasn't wandered off. */
+export const allyHere = (id: string): boolean => !!S.allies[id] && !(id === "nate" && S.nateAway);
+export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);
 export function succChance(m: Mission): number {
   if (m.kid) return 1; // Michael never fails when a kid is involved
   const c = m.succ + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);

@@ -23,7 +23,7 @@ export const STORY: StoryBeat[] = [
   {at:6e10,  fav:6,  t:"The Founder",
    x:"The man you thought was a helpless hostage is the Organization's founder. He frames Fiona and says he'll lift the burn if you do him a favor. He's the first liar who's ever made you feel like a student."},
   {at:2.5e11,fav:6,  t:"Brothers and Strings",
-   x:"Your brother is killed in the crossfire of a shot meant for someone else. The orders came from the man who taught you everything. You suspect it before you can prove it."},
+   x:"Your brother is caught in the crossfire of a shot meant for someone else. He walks away shaken and, for once, not joking about it. The orders came from the man who taught you everything. You suspect it before you can prove it."},
   {at:7e11,  fav:8,  t:"The Mentor's Last Lesson",
    x:"Your mentor sends you and your team to Panama on a mission he calls routine. It's built to fail. You come back anyway, and he doesn't get another chance."},
   {at:2e12,  fav:8,  t:"Hunted by the Best",

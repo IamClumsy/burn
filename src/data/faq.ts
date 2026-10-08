@@ -85,6 +85,10 @@ export const FAQ: FaqSection[] = [
      a: () => "A few Case File moments ask you to decide. Each choice gives a permanent bonus, such as more income, safer missions, or less attention, and the Case File records what you picked."},
   ]},
   {title: "Progress and saving", items: [
+    {q: "What is Automation?",
+     a: () => "Chores the game will do for you once you've earned enough Credibility from Reinstating. Auto-take clients (Credibility 2) takes a client's case without a pop-up, for a bit less pay. Auto-send crew (Credibility 3) asks the right crew member for help on every mission you start, if they're around and free. Switch each on or off in the Automation pop-up."},
+    {q: "What's on the Stats card?",
+     a: () => "Your totals across every run: time played, income, missions won and lost, bosses beaten, your best single run, and how long you've been away at most. The Reinstate pop-up also previews what a reset would give you and when your next Credibility point arrives, and tells you if Fiona will go off for a few minutes (she does, after every reinstatement)."},
     {q: "What does Reinstate do?",
      a: () => `Once you've earned ${money(REINSTATE_MIN)} in a single run, you can reset in exchange for permanent Credibility. Each point is +10% income and job pay, and also raises your odd-jobs trickle. You keep your crew, perks, medals, boss wins, the Case File, your choices and where Nate's story stands. The exception is anyone who joins late in the show, like Jesse: you hire them again. Cash, operations, upgrades, missions and heat reset.`},
     {q: "What are medals?",

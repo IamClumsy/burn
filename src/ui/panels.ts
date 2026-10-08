@@ -23,8 +23,9 @@ import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
+import { AUTOS } from "../data/automation";
 
-export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "med" | "rep";
+export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "med" | "rep";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
@@ -34,7 +35,7 @@ export const SECTIONS: [TabId, string][] = [
 /** Reference and rare screens: opened as pop-ups from the toolbar. */
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"], ["gad", "Gadgets"], ["fav", "Favors"],
-  ["list", "The List"], ["file", "Michael's File"], ["stats", "Stats"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
+  ["list", "The List"], ["file", "Michael's File"], ["stats", "Stats"], ["auto", "Automation"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
 ];
 
 /** These open from buttons in The Loft card, so they're left off the toolbar. */
@@ -276,6 +277,16 @@ function medals(): string {
     <p class="small">Jobs ${st.clicks} · Burns ${st.burns} · Missions won ${st.mDone}/lost ${st.mFail} · Returned to clients ${money(st.returned)} · Kid cases ${st.kidMissions} · Ambushes ${st.ambush} · Gadgets ${st.crafted} · Lifetime ${money(S.life)} · Played ${t} min</p>`;
 }
 
+function automation(): string {
+  const rows = AUTOS.map(a => {
+    const open = S.cred >= a.need, on = !!S.auto[a.id];
+    return `<div class="box"><div class="row"><b>${a.name}</b><span class="small">${open ? (on ? "On" : "Off") : `Unlocks at Credibility ${a.need}`}</span></div>
+      <div class="small">${a.desc} <span style="color:var(--dim)">${a.cost}</span></div>
+      <div class="btns"><button data-act="auto" data-arg="${a.id}" ${open ? "" : "disabled"}>${open ? (on ? "Turn off" : "Turn on") : `Needs Credibility ${a.need} (you have ${S.cred})`}</button></div></div>`;
+  }).join("");
+  return `<div class="small" style="margin-bottom:8px">Credibility from Reinstating buys you help with the chores. Switch them on or off any time.</div>${rows}`;
+}
+
 function reinstate(): string {
   const g = credGain(), c = cps();
   const keep = `You reset cash, ops, upgrades and missions. You keep perks, medals, story and covers, and your allies too, except anyone who joined late in the story (like Jesse), who you hire again.`;
@@ -377,7 +388,7 @@ function faq(): string {
 const VIEWS: Record<TabId, () => string> = {
   faq,
   list: theList,
-  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, story, med: medals, rep: reinstate,
+  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, story, med: medals, rep: reinstate,
 };
 
 export const panelHTML = (tab: TabId): string => { portraitScope(tab); return VIEWS[tab](); };

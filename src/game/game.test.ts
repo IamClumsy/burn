@@ -18,7 +18,7 @@ import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missi
 import { allBeaten, checkEnding, newFixer, reduceGrip, simonTip, spawnErrand, tickOrg } from "./org";
 import { FIXERS, FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
 import { bribeCost, bribeDrop } from "../calc";
-import { payOffFixer } from "./actions";
+import { payOffFixer, toggleAuto } from "./actions";
 import { GRIP_PERKS, TIERS, handlerFor } from "../data/org";
 import { UPGS } from "../data/upgrades";
 import { FAQ } from "../data/faq";
@@ -1037,6 +1037,53 @@ describe("Crew events", () => {
     expect(out).toMatch(/Street Informant/);
     expect(S.gens.inf).toBe(42);
     expect(Object.keys(S.gens)).toEqual(["inf"]);
+  });
+});
+
+describe("Automation", () => {
+  it("unlocks with Credibility, and can't be switched on before then", () => {
+    S.cred = 1;
+    toggleAuto("clients"); toggleAuto("crew");
+    expect(S.auto).toEqual({ clients: false, crew: false });
+    S.cred = 2;
+    toggleAuto("clients"); toggleAuto("crew");
+    expect(S.auto).toEqual({ clients: true, crew: false });
+    S.cred = 3;
+    toggleAuto("crew");
+    expect(S.auto.crew).toBe(true);
+    toggleAuto("crew");
+    expect(S.auto.crew).toBe(false);
+  });
+
+  it("the Automation card shows what's locked and what's on", () => {
+    S.cred = 2; S.auto.clients = true;
+    const html = panelHTML("auto");
+    expect(html).toMatch(/Auto-take clients[\s\S]*On/);
+    expect(html).toMatch(/Unlocks at Credibility 3/);
+  });
+
+  it("an auto-taken client pays a little less and doesn't interrupt you", () => {
+    S.cred = 2; S.auto.clients = true; S.cash = 0; S.gens.inf = 50;
+    const before = S.stats.returned;
+    spawnClient();
+    expect(document.getElementById("evt")!.style.display).not.toBe("flex");
+    expect(S.cash).toBeGreaterThan(0);
+    expect(S.stats.returned).toBeGreaterThan(before);
+    expect(document.getElementById("log")!.textContent).toMatch(/without breaking stride/);
+  });
+
+  it("with auto-send on, a mission asks the right crew member for help by itself", () => {
+    S.cred = 3; S.auto.crew = true; S.allies.sam = true;
+    S.board = []; fillBoard();
+    const m = S.board.find(x => x.ally === "sam") ?? S.board[0];
+    S.allies[m.ally] = true;
+    startMission(m.uid);
+    expect(S.active[0].sent).toBe(m.ally);
+  });
+
+  it("an old save without automation settings still loads", () => {
+    const m = merge({ cash: 5 });
+    expect(m.auto).toEqual({ clients: false, crew: false });
   });
 });
 

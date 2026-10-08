@@ -13,7 +13,8 @@ import { tick } from "./game/tick";
 import { checkBurn, layLow } from "./game/heat";
 import { fillBoard, startMission } from "./game/missions";
 import { startArc } from "./game/arcs";
-import { strike } from "./game/bosses";
+import { bossAction } from "./game/bosses";
+import type { CaseAction } from "./types";
 import { scheduleClient, scheduleEvent } from "./game/events";
 import { scheduleErrand, syncTier } from "./game/org";
 import * as A from "./game/actions";
@@ -32,7 +33,7 @@ const onAct = (e: MouseEvent) => {
   ACT[t.dataset.act!](t.dataset.arg!);
   render();
 };
-buildLayout($("sections"), $("toolbar"));
+buildLayout($("sections"), $("toolbar"), $("bossacts"));
 $("sections").addEventListener("mousedown", onAct);
 $("modalBody").addEventListener("mousedown", onAct);
 
@@ -57,7 +58,12 @@ $("job").addEventListener("click", e => {
 });
 $("lay").addEventListener("click", () => { layLow(); render(); });
 $("bribe").addEventListener("click", () => { A.payOffFixer(); render(); });
-$("strike").addEventListener("click", e => { strike(e.clientX, e.clientY); render(); });
+$("bossacts").addEventListener("click", e => {
+  const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-case]");
+  if (!b || b.disabled) return;
+  bossAction(b.dataset.case as CaseAction, e.clientX, e.clientY);
+  render();
+});
 
 // ---- footer
 const syncMute = () => { $("mute").textContent = "sound: " + (S.mute ? "off" : "on"); };

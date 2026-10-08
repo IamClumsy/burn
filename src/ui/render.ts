@@ -1,7 +1,10 @@
 import { S } from "../state";
-import { bossDef, bribeCost, clickVal, cover, cps, layAmt, strikeDmg, tierDef } from "../calc";
+import { bossDef, bribeCost, clickVal, cover, cps, layAmt, tierDef } from "../calc";
 import { FX_NAMES } from "../data/perks";
-import { fmt, money } from "../util";
+import { money } from "../util";
+import type { CaseAction } from "../types";
+import { CASE_ACTIONS, MAX_LEADS } from "../data/caseActions";
+import { actionBlock } from "../game/bosses";
 import { $ } from "./dom";
 import { setText } from "./fx";
 import { SECTIONS, panelHTML, patchLive, resetLive, titleOf, type TabId } from "./panels";
@@ -44,9 +47,16 @@ export function render(): void {
     setText($("bossname"), bd.n);
     setText($("bossmech"), bd.mech);
     $("bosshp").style.width = Math.max(0, S.boss.hp / S.boss.max * 100) + "%";
-    setText($("bosshptxt"), `${fmt(Math.max(0, S.boss.hp))} / ${fmt(S.boss.max)} health`);
+    setText($("bosshptxt"), `Their cover: ${Math.max(0, Math.round(S.boss.hp / S.boss.max * 100))}% intact`);
     setText($("bosstime"), Math.ceil(S.boss.left) + "s left");
-    setText($("strike"), `STRIKE (${fmt(strikeDmg())} dmg)`);
+    const leads = S.boss.leads || 0;
+    setText($("bossleads"), "●".repeat(leads) + "○".repeat(MAX_LEADS - leads));
+    document.querySelectorAll<HTMLButtonElement>("#bossacts [data-case]").forEach(btn => {
+      const kind = btn.dataset.case as CaseAction, why = actionBlock(kind);
+      const hint = CASE_ACTIONS.find(a => a.id === kind)!.hint;
+      btn.disabled = !!why;
+      setText(btn.querySelector(".sub") as HTMLElement, why ?? hint);
+    });
   }
 
   // Only touch a card's DOM when its structure changed; moving numbers are patched in place.

@@ -31,7 +31,15 @@ export interface Boss {
   /** Character file, unlocked by beating them once. */
   file: string;
 }
-export interface ActiveBoss { id: string; hp: number; max: number; left: number }
+/** An encounter in progress. hp is how much of their cover is still intact. */
+export interface ActiveBoss {
+  id: string; hp: number; max: number; left: number;
+  /** Leads gathered by investigating; spent when you spring the trap. */
+  leads?: number;
+  /** Seconds until each action is ready again. */
+  cd?: Dict<number>;
+}
+export type CaseAction = "investigate" | "con" | "gadget" | "favor" | "trap";
 
 /** A frienemy: not crew, sells a specific kind of necessary favor for cash. */
 export interface Contact { id: "seymour" | "simon"; name: string; kind: string; bio: string; pitch: string }

@@ -14,8 +14,8 @@ import { allBeaten, checkEnding, reduceGrip, simonTip, spawnErrand } from "./org
 import { GRIP_PERKS, TIERS } from "../data/org";
 import { allyFree, allyHere, contactPrice, succChance } from "../calc";
 import { fillBoard, resolveMission, startMission } from "./missions";
-import { spawnBoss, strike } from "./bosses";
-import { strikeDmg } from "../calc";
+import { actionBlock, bossAction, spawnBoss } from "./bosses";
+import { actionDmg, conChance } from "../calc";
 import { checkBurn } from "./heat";
 import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
@@ -163,7 +163,7 @@ describe("the Organization", () => {
     spawnBoss();
     const id = S.boss!.id;
     S.boss!.hp = 1;
-    strike();
+    bossAction("investigate");
     expect(S.listKnown[id]).toBe(true);
     expect(S.grip).toBe(95);
   });
@@ -294,18 +294,78 @@ describe("game loop (headless)", () => {
     expect(S.boss).not.toBeNull();
     const id = S.boss!.id;
     S.boss!.hp = 1;
-    strike();
+    bossAction("investigate");
     expect(S.boss).toBeNull();
     expect(S.bossKills[id]).toBe(1);
   });
 
-  it("a strike takes a meaningful slice of any boss's health", () => {
+  it("every case action makes real progress against any boss", () => {
     S.life = 1e13; S.gens.inf = 8;
     for (const b of BOSSES) {
       S.boss = { id: b.id, hp: 1000, max: 1000, left: 75 };
-      expect(strikeDmg() / 1000, b.id).toBeGreaterThanOrEqual(0.02);
+      expect(actionDmg(0.03) / 1000, b.id).toBeGreaterThanOrEqual(0.01);
+      expect(actionDmg(0.2) / 1000, b.id).toBeGreaterThan(actionDmg(0.03) / 1000);
     }
     S.boss = null;
+  });
+
+  describe("case actions", () => {
+    const setup = () => { S.life = 1e13; S.gens.inf = 8; S.boss = { id: "paxson", hp: 1e6, max: 1e6, left: 75 }; };
+
+    it("working the angle builds leads, up to five", () => {
+      setup();
+      for (let i = 0; i < 8; i++) { bossAction("investigate"); S.boss!.cd!.investigate = 0; }
+      expect(S.boss!.leads).toBe(5);
+    });
+
+    it("springing the trap needs 3 leads, spends them, and hits harder with more", () => {
+      setup();
+      expect(actionBlock("trap")).toMatch(/3 leads/);
+      S.boss!.leads = 3;
+      const before = S.boss!.hp;
+      bossAction("trap");
+      const threeLeads = before - S.boss!.hp;
+      expect(S.boss!.leads).toBe(0);
+      S.boss!.hp = before; S.boss!.cd = {}; S.boss!.leads = 5;
+      bossAction("trap");
+      expect(before - S.boss!.hp).toBeGreaterThan(threeLeads);
+    });
+
+    it("a con can land or blow up", () => {
+      setup();
+      vi.spyOn(Math, "random").mockReturnValue(0.01);
+      const hp = S.boss!.hp;
+      bossAction("con");
+      expect(S.boss!.hp).toBeLessThan(hp);
+      S.boss!.cd = {}; S.heat = 0;
+      vi.spyOn(Math, "random").mockReturnValue(0.99);
+      const hp2 = S.boss!.hp;
+      bossAction("con");
+      expect(S.boss!.hp).toBe(hp2);
+      expect(S.heat).toBeGreaterThan(0);
+      expect(conChance()).toBeLessThanOrEqual(0.95);
+      vi.restoreAllMocks();
+    });
+
+    it("gadgets and favors cost something real", () => {
+      setup();
+      expect(actionBlock("gadget")).toMatch(/wire/);
+      expect(actionBlock("favor")).toMatch(/favor/);
+      S.junk.wire = 1; S.junk.tape = 1; S.favors = 1;
+      bossAction("gadget"); bossAction("favor");
+      expect(S.junk.wire).toBe(0);
+      expect(S.junk.tape).toBe(0);
+      expect(S.favors).toBe(0);
+    });
+
+    it("actions go on cooldown", () => {
+      setup();
+      bossAction("investigate");
+      expect(actionBlock("investigate")).toMatch(/Ready in/);
+      const leads = S.boss!.leads;
+      bossAction("investigate");
+      expect(S.boss!.leads).toBe(leads);
+    });
   });
 
   it("every boss mechanic runs for several seconds without error", () => {

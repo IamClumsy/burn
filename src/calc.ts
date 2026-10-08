@@ -119,11 +119,20 @@ export const missionKeep = (m: Mission): number => missionReward(m) * KEEP_RATE;
 // ---- bosses
 export const bossDef = (): Boss | null => (S.boss ? BOSSES.find(b => b.id === S.boss!.id) || null : null);
 export const bossHP = (b: Boss): number => (cps() * 400 + clickVal() * 200 + 500) * b.hpm;
-/** A strike always chews through a real slice of the boss (about 6%, less for tougher bosses). */
-export function strikeDmg(): number {
+/**
+ * Progress an action makes against a boss's cover, as a fraction of it (pct). Tougher bosses
+ * take proportionally less from each action, and there's always a floor tied to your strength.
+ */
+export function actionDmg(pct: number): number {
   const base = clickVal() * 8 + cps() * 2;
   const b = S.boss;
-  if (!b) return base;
+  if (!b) return base * (pct / 0.06);
   const hpm = bossDef()?.hpm ?? 1;
-  return Math.max(base, b.max * (0.06 / Math.sqrt(hpm)));
+  return Math.max(base * (pct / 0.06), b.max * pct / Math.sqrt(hpm));
+}
+
+/** Odds that a con works on a boss. */
+export function conChance(): number {
+  const c = 0.7 + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0);
+  return Math.min(0.95, c);
 }

@@ -83,7 +83,12 @@
   @keyframes up{to{transform:translateY(-60px);opacity:0}}
   .boss{border:2px solid var(--bad);box-shadow:0 0 22px #ff4d5e55;display:none}
   .boss h2{color:var(--bad)}
-  #strike{width:100%;padding:14px;font-weight:700;letter-spacing:2px;background:linear-gradient(#ff4d5e,#a3122a);border:none;color:#fff}
+  .bossacts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .bossacts button{text-align:left;padding:8px 10px;line-height:1.25}
+  .bossacts button b{display:block;font-size:14px}
+  .bossacts .sub{display:block;font-size:11px;color:var(--dim)}
+  .bossacts button:last-child{grid-column:1/-1;background:linear-gradient(#ff4d5e,#a3122a);border-color:transparent;color:#fff}
+  .bossacts button:last-child .sub{color:#ffd9de}
   .boss.hit{animation:bosshit .18s}
   @keyframes bosshit{0%{transform:translateX(-4px);box-shadow:0 0 34px #ff4d5e}50%{transform:translateX(4px)}100%{transform:none}}
   .bossbar{background:linear-gradient(90deg,#ff4d5e,#ff9a3c)}

@@ -12,6 +12,7 @@ import { PERKS, JUNK, RECIPES } from "../data/perks";
 import { STORY } from "../data/story";
 import { MEDALS } from "../data/medals";
 import { ARCS } from "../data/arcs";
+import { CASE_ACTIONS } from "../data/caseActions";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS } from "../data/contacts";
@@ -36,8 +37,12 @@ const LOFT_ONLY: TabId[] = ["crew", "cov"];
 
 export const titleOf = (id: TabId): string => [...SECTIONS, ...MODALS].find(([i]) => i === id)![1];
 
-/** Build the static card shells and the toolbar once at startup. */
-export function buildLayout(host: HTMLElement, toolbar: HTMLElement): void {
+/** Build the static card shells, the toolbar and the case-action buttons once at startup. */
+export function buildLayout(host: HTMLElement, toolbar: HTMLElement, actions?: HTMLElement | null): void {
+  if (actions) {
+    actions.innerHTML = CASE_ACTIONS.map(a =>
+      `<button data-case="${a.id}"><b>${a.name}</b><span class="sub">${a.hint}</span></button>`).join("");
+  }
   host.innerHTML = SECTIONS.map(([id, t]) =>
     `<div class="card sec sec-${id}"><h2>${t}</h2><div class="secbody" id="sec-${id}"></div></div>`).join("");
   toolbar.innerHTML = MODALS.filter(([id]) => !LOFT_ONLY.includes(id))
@@ -175,10 +180,10 @@ function favors(): string {
 }
 
 function rogues(): string {
-  return `<div class="small" style="margin-bottom:8px">Bosses turn up every few minutes. Beat each one once for a permanent +3% income. Next one in about ${Math.ceil(Math.max(0, S.bossCd) / 60)} min.</div>` +
+  return `<div class="small" style="margin-bottom:8px">Bosses turn up every few minutes. Outmaneuver each one once for a permanent +3% income. Next one in about ${Math.ceil(Math.max(0, S.bossCd) / 60)} min.</div>` +
     BOSSES.map(b => {
       const open = S.life >= b.at, k = S.bossKills[b.id] || 0;
-      return `<div class="box" style="${open ? "" : "opacity:.5"}"><div class="row"><b>${open ? b.n : "???"}</b><span class="small">${open ? "Defeated " + k + "×" : "Appears at " + money(b.at) + " lifetime"}</span></div>
+      return `<div class="box" style="${open ? "" : "opacity:.5"}"><div class="row"><b>${open ? b.n : "???"}</b><span class="small">${open ? "Outmaneuvered " + k + "×" : "Appears at " + money(b.at) + " lifetime"}</span></div>
         ${open ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">${b.mech}</div>
           ${k > 0 ? `<div class="small" style="margin-top:6px;color:var(--text)"><b>File:</b> ${b.file}</div>` : `<div class="small" style="margin-top:6px">Beat them once to open their file.</div>`}` : ""}</div>`;
     }).join("");

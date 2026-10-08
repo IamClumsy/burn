@@ -55,7 +55,7 @@ export interface ActiveBoss {
   /** Seconds until each action is ready again. */
   cd?: Dict<number>;
 }
-export type CaseAction = "investigate" | "con" | "gadget" | "favor" | "trap";
+export type CaseAction = "investigate" | "con" | "gadget" | "favor" | "stakeout" | "cover" | "crew" | "trap";
 
 /** A frienemy: not crew, sells a specific kind of necessary favor for cash. */
 export interface Contact { id: "seymour" | "simon"; name: string; kind: string; bio: string; pitch: string }

@@ -131,6 +131,9 @@
   .bossacts button{text-align:left;padding:8px 10px;line-height:1.25}
   .bossacts button b{display:block;font-size:14px}
   .bossacts .sub{display:block;font-size:11px;color:var(--dim)}
+  .bossacts #rottile{grid-column:1/-1;min-height:58px}
+  .bossacts #rottile.swap{animation:rotswap .35s ease-out}
+  @keyframes rotswap{from{opacity:.25}to{opacity:1}}
   .bossacts button:last-child{grid-column:1/-1;background:linear-gradient(#ff4d5e,#a3122a);border-color:transparent;color:#fff}
   .bossacts button:last-child .sub{color:#ffd9de}
   .boss.hit{animation:bosshit .18s}

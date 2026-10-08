@@ -1,6 +1,6 @@
 import { S, earn } from "../state";
-import { actionDmg, bossDef, bossHP, conChance, cps, heatMult } from "../calc";
-import { CASE_ACTIONS, MAX_LEADS, TRAP_MIN_LEADS } from "../data/caseActions";
+import { actionDmg, allyHere, bossDef, bossHP, conChance, cps, heatMult } from "../calc";
+import { CASE_ACTIONS, CREW_LINES, MAX_LEADS, TRAP_MIN_LEADS } from "../data/caseActions";
 import type { CaseAction } from "../types";
 import { BOSSES } from "../data/bosses";
 import { beep, chime } from "../audio";
@@ -43,6 +43,9 @@ export function loseBoss(): void {
 
 const def = (k: CaseAction) => CASE_ACTIONS.find(x => x.id === k)!;
 
+/** Crew members who can lend a hand right now. */
+const crewHere = (): string[] => Object.keys(CREW_LINES).filter(allyHere);
+
 /** Why an action can't be used right now, or null if it's ready. */
 export function actionBlock(kind: CaseAction): string | null {
   const b = S.boss;
@@ -51,6 +54,7 @@ export function actionBlock(kind: CaseAction): string | null {
   if (cd > 0) return `Ready in ${Math.ceil(cd)}s`;
   if (kind === "gadget" && (S.junk.wire < 1 || S.junk.tape < 1)) return "Needs 1 wire and 1 tape";
   if (kind === "favor" && S.favors < 1) return "Needs 1 favor";
+  if (kind === "crew" && !crewHere().length) return "Nobody from your crew is around";
   if (kind === "trap" && (b.leads || 0) < TRAP_MIN_LEADS) return `Needs ${TRAP_MIN_LEADS} leads`;
   return null;
 }
@@ -81,6 +85,17 @@ export function bossAction(kind: CaseAction, x?: number, y?: number): void {
   } else if (kind === "favor") {
     S.favors--;
     dmg = actionDmg(0.2);
+  } else if (kind === "stakeout") {
+    dmg = actionDmg(0.02);
+    b.leads = Math.min(MAX_LEADS, b.leads + 2);
+    label = "+2 leads";
+  } else if (kind === "cover") {
+    dmg = actionDmg(0.06);
+    S.heat = Math.max(0, S.heat - 6);
+  } else if (kind === "crew") {
+    dmg = actionDmg(0.15);
+    const who = pick(crewHere());
+    say(pick(CREW_LINES[who]));
   } else {
     dmg = actionDmg(0.1 * b.leads);
     b.leads = 0;
@@ -89,8 +104,8 @@ export function bossAction(kind: CaseAction, x?: number, y?: number): void {
 
   if (dmg > 0) {
     b.hp -= dmg;
-    if (kind !== "investigate") label = "-" + fmt(dmg);
-    say(pick(def(kind).lines));
+    if (kind !== "investigate" && kind !== "stakeout") label = "-" + fmt(dmg);
+    if (kind !== "crew") say(pick(def(kind).lines));
   }
   b.cd[kind] = def(kind).cd;
   hitBoss();

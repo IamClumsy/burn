@@ -44,8 +44,10 @@ export const titleOf = (id: TabId): string => [...SECTIONS, ...MODALS].find(([i]
 /** Build the static card shells, the toolbar and the case-action buttons once at startup. */
 export function buildLayout(host: HTMLElement, toolbar: HTMLElement, actions?: HTMLElement | null): void {
   if (actions) {
-    actions.innerHTML = CASE_ACTIONS.map(a =>
-      `<button data-case="${a.id}"><b>${a.name}</b><span class="sub">${a.hint}</span></button>`).join("");
+    const tile = (a: (typeof CASE_ACTIONS)[number], extra = "") =>
+      `<button data-case="${a.id}"${extra}><b>${a.name}</b><span class="sub">${a.hint}</span></button>`;
+    // The tools Michael rotates through share one tile; Spring the Trap keeps its own button.
+    actions.innerHTML = tile(CASE_ACTIONS[0], ' id="rottile"') + tile(CASE_ACTIONS.find(a => a.id === "trap")!);
   }
   host.innerHTML = SECTIONS.map(([id, t]) =>
     `<div class="card sec sec-${id}"><h2>${t}</h2><div class="secbody" id="sec-${id}"></div></div>`).join("");

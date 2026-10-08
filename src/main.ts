@@ -5,7 +5,7 @@ import { pick, money } from "./util";
 import { QUOTES } from "./data/text";
 import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
-import { render, showModal } from "./ui/render";
+import { advanceCase, initCaseTile, render, showModal } from "./ui/render";
 import { initNotices } from "./ui/notice";
 import { portrait } from "./ui/portrait";
 import { buildLayout, type TabId } from "./ui/panels";
@@ -36,6 +36,7 @@ const onAct = (e: MouseEvent) => {
   render();
 };
 buildLayout($("sections"), $("toolbar"), $("bossacts"));
+initCaseTile();
 $("sections").addEventListener("mousedown", onAct);
 $("modalBody").addEventListener("mousedown", onAct);
 
@@ -86,6 +87,7 @@ $("bossacts").addEventListener("click", e => {
   const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-case]");
   if (!b || b.disabled) return;
   bossAction(b.dataset.case as CaseAction, e.clientX, e.clientY);
+  if (b.id === "rottile") advanceCase();
   render();
 });
 

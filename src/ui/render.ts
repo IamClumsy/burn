@@ -3,7 +3,7 @@ import { bossDef, bribeCost, bribeDrop, clickVal, cover, cps, layAmt, tierDef } 
 import { FX_NAMES } from "../data/perks";
 import { money } from "../util";
 import type { CaseAction } from "../types";
-import { CASE_ACTIONS, MAX_LEADS } from "../data/caseActions";
+import { CASE_ACTIONS, MAX_LEADS, ROTATING } from "../data/caseActions";
 import { actionBlock } from "../game/bosses";
 import { loftBadges } from "./badges";
 import { portrait } from "./portrait";
@@ -25,6 +25,40 @@ const last = new Map<string, string>();
 let lastFx = "";
 let faceFor = "";
 let lastModal = "";
+
+// ---- the rotating case tile: cycles through Michael's tools, skipping ones that aren't ready
+const ROTATE_MS = 2200;
+let rotIdx = 0, rotAt = 0, rotHover = false;
+
+/** Move the tile on to the next tool that's ready (or just the next one, if none are). */
+export function advanceCase(): void {
+  rotAt = performance.now();
+  for (let i = 1; i <= ROTATING.length; i++) {
+    const n = (rotIdx + i) % ROTATING.length;
+    if (!actionBlock(ROTATING[n])) { rotIdx = n; return; }
+  }
+  rotIdx = (rotIdx + 1) % ROTATING.length;
+}
+
+export function initCaseTile(): void {
+  const t = document.getElementById("rottile");
+  if (!t) return;
+  t.addEventListener("mouseenter", () => { rotHover = true; });
+  t.addEventListener("mouseleave", () => { rotHover = false; rotAt = performance.now(); });
+}
+
+function rotateCase(): void {
+  const tile = document.getElementById("rottile") as HTMLButtonElement | null;
+  if (!tile) return;
+  const now = performance.now();
+  const stuck = !!actionBlock(ROTATING[rotIdx]) && ROTATING.some(k => !actionBlock(k)); // current tool is cooling down, another is ready
+  if ((!rotHover && now - rotAt >= ROTATE_MS) || (stuck && !rotHover)) advanceCase();
+  const kind = ROTATING[rotIdx];
+  if (tile.dataset.case !== kind) {
+    tile.dataset.case = kind;
+    tile.classList.remove("swap"); void tile.offsetWidth; tile.classList.add("swap");
+  }
+}
 
 export function render(): void {
   setText($("cash"), money(S.cash));
@@ -66,9 +100,11 @@ export function render(): void {
     setText($("bosstime"), Math.ceil(S.boss.left) + "s left");
     const leads = S.boss.leads || 0;
     setText($("bossleads"), "●".repeat(leads) + "○".repeat(MAX_LEADS - leads));
+    rotateCase();
     document.querySelectorAll<HTMLButtonElement>("#bossacts [data-case]").forEach(btn => {
       const kind = btn.dataset.case as CaseAction, why = actionBlock(kind);
-      const hint = CASE_ACTIONS.find(a => a.id === kind)!.hint;
+      const def = CASE_ACTIONS.find(a => a.id === kind)!, hint = def.hint;
+      setText(btn.querySelector("b") as HTMLElement, def.name);
       btn.disabled = !!why;
       setText(btn.querySelector(".sub") as HTMLElement, why ?? hint);
     });

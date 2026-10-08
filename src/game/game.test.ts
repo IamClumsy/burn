@@ -1299,6 +1299,21 @@ describe("game loop (headless)", () => {
       vi.restoreAllMocks();
     });
 
+    it("stake out builds two leads, going undercover cools heat, and the crew needs someone around", () => {
+      setup();
+      bossAction("stakeout");
+      expect(S.boss!.leads).toBe(2);
+      S.heat = 30; bossAction("cover");
+      expect(S.heat).toBeLessThan(30);
+      expect(actionBlock("crew")).toMatch(/crew/i);
+      S.allies.sam = true;
+      expect(actionBlock("crew")).toBeNull();
+      const hp = S.boss!.hp;
+      bossAction("crew");
+      expect(S.boss!.hp).toBeLessThan(hp);
+      expect(actionBlock("crew")).toMatch(/Ready in/);
+    });
+
     it("gadgets and favors cost something real", () => {
       setup();
       expect(actionBlock("gadget")).toMatch(/wire/);

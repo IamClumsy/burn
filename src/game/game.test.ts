@@ -776,6 +776,15 @@ describe("upgrades never run out", () => {
     expect(panelHTML("upg")).toMatch(/Next up: <b[^>]*>[^<]+<\/b> (once you own|at )/);
   });
 
+  it("Reinstating drops Jesse (he debuts in Season 4) but keeps the early crew", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    S.run = 2e8; S.life = 2e8; S.allies.sam = true; S.allies.jesse = true;
+    prestige();
+    expect(S.allies.sam).toBe(true);
+    expect(S.allies.jesse).toBeFalsy();
+    vi.restoreAllMocks();
+  });
+
   it("the endless upgrade resets with the rest when you Reinstate", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     S.run = 2e8; S.referrals = 5;

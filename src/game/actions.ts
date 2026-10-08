@@ -138,12 +138,18 @@ export function payOffFixer(): void {
   newFixer(); // that fixer's done; someone else will be along with a different price
 }
 
+/** Allies who debut in a later season (like Jesse) have to be hired again after a reset, since the story starts over. */
+function keptAllies(): Record<string, boolean> {
+  const later = new Set(ALLIES.filter(a => a.debut).map(a => a.id));
+  return Object.fromEntries(Object.entries(S.allies).filter(([id]) => !later.has(id)));
+}
+
 export function prestige(): void {
   const gain = credGain();
   if (gain < 1) return;
-  if (!confirm(`Get reinstated? You reset cash, ops, upgrades and missions, but gain ${gain} Credibility (+${gain * 10}% income) and ${gain} favors. Allies, perks, medals and story are kept.`)) return;
+  if (!confirm(`Get reinstated? You reset cash, ops, upgrades and missions, but gain ${gain} Credibility (+${gain * 10}% income) and ${gain} favors. Allies who joined late in the story, like Jesse, have to be hired again. Perks, medals and story are kept.`)) return;
   const keep = {
-    cred: S.cred + gain, life: S.life, favors: S.favors + gain, perks: S.perks, allies: S.allies, ach: S.ach,
+    cred: S.cred + gain, life: S.life, favors: S.favors + gain, perks: S.perks, allies: keptAllies(), ach: S.ach,
     stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
     choices: S.choices, arcStep: S.arcStep, arcsDone: S.arcsDone,
     grip: S.grip, listKnown: S.listKnown, attPeak: S.attPeak, cleanRecord: S.cleanRecord,

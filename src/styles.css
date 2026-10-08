@@ -20,6 +20,13 @@
   .sections .card{margin-bottom:0}
   .secbody{max-height:min(640px,72vh);overflow-y:auto;padding-right:2px}
   .sec-ops,.sec-mis{grid-row:span 1}
+  .dfile{display:grid;gap:6px}
+  .drow{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:baseline;background:#0b0610;border:1px dashed var(--line);border-radius:6px;padding:8px 10px}
+  .dlabel{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+  .dtext{font-size:14px;color:var(--text)}
+  .drow.redacted .dlabel,.drow.redacted .dtext{color:var(--dim)}
+  .dstamp{display:inline-block;font-size:22px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#ff4d5e;border:3px solid #ff4d5e;border-radius:6px;padding:2px 12px;margin:2px 0 12px;transform:rotate(-4deg)}
+  @media(max-width:520px){.drow{grid-template-columns:1fr;gap:2px}}
   .dossier{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--text);background:#0b0610;border:1px dashed var(--line);border-radius:6px;padding:8px;margin:4px 0}
   .dossier.redacted{color:var(--dim)}
   .faqitem{background:var(--panel2);border:1px solid var(--line);border-radius:8px;margin-bottom:6px}

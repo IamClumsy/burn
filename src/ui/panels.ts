@@ -23,7 +23,7 @@ import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 
-export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "med" | "rep";
+export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "med" | "rep";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
@@ -33,7 +33,7 @@ export const SECTIONS: [TabId, string][] = [
 /** Reference and rare screens: opened as pop-ups from the toolbar. */
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"], ["gad", "Gadgets"], ["fav", "Favors"],
-  ["list", "The List"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
+  ["list", "The List"], ["file", "Michael's File"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
 ];
 
 /** These open from buttons in The Loft card, so they're left off the toolbar. */
@@ -299,12 +299,21 @@ function theList(): string {
     ? `<div class="box" style="margin-top:8px;border-color:var(--gold)"><b>The burn is lifted.</b><div class="small" style="color:var(--text)">Every name is crossed off. You're clear, and your income is up 25% for good.</div></div>`
     : `<div class="small" style="margin-top:6px">Beat each of them to cross them off. Simon sometimes passes you a name. Finish the List to lift the burn.</div>`;
 
-  const t = tierDef();
-  h += `<h2 style="margin-top:14px">Your file</h2><div class="small" style="margin-bottom:4px">Right now they have you as: <b style="color:var(--text)">${t.name}</b>. ${t.note}</div>`;
-  h += DOSSIER.map(d => S.attPeak >= d.peak
-    ? `<div class="dossier">${d.text}</div>`
-    : `<div class="dossier redacted">████████ ████ ██████ (reached at ${d.peak}% attention)</div>`).join("");
   return h;
+}
+
+/** Michael's file as the Organization keeps it. More of it fills in as their attention on you peaks. */
+function file(): string {
+  const t = tierDef();
+  const rows = DOSSIER.map(d => S.attPeak >= d.peak
+    ? `<div class="drow"><span class="dlabel">${d.label}</span><span class="dtext">${d.text}</span></div>`
+    : `<div class="drow redacted"><span class="dlabel">██████ ████</span><span class="dtext">████████ ██████ <span class="small">(Reached at ${d.peak}% attention)</span></span></div>`).join("");
+  const learned = DOSSIER.filter(d => S.attPeak >= d.peak).length;
+  return `<div class="filehead"><div class="who">${portrait("michael", 72)}<div><div class="dstamp">Burned</div>
+      <div class="small">Organization file, ${learned} of ${DOSSIER.length} entries filled in</div></div></div></div>
+    <div class="small" style="margin:8px 0">Right now they have you as: <b style="color:var(--text)">${t.name}</b>. ${t.note}</div>
+    <div class="dfile">${rows}</div>
+    <div class="small" style="margin-top:8px">The more attention you draw from the Organization, the more of this they fill in. The file doesn't shrink, even when your attention drops.</div>`;
 }
 
 function faq(): string {
@@ -318,7 +327,7 @@ function faq(): string {
 const VIEWS: Record<TabId, () => string> = {
   faq,
   list: theList,
-  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, story, med: medals, rep: reinstate,
+  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, story, med: medals, rep: reinstate,
 };
 
 export const panelHTML = (tab: TabId): string => VIEWS[tab]();

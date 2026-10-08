@@ -37,12 +37,14 @@ export const GRIP_PERKS: GripPerk[] = [
 ];
 
 /** What the Organization has on you, revealed as their attention peaks. */
-export const DOSSIER: { peak: number; text: string }[] = [
-  {peak:0,  text:"Subject: Michael Westen. Status: burned."},
-  {peak:20, text:"Address on file: a loft in Miami."},
-  {peak:45, text:"Known associates: Sam Axe, Fiona Glenanne, Madeline Westen."},
-  {peak:70, text:"Pressure points: everyone he loves."},
-  {peak:95, text:"Recommendation: deal with him permanently."},
+export const DOSSIER: { peak: number; label: string; text: string }[] = [
+  {peak:0,  label:"Subject",            text:"Michael Westen"},
+  {peak:0,  label:"Status",             text:"Burned"},
+  {peak:10, label:"Former Occupation",  text:"Intelligence Operative"},
+  {peak:20, label:"Address on File",    text:"A loft in Miami"},
+  {peak:45, label:"Known Associates",   text:"Sam Axe, Fiona Glenanne, Madeline Westen"},
+  {peak:70, label:"Pressure Points",    text:"Everyone he loves"},
+  {peak:95, label:"Recommendation",     text:"Deal with him permanently"},
 ];
 
 /** Who hands you an errand depends on how far you've come. */

@@ -561,12 +561,24 @@ describe("notifications", () => {
   });
 
   it("Nate wandering off and coming back both pop up", () => {
-    S.allies.nate = true; S.nateAway = false; S.nateTimer = 0;
+    S.allies.nate = true; S.nateAway = false; S.nateTimer = 0; S.nateWed = true;
     tickNate(0.1);
     expect(shown()).toBe(true);
     expect(title()).toBe("Nate wandered off");
     dismissNotice();
     S.nateTimer = 0;
+    tickNate(0.1);
+    expect(title()).toBe("Nate's back");
+  });
+
+  it("Nate's first return from Vegas brings his new bride, once", () => {
+    S.allies.nate = true; S.nateAway = true; S.nateWed = false; S.nateTimer = 0;
+    tickNate(0.1);
+    expect(title()).toBe("Nate got married");
+    expect(document.getElementById("nM")!.textContent).toContain("Ruth");
+    expect(S.nateWed).toBe(true);
+    dismissNotice();
+    S.nateAway = true; S.nateTimer = 0;
     tickNate(0.1);
     expect(title()).toBe("Nate's back");
   });

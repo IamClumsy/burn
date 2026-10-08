@@ -66,6 +66,13 @@ export function tickNate(dt: number): void {
   if (S.nateTimer > 0) return;
   S.nateAway = !S.nateAway;
   S.nateTimer = S.nateAway ? 3600 + Math.random() * 7200 : 600 + Math.random() * 900;
+  if (!S.nateAway && !S.nateWed) {
+    S.nateWed = true;
+    const wed = "Nate's back from Vegas with a wife. Meet Ruth, a blackjack dealer he's known for about a month. Madeline is thrilled. Michael is not.";
+    toast("Nate got married", wed);
+    say(wed);
+    return;
+  }
   const line = pick(S.nateAway ? LINES.nateAway : LINES.nateBack);
   toast(S.nateAway ? "Nate wandered off" : "Nate's back", line);
   say(line);

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { fresh, merge, payClient, setState, S, KEEP_RATE } from "./state";
+import { fresh, merge, payClient, setState, S, KEEP_RATE, FEE_CAP, capFee, missionCap } from "./state";
 import { REINSTATE_MIN, missionKeep, missionReward, bulkCost, clickVal, cps, credGain, heatMult, incomeMult, maxAfford, owned, succChance } from "./calc";
 import { GENS } from "./data/ops";
 import { fmt, money } from "./util";
@@ -105,13 +105,71 @@ describe("client payouts", () => {
     expect(S.stats.returned).toBeCloseTo(9000);
   });
 
-  it("mission fees are 10x bigger but his cut equals the old payout", () => {
+  it("mission fees are about 10x his cut, and early on his cut is close to what it always was", () => {
     S.gens.inf = 20;
     const m = mission({ rm: 2 });
     const oldReward = Math.floor((cps() * 60 + 150) * 2);
-    expect(missionReward(m)).toBeGreaterThan(oldReward * 9);
-    expect(missionKeep(m)).toBeCloseTo(oldReward, -1);
+    expect(missionReward(m)).toBeGreaterThan(oldReward * 8);
+    expect(missionKeep(m)).toBeCloseTo(oldReward, -1); // small fees aren't touched by the ceiling
     expect(KEEP_RATE).toBe(0.1);
+  });
+
+  it("no mission fee is ever silly, whatever the income", () => {
+    S.gens.inf = 1e9; // an absurd network
+    expect(missionReward(mission({ rm: 7 }))).toBeLessThanOrEqual(FEE_CAP);
+    expect(missionReward(mission({ rm: 7 }))).toBeGreaterThan(FEE_CAP * 0.99); // it levels off just under the ceiling
+  });
+
+  it("fees grow smoothly with income and never go backwards", () => {
+    let last = 0;
+    for (const n of [0, 5, 20, 100, 1000, 1e5, 1e8]) {
+      S.gens.inf = n;
+      const fee = missionReward(mission({ rm: 3 }));
+      expect(fee).toBeGreaterThanOrEqual(last);
+      expect(fee).toBeLessThanOrEqual(FEE_CAP);
+      last = fee;
+    }
+  });
+});
+
+describe("fee ceiling", () => {
+  it("leaves anything up to half the cap exactly as it was", () => {
+    for (const x of [0, 1, 1000, 25_000, FEE_CAP / 2]) expect(capFee(x)).toBe(x);
+  });
+
+  it("eases toward the cap above that and never passes it", () => {
+    expect(capFee(FEE_CAP)).toBeGreaterThan(FEE_CAP * 0.8);
+    expect(capFee(FEE_CAP)).toBeLessThan(FEE_CAP);
+    for (const x of [1e6, 1e9, 1e15]) expect(capFee(x)).toBeLessThanOrEqual(FEE_CAP);
+    expect(capFee(1e6)).toBeGreaterThan(FEE_CAP * 0.999);
+  });
+
+  it("is smooth: no jump where the easing starts", () => {
+    const knee = FEE_CAP / 2;
+    expect(capFee(knee + 1) - capFee(knee)).toBeCloseTo(1, 1); // same slope on both sides
+  });
+
+  it("is monotonic", () => {
+    let last = -1;
+    for (let x = 0; x <= 2e5; x = x * 1.7 + 1) { const f = capFee(x); expect(f).toBeGreaterThan(last); last = f; }
+    expect(capFee(1e9)).toBeGreaterThanOrEqual(capFee(2e5));
+  });
+
+  it("harder cases get a higher ceiling, so they still pay more late in the game", () => {
+    expect(missionCap(7)).toBeGreaterThan(missionCap(2));
+    expect(missionCap(100)).toBe(FEE_CAP); // never above the overall cap
+    S.gens.inf = 1e9;
+    const easy = missionReward(mission({ rm: 2 })), hard = missionReward(mission({ rm: 7 }));
+    expect(hard).toBeGreaterThan(easy * 2);
+    expect(hard).toBeLessThanOrEqual(FEE_CAP);
+    expect(easy).toBeLessThanOrEqual(missionCap(2));
+  });
+
+  it("early on, fees are exactly what they always were", () => {
+    S.gens.inf = 5;
+    const m = mission({ rm: 2 });
+    const old = Math.floor((cps() * 60 + 150) * 2 / KEEP_RATE);
+    expect(missionReward(m)).toBe(old);
   });
 });
 

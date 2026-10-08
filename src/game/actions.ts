@@ -1,7 +1,7 @@
 import { S } from "../state";
 import { fresh, setState } from "../state";
 import {
-  allyHere, bribeCost, bribeDrop, bulkCost, buyN, contactPrice, credGain, favorsLeft, hangOutPrice, owned, perk, perkCost, recentFavors,
+  referralCost, allyHere, bribeCost, bribeDrop, bulkCost, buyN, contactPrice, credGain, favorsLeft, hangOutPrice, owned, perk, perkCost, recentFavors,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -33,6 +33,14 @@ export function buyUpg(id: string): void {
   if (S.upgs[id] || S.cash < u.cost) return;
   S.cash -= u.cost; S.upgs[id] = true;
   say("Acquired: " + u.name + ".");
+  beep(780, 0.1, "triangle", 0.05);
+}
+
+export function buyReferral(): void {
+  const c = referralCost();
+  if (S.cash < c) return;
+  S.cash -= c; S.referrals++;
+  say("Word keeps spreading. People Michael helped send people he hasn't met yet.");
   beep(780, 0.1, "triangle", 0.05);
 }
 

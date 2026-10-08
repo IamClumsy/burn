@@ -1,10 +1,10 @@
 import { S } from "../state";
 import {
-  REINSTATE_MIN, allyAvailable, baseIncome, tierDef, allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
+  REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
-import { UPGS } from "../data/upgrades";
+import { REFERRAL, UPGS } from "../data/upgrades";
 import { ALLIES } from "../data/allies";
 import { COVERS } from "../data/covers";
 import { BOSSES } from "../data/bosses";
@@ -106,9 +106,27 @@ function ops(): string {
 }
 
 function upgrades(): string {
-  const av = UPGS.filter(u => !S.upgs[u.id] && S.life >= u.cost * 0.3).slice(0, 9);
-  if (!av.length) return '<div class="small">Nothing on the table yet. Keep earning.</div>';
-  return av.map(u => item("upg", u.id, S.cash >= u.cost, u.name, u.desc, `<div class="cost">${money(u.cost)}</div>`)).join("");
+  const open = UPGS.filter(u => !S.upgs[u.id] && upgradeUnlocked(u));
+  const av = open.filter(u => S.life >= u.cost * 0.3).slice(0, 9);
+  let h = av.map(u => item("upg", u.id, S.cash >= u.cost, u.name, u.desc, `<div class="cost">${money(u.cost)}</div>`)).join("");
+
+  // The one that never runs out.
+  if (S.life >= referralCost() * REFERRAL.unlockFraction) {
+    h += item("referral", "x", S.cash >= referralCost(), `${REFERRAL.name} (level ${S.referrals})`,
+      `Each level makes all income ×${REFERRAL.gain}. Now ×${referralMult().toFixed(2)}. You can always buy another.`,
+      `<div class="cost">${money(referralCost())}</div>`);
+  }
+
+  // Nothing available? Say what's coming, so the card is never a dead end.
+  if (!h) {
+    const next = UPGS.filter(u => !S.upgs[u.id])
+      .map(u => ({ u, why: !upgradeUnlocked(u) ? `once you own ${u.needs!.owned} ${GENS.find(g => g.id === u.needs!.gen)!.name}` : `at ${money(u.cost * 0.3)} lifetime earnings` }))
+      .sort((x, y) => x.u.cost - y.u.cost)[0];
+    return next
+      ? `<div class="small">Nothing new right now. Next up: <b style="color:var(--text)">${next.u.name}</b> ${next.why}.</div>`
+      : `<div class="small">Nothing new right now. Keep earning.</div>`;
+  }
+  return h;
 }
 
 function missions(): string {

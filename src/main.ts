@@ -24,7 +24,7 @@ import * as A from "./game/actions";
 // ---- card clicks (delegated on mousedown, since cards re-render constantly)
 const ACT: Record<string, (arg: string) => void> = {
   amt: a => { S.buyAmt = a === "max" ? "max" : (+a as 1 | 10 | 100); },
-  gen: A.buyGen, upg: A.buyUpg, hire: A.hireAlly, ability: A.useAbility,
+  gen: A.buyGen, upg: A.buyUpg, referral: () => A.buyReferral(), hire: A.hireAlly, ability: A.useAbility,
   cover: A.setCover, perk: A.buyPerk, contact: a => A.buyFavorFrom(a), hangout: () => A.buyFavorFrom("seymour", "hangout"), craft: A.craft,
   start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
 };

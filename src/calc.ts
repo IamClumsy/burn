@@ -1,4 +1,4 @@
-import { S, KEEP_RATE } from "./state";
+import { S, KEEP_RATE, capFee, missionCap } from "./state";
 import { GENS } from "./data/ops";
 import { UPGS } from "./data/upgrades";
 import { COVERS } from "./data/covers";
@@ -7,6 +7,7 @@ import { STORY } from "./data/story";
 import { seasonsOpen } from "./data/missions";
 import { DAY_MS, FAVORS_PER_DAY } from "./data/pacing";
 import { GRIP_PERKS, TIERS } from "./data/org";
+import { REFERRAL } from "./data/upgrades";
 import type { Boss, ChoiceFx, Gen, Mission } from "./types";
 
 /** Fx from every story choice the player has made. */
@@ -39,7 +40,15 @@ export const gripFixer = (): number => gripPerks().reduce((m, p) => m * (p.fixer
 /** Has this ally's season opened yet? Someone who debuts in Season 4 can't be hired in Season 2. */
 export const allyAvailable = (debut?: number): boolean => !debut || seasonsOpen(S.life) >= debut;
 
+/** The endless upgrade: every level makes all income a bit bigger, forever. */
+export const referralMult = (): number => Math.pow(REFERRAL.gain, S.referrals);
+export const referralCost = (): number => REFERRAL.firstCost * Math.pow(REFERRAL.growth, S.referrals);
+
 export const owned = (id: string): number => S.gens[id] || 0;
+/** Has this upgrade's requirement been met (owning enough of an operation)? */
+export const upgradeUnlocked = (u: { needs?: { gen: string; owned: number } }): boolean =>
+  !u.needs || owned(u.needs.gen) >= u.needs.owned;
+
 export const totalOps = (): number => GENS.reduce((a, g) => a + owned(g.id), 0);
 export const cover = () => COVERS.find(c => c.id === S.cover) || COVERS[0];
 export const perk = (id: string): number => S.perks[id] || 0;
@@ -49,7 +58,7 @@ export function incomeMult(): number {
   for (const u of UPGS) if (S.upgs[u.id] && u.kind === "all") m *= u.m!;
   if (S.fx.boost > 0) m *= 2;
   if (allyHere("nate")) m *= 1.15;
-  return m * choiceMult("inc") * gripInc() * (S.cleanRecord ? 1.25 : 1);
+  return m * choiceMult("inc") * gripInc() * (S.cleanRecord ? 1.25 : 1) * referralMult();
 }
 
 export const genMult = (id: string): number =>
@@ -153,7 +162,7 @@ export function succChance(m: Mission): number {
   return Math.min(0.97, c);
 }
 /** What the client pays in total. Michael keeps KEEP_RATE of it. */
-export const missionReward = (m: Mission): number => Math.floor((cps() * 60 + 150) * m.rm * cover().mis * choiceMult("mis") / KEEP_RATE);
+export const missionReward = (m: Mission): number => Math.floor(capFee((cps() * 60 + 150) * m.rm * cover().mis * choiceMult("mis") / KEEP_RATE, missionCap(m.rm) * cover().mis * choiceMult("mis")));
 export const missionKeep = (m: Mission): number => missionReward(m) * KEEP_RATE;
 
 // ---- bosses

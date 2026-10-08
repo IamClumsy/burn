@@ -1,7 +1,7 @@
 import type { GameEvent } from "../types";
 import { S, earn, payClient } from "../state";
 import { cps, owned } from "../calc";
-import { KEEP_RATE } from "../state";
+import { KEEP_RATE, capFee } from "../state";
 import { GENS } from "./ops";
 import { money, pick } from "../util";
 import { shake } from "../ui/fx";
@@ -10,7 +10,7 @@ const att = (n: number) => { S.att = Math.min(100, S.att + n); };
 
 /** Help a client: payout scaled to income, plus favors and heat. Kid cases never fail. */
 function help(secs: number, fav: number, heat: number, line: string, kid = false): string {
-  const fee = (cps() * secs + 100) / KEEP_RATE;
+  const fee = capFee((cps() * secs + 100) / KEEP_RATE);
   payClient(fee);
   S.favors += fav;
   S.heat += heat;

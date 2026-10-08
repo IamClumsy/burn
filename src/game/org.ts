@@ -1,4 +1,4 @@
-import { S, KEEP_RATE, payClient } from "../state";
+import { S, KEEP_RATE, capFee, payClient } from "../state";
 import { attTier, cps } from "../calc";
 import { BOSSES } from "../data/bosses";
 import { ERRANDS, GRIP_PERKS, TIERS, TIER_DOWN, TIER_UP, handlerFor, rollFixer } from "../data/org";
@@ -85,7 +85,7 @@ export function spawnErrand(): void {
   // Only once they're watching, and never over another decision.
   if (S.att < TIERS[1].min || choiceBusy()) { scheduleErrand(45000); return; }
   const e = pick(ERRANDS), who = handlerFor(S.life);
-  const fee = (cps() * 200 + 500) / KEEP_RATE;
+  const fee = capFee((cps() * 200 + 500) / KEEP_RATE);
   showChoice(
     `${who} has a job`,
     `${who} sends word through a middleman: ${e.n}. ${e.d} It pays ${money(fee)}.`,

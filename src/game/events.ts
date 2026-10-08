@@ -1,4 +1,4 @@
-import { S, KEEP_RATE, payClient } from "../state";
+import { S, KEEP_RATE, capFee, payClient } from "../state";
 import { clickVal, cps, heatMult } from "../calc";
 import { EVENTS } from "../data/events";
 import { chime } from "../audio";
@@ -28,7 +28,7 @@ export function scheduleClient(): void { setTimeout(spawnClient, 45000 + Math.ra
 
 export function spawnClient(): void {
   if (choiceBusy()) { setTimeout(spawnClient, 20000); return; }
-  const reward = Math.max(500, (cps() * 45 + clickVal() * 10) / KEEP_RATE);
+  const reward = Math.max(500, capFee((cps() * 45 + clickVal() * 10) / KEEP_RATE));
   chime();
   showChoice(
     "📞 A client is at the door",

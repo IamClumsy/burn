@@ -9,6 +9,7 @@ import { STORY } from "./story";
 import { MEDALS } from "./medals";
 import { RECIPES, JUNK, PERKS } from "./perks";
 import { EVENTS } from "./events";
+import { OP_TIERS, REFERRAL } from "./upgrades";
 import { ARCS } from "./arcs";
 import { FAQ } from "./faq";
 import { EP_NOTES, outcomeLine } from "./episodeNotes";
@@ -157,6 +158,25 @@ describe("data integrity", () => {
       else expect(m.succ, m.n).toBeLessThan(1);
     }
     expect(MISSIONS.filter(m => m.kid).length).toBeGreaterThanOrEqual(5);
+  });
+
+  it("every operation has six tiers of upgrades that unlock as you own more of it", () => {
+    expect(OP_TIERS.length).toBe(6);
+    for (const g of GENS) {
+      const tiers = UPGS.filter(u => u.needs?.gen === g.id).sort((a, b) => a.needs!.owned - b.needs!.owned);
+      expect(tiers.length, g.id).toBe(6);
+      expect(tiers.map(t => t.needs!.owned), g.id).toEqual(OP_TIERS.map(t => t.owned));
+      for (let i = 1; i < tiers.length; i++) expect(tiers[i].cost, g.id).toBeGreaterThan(tiers[i - 1].cost);
+      for (const t of tiers) { expect(t.g).toBe(g.id); expect(t.kind).toBe("gen"); expect(t.m).toBeGreaterThanOrEqual(2); }
+    }
+    expect(UPGS.length).toBeGreaterThanOrEqual(60);
+    expect(unique(UPGS.map(u => u.id))).toBe(true);
+    expect(unique(UPGS.map(u => u.name))).toBe(true);
+  });
+
+  it("the endless upgrade is real: it has a price that rises and a gain that compounds", () => {
+    expect(REFERRAL.gain).toBeGreaterThan(1);
+    expect(REFERRAL.growth).toBeGreaterThan(REFERRAL.gain); // it gets steadily dearer, so it's a sink and not a trivial loop
   });
 
   it("upgrades are listed in order of cost", () => {

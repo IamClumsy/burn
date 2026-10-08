@@ -24,7 +24,7 @@ export const FAQ: FaqSection[] = [
     {q: "What do Buy ×1, ×10, ×100 and Max do?",
      a: () => "They set how many of an operation you buy per click. Each purchase raises that operation's price by 15%, so the row shows the total for the batch. Max buys as many as your cash covers."},
     {q: "What do Upgrades do?",
-     a: () => "They're one-time buys. Some multiply job pay, some boost one operation, some boost all income, and a few help with heat. They reset when you Reinstate."},
+     a: () => "Most are one-time buys: some multiply job pay, some boost all income, and a few help with heat. Every operation also has six tiers of upgrades that unlock as you own more of it (10, 25, 50, 100, 150 and 200). And \"Satisfied Clients Refer Friends\" can be bought again and again, so there's always something to spend on. They reset when you Reinstate."},
   ]},
   {title: "Heat and the Organization", items: [
     {q: "What is heat?",

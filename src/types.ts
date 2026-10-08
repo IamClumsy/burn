@@ -3,7 +3,11 @@ export type Dict<T> = Record<string, T>;
 export interface Gen { id: string; name: string; desc: string; base: number; cps: number }
 
 export type UpgKind = "click" | "gen" | "all" | "heat" | "lay" | "auto";
-export interface Upgrade { id: string; name: string; desc: string; cost: number; kind: UpgKind; m?: number; g?: string }
+export interface Upgrade {
+  id: string; name: string; desc: string; cost: number; kind: UpgKind; m?: number; g?: string;
+  /** Only offered once you own at least this many of an operation. */
+  needs?: { gen: string; owned: number };
+}
 
 export interface Ally {
   id: string; name: string; bio: string; cost: number; perk: string;
@@ -116,6 +120,8 @@ export interface GameState {
   cleanRecord: boolean;
   /** The fixer currently offering a payoff. */
   fixer: FixerQuote | null;
+  /** Levels of the endless 'Satisfied Clients Refer Friends' upgrade. */
+  referrals: number;
   /** When each frienemy last sold you a favor (real timestamps), for their daily limit. */
   favorLog: { seymour: number[]; simon: number[] };
   /** Episodes whose mission you've completed, by code. */

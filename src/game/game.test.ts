@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 import { S, fresh, setState } from "../state";
 import { tick, tickNate } from "./tick";
-import { buyFavorFrom, hireAlly, prestige, useAbility } from "./actions";
+import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
 import { arcAvailable, startArc } from "./arcs";
 import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
@@ -15,6 +15,7 @@ import { FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
 import { bribeCost, bribeDrop } from "../calc";
 import { payOffFixer } from "./actions";
 import { GRIP_PERKS, TIERS } from "../data/org";
+import { UPGS } from "../data/upgrades";
 import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
 import { loftBadges } from "../ui/badges";
@@ -23,6 +24,7 @@ import { dismissAllNotices, dismissNotice, initNotices, noticeCount, noticeOpen 
 import { showChoice, choiceBusy } from "../ui/choice";
 import { CONTACT_CAP, allyFree, allyHere, contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance } from "../calc";
 import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
+import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
@@ -30,7 +32,7 @@ import { actionBlock, bossAction, spawnBoss } from "./bosses";
 import { spawnClient } from "./events";
 import { seasonOf } from "../data/missions";
 import { EP_NOTES } from "../data/episodeNotes";
-import { actionDmg, conChance } from "../calc";
+import { actionDmg, conChance, cps, genMult, referralCost, referralMult, upgradeUnlocked } from "../calc";
 import { checkBurn } from "./heat";
 import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
@@ -684,6 +686,75 @@ describe("narration strip", () => {
   });
 });
 
+describe("upgrades never run out", () => {
+  it("an operation tier only appears once you own enough of it", () => {
+    const tier = UPGS.find(u => u.id === "t-inf-0")!; // needs 10 Street Informants
+    S.gens.inf = 9;
+    expect(upgradeUnlocked(tier)).toBe(false);
+    S.gens.inf = 10;
+    expect(upgradeUnlocked(tier)).toBe(true);
+  });
+
+  it("buying a tier multiplies that operation's income", () => {
+    S.gens.inf = 10; S.cash = 1e12; S.life = 1e12;
+    const before = cps();
+    buyUpg("t-inf-0");
+    expect(S.upgs["t-inf-0"]).toBe(true);
+    expect(genMult("inf")).toBe(2);
+    expect(cps()).toBeGreaterThan(before * 1.5);
+  });
+
+  it("the card offers tiers as you grow, and they don't show before you qualify", () => {
+    S.life = 1e12; S.gens.inf = 5;
+    expect(panelHTML("upg")).not.toContain("Trained Informants");
+    S.gens.inf = 12;
+    expect(panelHTML("upg")).toContain("Trained Informants");
+  });
+
+  it("the endless upgrade can be bought again and again, each time dearer and stronger", () => {
+    S.cash = 1e18; S.life = 1e12; S.gens.inf = 50;
+    const costs: number[] = [], incomes: number[] = [];
+    for (let i = 0; i < 6; i++) { costs.push(referralCost()); incomes.push(cps()); buyReferral(); }
+    expect(S.referrals).toBe(6);
+    for (let i = 1; i < costs.length; i++) { expect(costs[i]).toBeGreaterThan(costs[i - 1]); expect(incomes[i]).toBeGreaterThan(incomes[i - 1]); }
+    expect(referralMult()).toBeCloseTo(Math.pow(1.1, 6));
+  });
+
+  it("can't be bought without the cash", () => {
+    S.cash = 10;
+    buyReferral();
+    expect(S.referrals).toBe(0);
+    expect(S.cash).toBe(10);
+  });
+
+  it("even after you've bought every other upgrade, the card still has something to spend on", () => {
+    S.life = 1e15; S.cash = 1e15;
+    for (const u of UPGS) S.upgs[u.id] = true;
+    const html = panelHTML("upg");
+    expect(html).toContain("Satisfied Clients Refer Friends");
+    expect(html).not.toContain("Nothing new right now");
+  });
+
+  it("when nothing is available yet, it says what's coming instead of leaving a dead end", () => {
+    S.life = 0;
+    const html = panelHTML("upg");
+    expect(html).toContain("Nothing new right now. Next up:");
+    expect(html).toContain("Better Cover Story");
+    expect(html).toMatch(/lifetime earnings/);
+    S.life = 1e12; S.gens.inf = 0; for (const u of UPGS) if (!u.needs) S.upgs[u.id] = true;
+    S.referrals = 0; S.life = 1; // nothing visible: the hint should name a tier and what it needs
+    expect(panelHTML("upg")).toMatch(/Next up: <b[^>]*>[^<]+<\/b> (once you own|at )/);
+  });
+
+  it("the endless upgrade resets with the rest when you Reinstate", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    S.run = 2e8; S.referrals = 5;
+    prestige();
+    expect(S.referrals).toBe(0);
+    vi.restoreAllMocks();
+  });
+});
+
 describe("Upgrades card order", () => {
   it("shows the cheapest available upgrades first", () => {
     S.life = 1e9;
@@ -710,6 +781,33 @@ describe("FAQ pop-up", () => {
     const html = panelHTML("faq");
     expect(html).toContain('id="faqSearch"');
     for (const sec of FAQ) for (const it of sec.items) expect(html).toContain(it.q);
+  });
+});
+
+describe("fees stay believable late in the game", () => {
+  it("the client at the door never asks for millions", () => {
+    S.gens.inf = 1e9;
+    spawnClient();
+    const text = document.getElementById("evtBig")!.textContent!;
+    expect(text).toMatch(/^\$\d+(\.\d+)?K$/);
+    (document.querySelectorAll<HTMLButtonElement>("#evtO button")[1]).click();
+  });
+
+  it("neither do the episode-style cases or handler errands", () => {
+    S.gens.inf = 1e9; S.att = 30;
+    spawnErrand();
+    expect(document.getElementById("evtD")!.textContent).toMatch(/It pays \$\d+(\.\d+)?K\./);
+    (document.querySelectorAll<HTMLButtonElement>("#evtO button")[2]).click();
+    const help = EVENTS.find(e => e.t === "A Mother's Plea")!;
+    const before = S.stats.returned;
+    help.o[0][1]();
+    expect(S.stats.returned - before).toBeLessThan(FEE_CAP);
+  });
+
+  it("mission cards show thousands, not billions, with a huge network", () => {
+    S.gens.inf = 1e9; S.life = 1e12;
+    const html = panelHTML("mis");
+    for (const m of html.matchAll(/pays \$([\d.]+)([KMB])/g)) expect(m[2], m[0]).toBe("K");
   });
 });
 
@@ -985,7 +1083,7 @@ describe("episode missions", () => {
     resolveMission(S.active[0]);
     const log = [...document.querySelectorAll("#log p")].map(p => p.textContent).join(" | ");
     expect(log).toContain("Spy tip: " + EP_NOTES["101"].tip);
-    expect(log).toMatch(/Javier|Graham Pyne/);
+    expect(log).toMatch(/Javier|Graham Pyne|Barry/); // the client, the villain, or (now and then) the friend who helped
     expect(panelHTML("story")).toContain("Spy notebook (1)");
     expect(panelHTML("story")).toContain(EP_NOTES["101"].tip);
   });

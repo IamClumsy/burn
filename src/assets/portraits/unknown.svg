@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-label="Someone you haven't met">
+<rect width="384" height="384" fill="#f4f1f7"/>
+<g fill="#0d0a12">
+<path d="M0 384V352Q0 330 62 312L142 286Q192 304 242 286L322 312Q384 330 384 352V384Z"/>
+<path d="M146 226H238V290Q192 308 146 290Z"/>
+<ellipse cx="192" cy="150" rx="62" ry="82"/>
+<ellipse cx="131" cy="162" rx="11" ry="21"/><ellipse cx="253" cy="162" rx="11" ry="21"/>
+<path d="M156 70Q176 52 200 58Q216 56 226 66Q208 62 192 66Q172 64 156 70Z"/>
+</g>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M151 128Q151 98 192 98Q234 98 234 136Q234 166 205 186Q192 196 192 214" stroke="#fff" stroke-width="15"/>
+<circle cx="192" cy="258" r="11" fill="#fff" stroke="#fff" stroke-width="4"/>
+<path d="M151 128Q151 98 192 98Q234 98 234 136Q234 166 205 186Q192 196 192 214" stroke="#0d0a12" stroke-width="8"/>
+<circle cx="192" cy="258" r="6" fill="#0d0a12" stroke="#0d0a12" stroke-width="1"/>
+</g>
+</svg>

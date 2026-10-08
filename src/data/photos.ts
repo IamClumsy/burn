@@ -3,7 +3,7 @@
  * brennen.png and so on; a file named unknown.webp is the "?" picture for anyone you haven't met yet; Nate also has natelv.webp for after he comes back from Vegas) into src/assets/portraits/ and the game uses it instead of the drawn sketch. Square images
  * work best, with the face in the middle. Characters without a file keep their drawn portrait.
  */
-const files = import.meta.glob("../assets/portraits/*.{webp,jpg,jpeg,png,avif}", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
+const files = import.meta.glob("../assets/portraits/*.{webp,jpg,jpeg,png,avif,svg}", { eager: true, query: "?url", import: "default" }) as Record<string, string>;
 
 export const PHOTOS: Record<string, string> = Object.fromEntries(
   Object.entries(files).map(([path, url]) => [path.split("/").pop()!.replace(/\.\w+$/, ""), url]),

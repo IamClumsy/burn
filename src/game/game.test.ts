@@ -18,7 +18,7 @@ import { allBeaten, checkEnding, newFixer, reduceGrip, simonTip, spawnErrand, ti
 import { FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
 import { bribeCost, bribeDrop } from "../calc";
 import { payOffFixer } from "./actions";
-import { GRIP_PERKS, TIERS } from "../data/org";
+import { GRIP_PERKS, TIERS, handlerFor } from "../data/org";
 import { UPGS } from "../data/upgrades";
 import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
@@ -887,6 +887,17 @@ describe("Event options that need an ally", () => {
   it("and shows when he is", () => {
     S.allies.jesse = true;
     expect(showFootballEvent()).toContain("Bring Jesse in");
+  });
+});
+
+describe("Handlers follow the show", () => {
+  it("Carla hands out errands only until her death in the Season 2 finale", () => {
+    expect(handlerFor(1e5)).toBe("Carla");
+    expect(handlerFor(1.4e6)).toBe("Carla");
+    expect(handlerFor(2e6)).toBe("Management");
+    expect(handlerFor(2e7)).toBe("Management");
+    expect(handlerFor(5e7)).toBe("Vaughn");
+    expect(handlerFor(2e10)).toBe("Tom Card");
   });
 });
 

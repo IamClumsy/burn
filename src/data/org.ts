@@ -53,7 +53,8 @@ export const DOSSIER: { peak: number; label: string; text: string }[] = [
 
 /** Who hands you an errand depends on how far you've come. */
 export function handlerFor(life: number): string {
-  if (life < 2e7) return "Carla";
+  if (life < 1.5e6) return "Carla"; // she dies in the Season 2 finale, the same story beat as "Lesser Evil"
+  if (life < 3e7) return "Management"; // Season 3: the old man himself, since there's no one between Carla and Vaughn
   if (life < 1e10) return "Vaughn";
   return "Tom Card";
 }

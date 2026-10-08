@@ -12,7 +12,8 @@ import { PERKS, JUNK, RECIPES } from "../data/perks";
 import { STORY } from "../data/story";
 import { MEDALS } from "../data/medals";
 import { ARCS } from "../data/arcs";
-import { MISSIONS, epLabel, seasonsOpen } from "../data/missions";
+import { MISSIONS, epLabel, episodeOf, seasonOf, seasonsOpen } from "../data/missions";
+import { EP_NOTES } from "../data/episodeNotes";
 import { CASE_ACTIONS } from "../data/caseActions";
 import { FAQ } from "../data/faq";
 import { bossGapText } from "../data/pacing";
@@ -74,6 +75,14 @@ export function patchLive(root: ParentNode): void {
   });
 }
 
+/** "Client: Javier · Up against: Graham Pyne", for whichever of the two the episode has. */
+function castLine(ep: string | undefined): string {
+  const n = ep ? EP_NOTES[ep] : undefined;
+  if (!n) return "";
+  const bits = [n.client && `Client: ${n.client}`, n.villain && `Up against: ${n.villain}`].filter(Boolean);
+  return bits.length ? `<div class="small" style="color:var(--text)">${bits.join(" · ")}</div>` : "";
+}
+
 function item(act: string, arg: string | number, can: boolean, title: string, desc: string, right: string, cls = ""): string {
   return `<div class="item ${can ? "can" : "no"} ${cls}" data-act="${act}" data-arg="${arg}">
     <div><b>${title}</b><span>${desc}</span></div><div style="text-align:right">${right}</div></div>`;
@@ -116,7 +125,7 @@ function missions(): string {
   }
   if (S.active.length) {
     h += `<h2 style="margin-top:12px">In Progress</h2>` + S.active.map(m => `<div class="box"><div class="row"><b>${m.n}</b><span class="small">${lv("t" + m.uid, `${Math.ceil(m.left)}s · ${Math.round(m.chance * 100)}%`)}</span></div>
-      ${m.ep ? `<div class="small">${epLabel(m.ep, m.epTitle || "")}</div>` : ""}
+      ${m.ep ? `<div class="small">${epLabel(m.ep, m.epTitle || "")}</div>` : ""}${castLine(m.ep)}
       <div class="bar"><i class="mbar" ${lvBar("b" + m.uid, (1 - m.left / m.dur) * 100)}></i></div>
       <span class="small">Pays ${money(m.reward)} · +${m.fav} favor${m.sent ? " · " + ALLIES.find(a => a.id === m.sent)!.name + " is out" : ""}</span></div>`).join("");
   }
@@ -128,7 +137,7 @@ function missions(): string {
     const why = !S.allies[m.ally] ? `Hire ${first} in Crew to send ${al.she ? "her" : "him"} (+25%)`
       : out ? `${first} is out on "${out.n}", back in ${lv("w" + m.uid, Math.ceil(out.left) + "s")}`
       : !allyHere(m.ally) ? `${first} has wandered off` : "";
-    return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}${m.ep && S.episodesDone[m.ep] ? ' <span class="chip">Seen</span>' : ""}</b>${m.ep ? `<div class="small" style="margin-bottom:2px">${epLabel(m.ep, m.epTitle || "")}</div>` : ""}<div class="small">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
+    return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}${m.ep && S.episodesDone[m.ep] ? ' <span class="chip">Seen</span>' : ""}</b>${m.ep ? `<div class="small" style="margin-bottom:2px">${epLabel(m.ep, m.epTitle || "")}</div>` : ""}${castLine(m.ep)}<div class="small" style="margin-top:2px">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
       ${why ? `<div class="small" style="margin-top:4px;color:var(--gold)">${why}</div>` : ""}
       <div class="btns">${S.allies[m.ally] ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Send ${first} (+25%)</button>` : ""}
       <button data-act="start" data-arg="${m.uid}" ${S.active.length >= 3 ? "disabled" : ""}>Start mission</button></div></div>`;
@@ -199,16 +208,30 @@ function rogues(): string {
 }
 
 function story(): string {
-  let h = STORY.slice(0, S.story).map((s, i) => {
+  const beats = STORY.slice(0, S.story).map((s, i) => {
     const k = S.choices[i], pick = s.choice && k !== undefined ? s.choice.options[k] : null;
     return `<div class="box"><b>${i + 1}. ${s.t}</b><div class="small" style="font-size:13px;color:var(--text)">${s.x}</div>
       ${pick ? `<div class="small" style="margin-top:6px;color:var(--gold)">You chose: ${pick.label}. ${pick.result}</div>` : ""}</div>`;
   }).join("");
+
   const closed = ARCS.filter(a => S.arcsDone[a.id]);
-  if (closed.length) h += `<h2 style="margin-top:12px">Closed Cases</h2>` + closed.map(a => `<div class="box"><b>${a.title}</b><div class="small" style="font-size:13px;color:var(--text)">${a.epilogue}</div></div>`).join("");
-  if (S.story < STORY.length) h += `<div class="small">Next lead at ${money(STORY[S.story].at)} lifetime earnings.</div>`;
-  else h += `<div class="small">The file is closed. The game isn't. Keep stacking.</div>`;
-  return h || '<div class="small">Nothing yet. Earn some money and the story finds you.</div>';
+  const cases = closed.length
+    ? `<h2 style="margin-top:12px">Closed Cases</h2>` + closed.map(a =>
+        `<div class="box"><b>${a.title}</b><div class="small" style="font-size:13px;color:var(--text)">${a.epilogue}</div></div>`).join("")
+    : "";
+
+  const tips = Object.keys(S.episodesDone).sort().filter(k => EP_NOTES[k]);
+  const notebook = tips.length
+    ? `<h2 style="margin-top:12px">Spy notebook (${tips.length})</h2>` + tips.map(k =>
+        `<div class="box"><div class="small">Season ${seasonOf(k)}, Episode ${episodeOf(k)}</div><div class="small" style="font-size:13px;color:var(--text)">${EP_NOTES[k].tip}</div></div>`).join("")
+    : "";
+
+  const next = S.story < STORY.length
+    ? `<div class="small">Next lead at ${money(STORY[S.story].at)} lifetime earnings.</div>`
+    : `<div class="small">The file is closed. The game isn't. Keep stacking.</div>`;
+
+  const empty = !beats ? `<div class="small">Nothing yet. Earn some money and the story finds you.</div>` : "";
+  return empty + beats + cases + next + notebook;
 }
 
 function medals(): string {

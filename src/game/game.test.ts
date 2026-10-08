@@ -24,6 +24,7 @@ import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss } from "./bosses";
 import { spawnClient } from "./events";
 import { seasonOf } from "../data/missions";
+import { EP_NOTES } from "../data/episodeNotes";
 import { actionDmg, conChance } from "../calc";
 import { checkBurn } from "./heat";
 import { BOSSES } from "../data/bosses";
@@ -39,7 +40,10 @@ beforeAll(() => {
   buildLayout(document.getElementById("sections")!, document.getElementById("toolbar")!);
 });
 
-beforeEach(() => { setState(fresh()); fillBoard(); });
+beforeEach(() => {
+  setState(fresh()); fillBoard();
+  document.getElementById("log")!.innerHTML = ""; // narration from one test shouldn't leak into the next
+});
 
 describe("frienemies", () => {
   it("Seymour sells a favor and some gear, and the price climbs", () => {
@@ -539,6 +543,37 @@ describe("episode missions", () => {
     expect(S.seasonOpen).toBe(3);
     tick(1.1);
     expect(S.seasonOpen).toBe(3);
+  });
+
+  it("mission cards name the client and who you're up against", () => {
+    S.life = 0;
+    S.board = [{ uid: 1, n: "Clear a Caretaker Accused of Theft", dur: 54, succ: .8, heat: 5, rm: 1, fav: 1, ally: "sam", kid: false, send: false, ep: "101", epTitle: "Pilot" }];
+    const html = panelHTML("mis");
+    expect(html).toContain("Client: Javier");
+    expect(html).toContain("Up against: Graham Pyne");
+  });
+
+  it("winning narrates the people, tells you the tip, and files it in the notebook", () => {
+    S.life = 0; S.board = [{ uid: 1, n: "Clear a Caretaker Accused of Theft", dur: 1, succ: 1, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false, ep: "101", epTitle: "Pilot" }];
+    startMission(1);
+    S.active[0].chance = 1;
+    resolveMission(S.active[0]);
+    const log = [...document.querySelectorAll("#log p")].map(p => p.textContent).join(" | ");
+    expect(log).toContain("Spy tip: " + EP_NOTES["101"].tip);
+    expect(log).toMatch(/Javier|Graham Pyne/);
+    expect(panelHTML("story")).toContain("Spy notebook (1)");
+    expect(panelHTML("story")).toContain(EP_NOTES["101"].tip);
+  });
+
+  it("losing narrates the villain getting away and gives no tip", () => {
+    S.life = 0; S.board = [{ uid: 1, n: "Clear a Caretaker Accused of Theft", dur: 1, succ: 0, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false, ep: "101", epTitle: "Pilot" }];
+    startMission(1);
+    S.active[0].chance = 0;
+    resolveMission(S.active[0]);
+    const log = [...document.querySelectorAll("#log p")].map(p => p.textContent).join(" | ");
+    expect(log).toContain("Graham Pyne");
+    expect(log).not.toContain("Spy tip");
+    expect(panelHTML("story")).not.toContain("Spy notebook");
   });
 
   it("the Missions card shows the episode and your progress", () => {

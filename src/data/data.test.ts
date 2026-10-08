@@ -11,6 +11,7 @@ import { RECIPES, JUNK, PERKS } from "./perks";
 import { EVENTS } from "./events";
 import { ARCS } from "./arcs";
 import { FAQ } from "./faq";
+import { EP_NOTES, outcomeLine } from "./episodeNotes";
 import { ABILITIES } from "../game/abilities";
 
 const unique = (a: string[]) => new Set(a).size === a.length;
@@ -35,6 +36,29 @@ describe("data integrity", () => {
     expect(MISSIONS.length).toBe(111);
     expect(unique(MISSIONS.map(m => m.ep!))).toBe(true);
     for (const m of MISSIONS) expect(m.epTitle, m.ep).toBeTruthy();
+  });
+
+  it("every episode has notes: a spy tip, and at least one person to name", () => {
+    for (const m of MISSIONS) {
+      const n = EP_NOTES[m.ep!];
+      expect(n, m.ep).toBeTruthy();
+      expect(n.tip.length, m.ep).toBeGreaterThan(25);
+      expect(n.tip.length, m.ep).toBeLessThan(140);
+    }
+    expect(Object.keys(EP_NOTES).sort()).toEqual(MISSIONS.map(m => m.ep!).sort());
+    expect(unique(Object.values(EP_NOTES).map(n => n.tip))).toBe(true);
+  });
+
+  it("outcome narration names the people involved", () => {
+    const first = <T,>(a: readonly T[]) => a[0];
+    const both = { client: "Javier", villain: "Graham Pyne", tip: "x" };
+    expect(outcomeLine(both, true, first)).toContain("Javier");
+    expect(outcomeLine(both, true, first)).toContain("Graham Pyne");
+    expect(outcomeLine(both, false, first)).toContain("Graham Pyne");
+    expect(outcomeLine({ client: "Cara", tip: "x" }, true, first)).toContain("Cara");
+    expect(outcomeLine({ villain: "Simon", tip: "x" }, false, first)).toContain("Simon");
+    expect(outcomeLine({ tip: "x" }, true, first)).toBeNull();
+    expect(outcomeLine(undefined, true, first)).toBeNull();
   });
 
   it("episode credits read naturally", () => {

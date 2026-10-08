@@ -7,6 +7,7 @@ import { money, pick } from "../util";
 import { say, toast } from "../ui/fx";
 import { advanceArc, failArcStep } from "./arcs";
 import { reduceGrip } from "./org";
+import { EP_NOTES, outcomeLine } from "../data/episodeNotes";
 import type { ActiveMission, Mission } from "../types";
 
 export function newMission(): Mission {
@@ -50,6 +51,10 @@ export function resolveMission(m: ActiveMission): void {
     if (m.ep) S.episodesDone[m.ep] = true;
     reduceGrip(1);
     say(m.kid ? pick(KID_LINES) : pick(LINES.mOk));
+    const note = m.ep ? EP_NOTES[m.ep] : undefined;
+    const won = outcomeLine(note, true, pick);
+    if (won) say(won);
+    if (note) say("Spy tip: " + note.tip);
     if (Math.random() < 0.4) say(pick(LINES.returned));
     toast("Mission complete: " + m.n, `Paid ${money(m.reward)}. Expenses covered, the rest went back to the people who needed it. +${m.fav} favor`);
     chime();
@@ -57,6 +62,8 @@ export function resolveMission(m: ActiveMission): void {
     S.heat += m.heat * 1.5 * heatMult(); S.stats.mFail++;
     if (m.arc) failArcStep(m.arc.id);
     say(pick(LINES.mBad));
+    const lost = outcomeLine(m.ep ? EP_NOTES[m.ep] : undefined, false, pick);
+    if (lost) say(lost);
     toast("Mission failed: " + m.n, "Extra heat, no pay.");
     beep(130, 0.3, "sawtooth", 0.06, -50);
   }

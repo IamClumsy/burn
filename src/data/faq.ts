@@ -47,6 +47,8 @@ export const FAQ: FaqSection[] = [
      a: () => "The mission card says why. They're either not hired yet (hire them from Crew), already out on another mission, or, for Nate, wandered off. An ally can only be on one mission at a time, and the case missions send theirs in automatically."},
     {q: "Where do the missions come from?",
      a: () => "Every mission is adapted from an episode of the show, and the board shows which one. Season 1 cases are open from the start, and later seasons open as you earn more, so the cases get bigger as Michael's reputation grows. The Missions card keeps count of how many episodes you've worked."},
+    {q: "What's the spy notebook?",
+     a: () => "Each episode's mission has a spy tip attached. Complete the mission and the tip goes into your Spy notebook, at the bottom of the Case File. Mission cards also name the client and who you're up against, and the narration mentions them when you win or lose."},
     {q: "Why do missions with kids never fail?",
      a: () => "It's Michael's rule. Anything involving a kid always succeeds, no matter how hot things are. Those missions are marked \"Never fails.\""},
     {q: "Who is Nate, and why does he keep disappearing?",

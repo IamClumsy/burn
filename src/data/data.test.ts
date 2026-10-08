@@ -27,6 +27,14 @@ describe("data integrity", () => {
     expect(unique(MISSIONS.map(m => m.n))).toBe(true);
   });
 
+  it("upgrades have real names, not just a multiplier", () => {
+    for (const u of UPGS) {
+      expect(u.name, u.id).not.toMatch(/[×x]\s?\d/);
+      expect(u.name.length, u.id).toBeGreaterThan(5);
+      expect(u.desc, u.id).toBeTruthy();
+    }
+  });
+
   it("every mission names a real ally", () => {
     const ids = new Set(ALLIES.map(a => a.id));
     for (const m of MISSIONS) expect(ids.has(m.ally), m.n).toBe(true);

@@ -46,6 +46,27 @@ Say what the reset would give you before you do it:
 - **Tablet check:** phone width and desktop are checked; the in-between widths haven't had a proper look.
 - **Balance pass after a long playthrough:** several Reinstates in, check boss timing, favor prices and how fast the late seasons open.
 
+## 5. Second pass: what would make it feel finished
+
+**Before launch (small, worth doing)**
+- **Real-device playtest:** phone and tablet widths, a long session, and a couple of Reinstates. Watch Vercel's INP numbers after each deploy.
+- **Accessibility pass:** keyboard focus for pop-ups and the case tile, a reduced-motion setting, and checking contrast on the dimmed cards.
+- **Share image:** a 1200×630 preview for links, using the header art and the photos.
+
+**An ending that lands**
+- **Burn lifted screen:** crossing off everyone on The List sets a flag and a +25% bonus, but there's no moment. A short epilogue card (Michael, Fiona, Sam, Madeline, Nate's kid) and a "keep playing" button would give the run a finish.
+- **Late-story deaths:** Nate's Season 6 fate, Anson's end and Cowan's death could use the same "after the story beat" treatment that Carla now has, as quiet in-game moments rather than missing characters.
+
+**More to do mid-game**
+- **Automation unlocks** (auto-take clients, auto-send crew), tied to Credibility.
+- **Stats card** and a **Reinstate preview**, so resets feel like decisions.
+- **Photos on mission cards:** show the client and the villain next to each episode mission, using the portraits already in the game.
+- **More random events:** Nate's excuses, Madeline's phone tree, a Sam story, a Barry rate-card moment. Each is a few lines of text.
+
+**Nice to have**
+- **Install as an app** (works offline, home-screen icon) and a **sound pass** with a volume slider.
+- **Seasonal flavor:** a one-line recap card when each new Season opens.
+
 ## Done recently, for reference
 
 Full-rate offline progress (24 h cap), a "Welcome back" summary card, a live tab title, number safety (finite totals, a scientific-notation switch, sanitized saves), a backup reminder, Barry selling favors, Victor then Simon then Pearce as the intel contact, Thomas O'Neill as a Rogue, staged Nate story beats, Michael's File, the rotating-to-ready case tile, and the header skyline.

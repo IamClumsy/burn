@@ -827,6 +827,17 @@ describe("episode missions", () => {
     expect(html).toContain("Up against: Graham Pyne");
   });
 
+  it("cards for other episodes name their helpers too", () => {
+    S.life = 1e12;
+    const card = (ep: string, epTitle: string) => ({ uid: 1, n: "t", dur: 10, succ: .5, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false, ep, epTitle });
+    S.board = [card("207", "Rough Seas")];
+    expect(panelHTML("mis")).toContain("Arms dealer who helped trace the rifle: Seymour");
+    S.board = [card("501", "Company Man")];
+    expect(panelHTML("mis")).toContain("Your new CIA handler: Max");
+    S.board = [card("202", "Turn and Burn")];
+    expect(panelHTML("mis")).toContain("Your money launderer: Barry");
+  });
+
   it("the card for Friends and Family names the friend who bailed you out", () => {
     S.life = 5e6;
     S.board = [{ uid: 1, n: "Pay Back an Old Friend's Favor Without Getting Hurt", dur: 54, succ: .8, heat: 5, rm: 1, fav: 1, ally: "sam", kid: false, send: false, ep: "301", epTitle: "Friends and Family" }];

@@ -57,6 +57,32 @@ describe("data integrity", () => {
     expect(n.friend?.win).toContain("Harlan");
   });
 
+  it("dozens of episodes name a friend who helps, each with a name and a role", () => {
+    const withFriend = Object.entries(EP_NOTES).filter(([, n]) => n.friend);
+    expect(withFriend.length).toBeGreaterThanOrEqual(30);
+    for (const [ep, n] of withFriend) {
+      expect(n.friend!.name.length, ep).toBeGreaterThan(2);
+      expect(n.friend!.role.length, ep).toBeGreaterThan(8);
+      expect(n.friend!.role.length, ep).toBeLessThan(60);
+    }
+  });
+
+  it("friends who are also on the crew only turn up once they've joined the show", () => {
+    for (const [ep, n] of Object.entries(EP_NOTES)) {
+      const crew = ALLIES.find(a => n.friend && a.name.split(" ")[0] === n.friend.name);
+      if (crew?.debutEp) expect(+ep, `${crew.name} in ${ep}`).toBeGreaterThanOrEqual(+crew.debutEp);
+    }
+  });
+
+  it("the helpers match the episodes they belong to", () => {
+    expect(EP_NOTES["101"].friend?.name).toBe("Barry");
+    expect(EP_NOTES["207"].friend?.name).toBe("Seymour");
+    expect(EP_NOTES["307"].friend?.name).toBe("Diego Garza");
+    expect(EP_NOTES["501"].friend?.name).toBe("Max");
+    expect(EP_NOTES["603"].friend?.name).toBe("Ayn");
+    expect(EP_NOTES["711"].friend?.name).toBe("Strong");
+  });
+
   it("the stolen-ledger case is credited to the thief who took it", () => {
     expect(EP_NOTES["308"].client).toBe("Barry");
     expect(EP_NOTES["308"].villain).toBe("Natalie Rice");

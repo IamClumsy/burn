@@ -111,6 +111,11 @@ describe("data integrity", () => {
     expect(MISSIONS.filter(m => m.kid).length).toBeGreaterThanOrEqual(5);
   });
 
+  it("upgrades are listed in order of cost", () => {
+    const costs = UPGS.map(u => u.cost);
+    expect(costs).toEqual([...costs].sort((a, b) => a - b));
+  });
+
   it("the crew is listed in order of cost", () => {
     const costs = ALLIES.map(a => a.cost);
     expect(costs).toEqual([...costs].sort((a, b) => a - b));

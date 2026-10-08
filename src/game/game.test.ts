@@ -493,6 +493,16 @@ describe("Jesse joins in Season 4", () => {
   });
 });
 
+describe("Upgrades card order", () => {
+  it("shows the cheapest available upgrades first", () => {
+    S.life = 1e9;
+    const html = panelHTML("upg");
+    const costs = [...html.matchAll(/class="cost">\$([\d.]+)([KMB]?)</g)].map(m => +m[1] * ({ "": 1, K: 1e3, M: 1e6, B: 1e9 } as Record<string, number>)[m[2]]);
+    expect(costs.length).toBeGreaterThan(3);
+    expect(costs).toEqual([...costs].sort((a, b) => a - b));
+  });
+});
+
 describe("Crew pop-up order", () => {
   it("lists allies cheapest first, after the frienemies", () => {
     S.life = 1e12;

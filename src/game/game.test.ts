@@ -1435,6 +1435,20 @@ describe("Nate", () => {
     expect(allyFree("nate")).toBe(false);
   });
 
+  it("missions built around him can't be started while he's away", () => {
+    S.allies.nate = true; S.nateAway = true;
+    const m = { uid: 9001, n: "Help Nate", dur: 10, succ: 0.5, heat: 1, rm: 1, fav: 1, ally: "nate", kid: false, send: false };
+    S.board = [m];
+    expect(panelHTML("mis")).toMatch(/can't start without him/);
+    expect(panelHTML("mis")).toMatch(/data-act="start" data-arg="9001" disabled/);
+    startMission(9001);
+    expect(S.active.length).toBe(0);
+    expect(S.board.some(x => x.uid === 9001)).toBe(true);
+    S.nateAway = false;
+    startMission(9001);
+    expect(S.active.length).toBe(1);
+  });
+
   it("can't use his ability, or be sent on a mission, while away", () => {
     S.allies.nate = true; S.nateAway = true; S.cash = 0;
     useAbility("nate");

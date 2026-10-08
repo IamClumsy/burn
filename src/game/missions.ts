@@ -1,5 +1,5 @@
 import { S, payClient } from "../state";
-import { allyFree, heatMult, missionReward, succChance } from "../calc";
+import { allyFree, awayWhy, heatMult, missionReward, succChance } from "../calc";
 import { MISSIONS, missionUnlocked } from "../data/missions";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
@@ -29,6 +29,7 @@ export function startMission(uid: number): void {
   if (S.active.length >= 3) return;
   const i = S.board.findIndex(m => m.uid === uid);
   if (i < 0) return;
+  if (awayWhy(S.board[i].ally)) return; // a mission built around someone can't start while they're away
   const m = S.board.splice(i, 1)[0];
   const sent = m.send && allyFree(m.ally) ? m.ally : null;
   S.active.push({ ...m, sent, left: m.dur, chance: succChance(m), reward: missionReward(m) });

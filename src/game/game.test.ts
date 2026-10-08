@@ -796,6 +796,30 @@ describe("upgrades never run out", () => {
   });
 });
 
+describe("Diego and Pearce", () => {
+  it("Diego's Pull a File reveals a name on the List and cools attention", () => {
+    S.allies.diego = true; S.att = 50; S.listKnown = {};
+    useAbility("diego");
+    expect(Object.keys(S.listKnown).length).toBe(1);
+    expect(S.att).toBe(35);
+  });
+
+  it("Pearce's Official Cover cuts heat and buys time on a case", () => {
+    S.allies.pearce = true; S.heat = 80;
+    S.boss = { id: "paxson", hp: 1e6, max: 1e6, left: 30 };
+    useAbility("pearce");
+    expect(S.heat).toBe(40);
+    expect(S.boss.left).toBe(50);
+  });
+
+  it("Pearce adds mission success", () => {
+    const m = { ...S.board[0], succ: 0.4, kid: false };
+    const base = succChance(m);
+    S.allies.pearce = true;
+    expect(succChance(m)).toBeGreaterThan(base);
+  });
+});
+
 describe("Idle while away", () => {
   it("earns at the full rate while you're gone, capped at a day", () => {
     S.gens.inf = 5;

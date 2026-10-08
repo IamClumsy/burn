@@ -57,6 +57,10 @@ export const CREW_LINES: Record<string, string[]> = {
              "Madeline asks them a few friendly questions. Moms are the best interrogators in the business."],
   nate: ["Nate hotwires their car \"just to see,\" and the glove box turns out to be very useful.",
          "Nate talks to the one guy you told him not to. It somehow works."],
+  diego: ["Diego checks a database he isn't supposed to touch and reads you a name off the screen. Then he deletes his search history.",
+          "Diego flashes an agency badge at the airport office. A closed door opens, and so does a file."],
+  pearce: ["Pearce makes one call and a very official-looking person asks them to step into a room.",
+           "Pearce arrives with a warrant, a thin smile and zero patience. They talk."],
   jesse: ["Jesse sits next to their guy at the bar. Two beers later, he knows the shift schedule and the safe code.",
           "Jesse plays the rookie fed with perfect confidence and the right amount of nerves."],
 };

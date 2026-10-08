@@ -166,7 +166,7 @@ export function awayWhy(id: string): { short: string; long: string } | null {
 export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);
 export function succChance(m: Mission): number {
   if (m.kid) return 1; // Michael never fails when a kid is involved
-  const c = m.succ + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
+  const c = m.succ + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (S.allies.pearce ? 0.08 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
   return Math.min(0.97, c);
 }
 /** What the client pays in total. Michael keeps KEEP_RATE of it. */
@@ -190,6 +190,6 @@ export function actionDmg(pct: number): number {
 
 /** Odds that a con works on a boss. */
 export function conChance(): number {
-  const c = 0.7 + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0);
+  const c = 0.7 + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (S.allies.pearce ? 0.08 : 0);
   return Math.min(0.95, c);
 }

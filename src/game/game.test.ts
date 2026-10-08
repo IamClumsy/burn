@@ -561,7 +561,7 @@ describe("notifications", () => {
   });
 
   it("Nate wandering off and coming back both pop up", () => {
-    S.allies.nate = true; S.nateAway = false; S.nateTimer = 0; S.nateWed = true;
+    S.allies.nate = true; S.nateAway = false; S.nateTimer = 0; S.nateStage = 3;
     tickNate(0.1);
     expect(shown()).toBe(true);
     expect(title()).toBe("Nate wandered off");
@@ -571,13 +571,17 @@ describe("notifications", () => {
     expect(title()).toBe("Nate's back");
   });
 
-  it("Nate's first return from Vegas brings his new bride, once", () => {
-    S.allies.nate = true; S.nateAway = true; S.nateWed = false; S.nateTimer = 0;
-    tickNate(0.1);
-    expect(title()).toBe("Nate got married");
-    expect(document.getElementById("nM")!.textContent).toContain("Ruth");
-    expect(S.nateWed).toBe(true);
-    dismissNotice();
+  it("Nate's first returns follow the show: a bride, a baby, then a hard season, once each", () => {
+    S.allies.nate = true; S.nateAway = true; S.nateStage = 0;
+    const titles: string[] = [];
+    for (let i = 0; i < 3; i++) {
+      S.nateAway = true; S.nateTimer = 0;
+      tickNate(0.1);
+      titles.push(title());
+      dismissNotice();
+    }
+    expect(titles).toEqual(["Nate got married", "Nate has news", "Nate needs a minute"]);
+    expect(S.nateStage).toBe(3);
     S.nateAway = true; S.nateTimer = 0;
     tickNate(0.1);
     expect(title()).toBe("Nate's back");

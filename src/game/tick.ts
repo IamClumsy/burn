@@ -8,7 +8,7 @@ import { seasonsOpen } from "../data/missions";
 import { chime } from "../audio";
 import { pick } from "../util";
 import { say, toast } from "../ui/fx";
-import { LINES } from "../data/text";
+import { LINES, NATE_BEATS } from "../data/text";
 import { choiceBusy, showChoice } from "../ui/choice";
 import { checkAmbush, checkBurn, layLow } from "./heat";
 import { fillBoard, resolveMission } from "./missions";
@@ -66,14 +66,16 @@ export function tickNate(dt: number): void {
   if (S.nateTimer > 0) return;
   S.nateAway = !S.nateAway;
   S.nateTimer = S.nateAway ? 3600 + Math.random() * 7200 : 600 + Math.random() * 900;
-  if (!S.nateAway && !S.nateWed) {
-    S.nateWed = true;
-    const wed = "Nate's back from Vegas with a wife. Meet Ruth, a blackjack dealer he's known for about a month. Madeline is thrilled. Michael is not.";
-    toast("Nate got married", wed);
-    say(wed);
+  if (!S.nateAway && S.nateStage < NATE_BEATS.length) {
+    const beat = NATE_BEATS[S.nateStage++];
+    toast(beat.title, beat.text);
+    say(beat.text);
     return;
   }
-  const line = pick(S.nateAway ? LINES.nateAway : LINES.nateBack);
+  const pool = S.nateAway
+    ? [...LINES.nateAway, ...(S.nateStage === 1 ? LINES.nateAwayVegas : []), ...(S.nateStage >= 2 ? LINES.nateAwayHome : [])]
+    : LINES.nateBack;
+  const line = pick(pool);
   toast(S.nateAway ? "Nate wandered off" : "Nate's back", line);
   say(line);
 }

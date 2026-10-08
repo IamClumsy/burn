@@ -18,7 +18,7 @@ export const ALLIES: Ally[] = [
    perk:"On missions she only helps with kids and older folks. Lay Low cools down twice as fast; auto Lay Low at 95% heat.",
    ab:"Family Dinner", abDesc:"−50 heat, −30 Organization attention", cd:100},
   {id:"nate", name:"Nate Westen", cost:1.5e6, flaky: true,
-   bio:"Michael's younger brother. Charming, well-meaning, and about as reliable as Miami weather.",
+   bio:"Michael's younger brother. A reformed gambler and con man turned limo-company owner: charming, well-meaning, a champion hotwirer, and about as reliable as Miami weather. He lives in his big brother's shadow and would still take a bullet for him.",
    perk:"+15% income while he's around. He comes and goes, so don't count on him.",
    ab:"Nate's Big Idea", abDesc:"A gamble: usually a windfall, sometimes a mess. Only when he's around.", cd:130},
   {id:"jesse", name:"Jesse Porter", cost:3e6, debut: 4, debutEp: "402",

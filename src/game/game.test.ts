@@ -220,6 +220,18 @@ describe("the Organization", () => {
   });
 });
 
+describe("pronouns on the mission board", () => {
+  it("says 'her' for Fiona and Madeline and 'him' for the men", () => {
+    for (const [ally, word] of [["fiona", "her"], ["madeline", "her"], ["sam", "him"], ["jesse", "him"], ["barry", "him"]]) {
+      S.allies = {};
+      S.board = [{ uid: 1, n: "t", dur: 10, succ: .5, heat: 1, rm: 1, fav: 1, ally, kid: false, send: false }];
+      S.life = 1e6;
+      const text = panelHTML("mis");
+      expect(text, ally).toContain(`to send ${word} (+25%)`);
+    }
+  });
+});
+
 describe("Nate", () => {
   it("is only available when he hasn't wandered off", () => {
     S.allies.nate = true; S.nateAway = false;

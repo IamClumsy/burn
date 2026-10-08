@@ -39,6 +39,11 @@ describe("data integrity", () => {
     expect(MISSIONS.filter(m => m.kid).length).toBeGreaterThanOrEqual(5);
   });
 
+  it("women on the crew are flagged so game text uses the right pronouns", () => {
+    const she = ALLIES.filter(a => a.she).map(a => a.id).sort();
+    expect(she).toEqual(["fiona", "madeline"]);
+  });
+
   it("every ally has an ability implementation", () => {
     for (const a of ALLIES) expect(typeof ABILITIES[a.id], a.id).toBe("function");
   });

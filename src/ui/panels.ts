@@ -120,7 +120,7 @@ function missions(): string {
     const al = ALLIES.find(a => a.id === m.ally)!, free = allyFree(m.ally), first = al.name.split(" ")[0];
     const out = S.active.find(a => a.sent === m.ally);
     // Say exactly why the ally can't go, so a greyed-out button is never a mystery.
-    const why = !S.allies[m.ally] ? `Hire ${first} in Crew to send him (+25%)`
+    const why = !S.allies[m.ally] ? `Hire ${first} in Crew to send ${al.she ? "her" : "him"} (+25%)`
       : out ? `${first} is out on "${out.n}", back in ${lv("w" + m.uid, Math.ceil(out.left) + "s")}`
       : !allyHere(m.ally) ? `${first} has wandered off` : "";
     return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}</b><div class="small">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>

@@ -10,6 +10,8 @@ export interface Ally {
   ab: string; abDesc: string; cd: number;
   /** Unreliable ally who comes and goes on his own schedule. */
   flaky?: boolean;
+  /** Uses she/her pronouns in game text. */
+  she?: boolean;
 }
 
 export interface MissionTpl {

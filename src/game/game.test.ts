@@ -16,6 +16,7 @@ import { bribeCost, bribeDrop } from "../calc";
 import { payOffFixer } from "./actions";
 import { GRIP_PERKS, TIERS } from "../data/org";
 import { FAQ } from "../data/faq";
+import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
 import { loftBadges } from "../ui/badges";
 import { allyFree, allyHere, contactPrice, hangOutPrice, succChance } from "../calc";
 import { tickBusy } from "./tick";
@@ -383,6 +384,43 @@ describe("Loft badges", () => {
     for (const id of ["crew", "cov", "gad", "fav"]) expect(document.getElementById("lb-" + id), id).not.toBeNull();
     const cards = [...document.querySelectorAll("#sections .sec > h2")].map(h => h.textContent);
     expect(cards).toEqual(["Missions", "Upgrades", "Operations"]);
+  });
+});
+
+describe("boss pacing", () => {
+  it("the first boss waits six minutes", () => {
+    expect(fresh().bossCd).toBe(BOSS_FIRST);
+    expect(BOSS_FIRST).toBeGreaterThanOrEqual(360);
+  });
+
+  it("bosses are spaced seven to eleven minutes apart", () => {
+    for (let i = 0; i < 200; i++) {
+      const gap = nextBossGap();
+      expect(gap).toBeGreaterThanOrEqual(BOSS_GAP_MIN);
+      expect(gap).toBeLessThanOrEqual(BOSS_GAP_MIN + BOSS_GAP_SPREAD);
+    }
+    expect(bossGapText()).toBe("7 to 11 minutes");
+  });
+
+  it("winning or losing an encounter sets the next gap", () => {
+    S.life = 1e13; S.gens.inf = 5;
+    spawnBoss();
+    S.boss!.hp = 1;
+    bossAction("investigate");
+    expect(S.boss).toBeNull();
+    expect(S.bossCd).toBeGreaterThanOrEqual(BOSS_GAP_MIN);
+    expect(S.bossCd).toBeLessThanOrEqual(BOSS_GAP_MIN + BOSS_GAP_SPREAD);
+
+    spawnBoss();
+    S.boss!.left = 0.01;
+    tick(0.1); // the clock runs out
+    expect(S.boss).toBeNull();
+    expect(S.bossCd).toBeGreaterThanOrEqual(BOSS_GAP_MIN);
+  });
+
+  it("the FAQ and Rogues text quote the same gap", () => {
+    expect(panelHTML("rogue")).toContain(bossGapText());
+    expect(FAQ.flatMap(f => f.items).map(i => i.a()).join(" ")).toContain(bossGapText());
   });
 });
 

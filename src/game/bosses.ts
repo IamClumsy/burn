@@ -8,6 +8,7 @@ import { fmt, money, pick } from "../util";
 import { floatText, hitBoss, say, shake, toast } from "../ui/fx";
 import { checkBurn } from "./heat";
 import { learnName, reduceGrip } from "./org";
+import { nextBossGap } from "../data/pacing";
 
 export function spawnBoss(): void {
   const pool = BOSSES.filter(b => S.life >= b.at);
@@ -25,7 +26,7 @@ export function winBoss(): void {
   const first = !S.bossKills[b.id];
   earn(reward); S.favors += fav; S.bossKills[b.id] = (S.bossKills[b.id] || 0) + 1;
   learnName(b.id); reduceGrip(5);
-  S.boss = null; S.bossCd = 240 + Math.random() * 180;
+  S.boss = null; S.bossCd = nextBossGap();
   chime();
   toast(b.n + " outmaneuvered", `+${money(reward)}, +${fav} favors${first ? " · first win: +3% income forever" : ""}`);
   say(b.n + " walks away with nothing, which is the best outcome you can ask for.");
@@ -34,7 +35,7 @@ export function winBoss(): void {
 export function loseBoss(): void {
   const b = bossDef()!;
   S.cash *= 0.92; S.heat += 15; S.att = Math.min(99, S.att + 20);
-  S.boss = null; S.bossCd = 240 + Math.random() * 180;
+  S.boss = null; S.bossCd = nextBossGap();
   beep(130, 0.4, "sawtooth", 0.06, -50);
   toast(b.n + " got away", "−8% cash, extra heat and attention.");
   say(b.n + " slips out with what they came for. You'll see them again.");

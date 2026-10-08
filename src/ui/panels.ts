@@ -14,6 +14,7 @@ import { MEDALS } from "../data/medals";
 import { ARCS } from "../data/arcs";
 import { CASE_ACTIONS } from "../data/caseActions";
 import { FAQ } from "../data/faq";
+import { bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS } from "../data/contacts";
@@ -184,7 +185,7 @@ function favors(): string {
 }
 
 function rogues(): string {
-  return `<div class="small" style="margin-bottom:8px">Bosses turn up every few minutes. Outmaneuver each one once for a permanent +3% income. Next one in about ${Math.ceil(Math.max(0, S.bossCd) / 60)} min.</div>` +
+  return `<div class="small" style="margin-bottom:8px">Bosses turn up about every ${bossGapText()}. Outmaneuver each one once for a permanent +3% income. Next one in about ${Math.ceil(Math.max(0, S.bossCd) / 60)} min.</div>` +
     BOSSES.map(b => {
       const open = S.life >= b.at, k = S.bossKills[b.id] || 0;
       return `<div class="box" style="${open ? "" : "opacity:.5"}"><div class="row"><b>${open ? b.n : "???"}</b><span class="small">${open ? "Outmaneuvered " + k + "×" : "Appears at " + money(b.at) + " lifetime"}</span></div>

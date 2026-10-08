@@ -65,8 +65,5 @@ export const CREW_LINES: Record<string, string[]> = {
           "Jesse plays the rookie fed with perfect confidence and the right amount of nerves."],
 };
 
-/**
- * The tools the case card's main tile offers, in priority order: the first one that's ready is shown.
- * Free ones come first so a quick tap never spends a favor or gadget parts by accident. Spring the Trap has its own button.
- */
+/** The tools the case card's main tile offers, in the order it moves through them. Spring the Trap has its own button. */
 export const ROTATING: CaseAction[] = ["investigate", "stakeout", "cover", "crew", "con", "gadget", "favor"];

@@ -28,14 +28,20 @@ let lastFx = "";
 let faceFor = "";
 let lastModal = "";
 
-// ---- the case tile: always offers whichever tool is ready (free ones first, so favors and parts aren't spent by accident)
+// ---- the case tile: stays on a tool while it's ready, and after you use it moves on to the next ready one in order,
+// so over a fight you see every tool rather than the same couple. Spring the Trap has its own button.
+let caseIdx = 0;
 function pickCase(): CaseAction {
-  const ready = ROTATING.find(k => !actionBlock(k));
-  if (ready) return ready;
-  // nothing ready: show the one that's closest to being ready
-  const cds = ROTATING.map(k => [k, S.boss?.cd?.[k] || 0] as const).filter(([k, c]) => c > 0 && actionBlock(k)?.startsWith("Ready in"));
+  if (!actionBlock(ROTATING[caseIdx])) return ROTATING[caseIdx];
+  for (let i = 1; i < ROTATING.length; i++) {
+    const n = (caseIdx + i) % ROTATING.length;
+    if (!actionBlock(ROTATING[n])) { caseIdx = n; return ROTATING[n]; }
+  }
+  // nothing ready: show the one closest to being ready
+  const cds = ROTATING.map((k, n) => [n, S.boss?.cd?.[k] || 0] as const).filter(([n, c]) => c > 0 && actionBlock(ROTATING[n])?.startsWith("Ready in"));
   cds.sort((x, y) => x[1] - y[1]);
-  return cds.length ? cds[0][0] : ROTATING[0];
+  if (cds.length) caseIdx = cds[0][0];
+  return ROTATING[caseIdx];
 }
 
 function updateCaseTile(): void {

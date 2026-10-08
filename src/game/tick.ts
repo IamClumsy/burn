@@ -21,7 +21,7 @@ export function milestones(): void {
   fillBoard(); // the board is never left short, whatever happened to it
   if (S.intel < 1 && S.seasonOpen >= 3) {
     S.intel = 1;
-    toast("Victor is gone", "Victor Stecker-Epps is dead, and Michael is the one who ended it. You get a new number for the same kind of favors: Simon Escher, a man you'd rather not need and who knows everything about the Organization.", "story");
+    toast("Victor is gone", "Victor Stecker-Epps died on that boat, shot by Carla's sniper, and it was not a good night for anyone who was there. You get a new number for the same kind of favors: Simon Escher, a man you'd rather not need and who knows everything about the Organization.", "story");
     say("Victor's line goes silent. A few days later, an unfamiliar number calls. \"We should talk,\" says Simon.");
   }
   if (S.intel < 2 && S.episodesDone["711"]) {

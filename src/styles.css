@@ -5,7 +5,7 @@
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 "Avenir Next",Helvetica,Arial,sans-serif;min-height:100vh}
-  body.shake{animation:shake .5s}
+  body.shake main,body.shake header{animation:shake .5s;will-change:transform}
   @keyframes shake{10%,50%,90%{transform:translate(-6px,3px)}30%,70%{transform:translate(6px,-3px)}}
   header{position:relative;overflow:hidden;padding:16px 20px 22px;background:linear-gradient(180deg,#240a3d 0,#6b1a68 55%,#ff5e62 120%);border-bottom:2px solid var(--pink)}
   header::before{content:"";position:absolute;right:90px;bottom:-60px;width:150px;height:150px;border-radius:50%;background:linear-gradient(#ffd166,#ff5e62);opacity:.85}
@@ -118,7 +118,7 @@
   #evt .dlg.client .evtbig{display:block}
   #evt button.primary{background:linear-gradient(#2ee6d6,#1aa89c);color:#04201d;border:none;font-weight:700;padding:13px;font-size:16px}
   #evt button.primary:hover:not(:disabled){background-color:transparent;filter:brightness(1.1)}
-  #notice{display:none;position:fixed;inset:0;background:#000c;backdrop-filter:blur(3px);z-index:40;align-items:center;justify-content:center;padding:20px}
+  #notice{display:none;position:fixed;inset:0;background:#000d;z-index:40;align-items:center;justify-content:center;padding:20px}
   .ndlg{--k:var(--gold);background:var(--panel);border:2px solid var(--k);border-radius:14px;padding:22px 24px;max-width:480px;width:100%;box-shadow:0 0 44px color-mix(in srgb,var(--k) 35%,transparent),0 24px 70px #000d;animation:pop .28s}
   .ndlg.good{--k:var(--sea)}
   .ndlg.bad{--k:var(--bad)}

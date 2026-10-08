@@ -429,8 +429,10 @@ export function portrait(id: string, px = 56, known = true, label?: string): str
     entry = { svg, base: known && look ? uid(look) : "" };
     cache.set(key, entry);
   }
-  const photo = known ? PHOTOS[face] ?? PHOTOS[id] : undefined; // a photo of the old Nate is better than a mismatched sketch
-  if (photo) return `<span class="portrait photo" style="width:${px}px;height:${px}px"><img src="${photo}" alt="${label || `Sketch of ${id}`}" width="${px}" height="${px}" loading="lazy" decoding="async"></span>`;
+  // A photo of the old Nate is better than a mismatched sketch. Someone you haven't met uses unknown.* if there is one.
+  const photo = known ? PHOTOS[face] ?? PHOTOS[id] : PHOTOS.unknown;
+  const alt = known ? label || `Sketch of ${id}` : "Someone you haven't met";
+  if (photo) return `<span class="portrait photo" style="width:${px}px;height:${px}px"><img src="${photo}" alt="${alt}" width="${px}" height="${px}" loading="lazy" decoding="async"></span>`;
   const suffix = `${scope}${slot++}`;
   const svg = entry.base ? entry.svg.replace(new RegExp(`-${entry.base}(?=["')])`, "g"), `-${entry.base}${suffix}`) : entry.svg;
   return `<span class="portrait" style="width:${px}px;height:${px}px">${svg}</span>`;

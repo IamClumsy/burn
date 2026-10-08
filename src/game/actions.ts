@@ -136,6 +136,7 @@ export function prestige(): void {
     stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, buyAmt: S.buyAmt, bossKills: S.bossKills,
     choices: S.choices, arcStep: S.arcStep, arcsDone: S.arcsDone,
     grip: S.grip, listKnown: S.listKnown, attPeak: S.attPeak, cleanRecord: S.cleanRecord,
+    episodesDone: S.episodesDone, seasonOpen: S.seasonOpen,
   };
   setState(Object.assign(fresh(), keep));
   S.stats.reinstated++;

@@ -1,6 +1,6 @@
 import { S, payClient } from "../state";
 import { allyFree, heatMult, missionReward, succChance } from "../calc";
-import { MISSIONS } from "../data/missions";
+import { MISSIONS, missionUnlocked } from "../data/missions";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
 import { money, pick } from "../util";
@@ -10,8 +10,14 @@ import { reduceGrip } from "./org";
 import type { ActiveMission, Mission } from "../types";
 
 export function newMission(): Mission {
-  const t = pick(MISSIONS);
-  return { uid: S.uid++, n: t.n, dur: t.dur, succ: t.succ, heat: t.heat, rm: t.rm, fav: t.fav, ally: t.ally, kid: !!t.kid, send: false };
+  // Only seasons you've unlocked, and nothing that's already on the board or running.
+  const open = MISSIONS.filter(t => missionUnlocked(t, S.life));
+  const fresh = open.filter(t => !S.board.some(m => m.n === t.n) && !S.active.some(m => m.n === t.n));
+  const t = pick(fresh.length ? fresh : open);
+  return {
+    uid: S.uid++, n: t.n, dur: t.dur, succ: t.succ, heat: t.heat, rm: t.rm, fav: t.fav, ally: t.ally,
+    kid: !!t.kid, send: false, ep: t.ep, epTitle: t.epTitle,
+  };
 }
 
 export function fillBoard(): void {
@@ -41,6 +47,7 @@ export function resolveMission(m: ActiveMission): void {
     payClient(m.reward); S.favors += m.fav; S.heat += m.heat * heatMult(); S.stats.mDone++;
     if (m.kid) S.stats.kidMissions++;
     if (m.arc) advanceArc(m.arc.id, m.arc.step);
+    if (m.ep) S.episodesDone[m.ep] = true;
     reduceGrip(1);
     say(m.kid ? pick(KID_LINES) : pick(LINES.mOk));
     if (Math.random() < 0.4) say(pick(LINES.returned));

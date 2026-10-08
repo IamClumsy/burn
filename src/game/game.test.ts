@@ -23,6 +23,7 @@ import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss } from "./bosses";
 import { spawnClient } from "./events";
+import { seasonOf } from "../data/missions";
 import { actionDmg, conChance } from "../calc";
 import { checkBurn } from "./heat";
 import { BOSSES } from "../data/bosses";
@@ -485,6 +486,66 @@ describe("Seymour wants company", () => {
     render();
     expect(job.disabled).toBe(false);
     expect(job.textContent).toBe("TAKE A JOB");
+  });
+});
+
+describe("episode missions", () => {
+  it("the board only offers seasons you've unlocked", () => {
+    S.life = 0; S.board = [];
+    for (let i = 0; i < 60; i++) { S.board = []; fillBoard(); for (const m of S.board) expect(seasonOf(m.ep!)).toBe(1); }
+    S.life = 1e11;
+    const seen = new Set<number>();
+    for (let i = 0; i < 400; i++) { S.board = []; fillBoard(); S.board.forEach(m => seen.add(seasonOf(m.ep!))); }
+    expect(seen.size).toBe(7);
+  });
+
+  it("tops the board back up by itself", () => {
+    S.board = [];
+    tick(1.1);
+    expect(S.board.length).toBe(3);
+  });
+
+  it("never puts the same episode on the board twice", () => {
+    S.life = 1e11;
+    for (let i = 0; i < 100; i++) {
+      S.board = []; fillBoard();
+      expect(new Set(S.board.map(m => m.ep)).size).toBe(S.board.length);
+    }
+  });
+
+  it("completing a mission marks the episode as worked", () => {
+    S.life = 0; S.board = []; fillBoard();
+    const m = S.board[0];
+    startMission(m.uid);
+    const run = S.active[0];
+    expect(run.ep).toBe(m.ep);
+    run.chance = 1;
+    resolveMission(run);
+    expect(S.episodesDone[m.ep!]).toBe(true);
+  });
+
+  it("failing a mission doesn't count it", () => {
+    S.life = 0; S.board = []; fillBoard();
+    const m = S.board[0];
+    startMission(m.uid);
+    S.active[0].chance = 0;
+    resolveMission(S.active[0]);
+    expect(S.episodesDone[m.ep!]).toBeUndefined();
+  });
+
+  it("opening a new season is announced once", () => {
+    S.life = 3e6; S.seasonOpen = 1;
+    tick(1.1);
+    expect(S.seasonOpen).toBe(3);
+    tick(1.1);
+    expect(S.seasonOpen).toBe(3);
+  });
+
+  it("the Missions card shows the episode and your progress", () => {
+    S.life = 0; S.board = []; fillBoard();
+    const html = panelHTML("mis");
+    expect(html).toMatch(/Season 1, Episode \d+/);
+    expect(html).toContain("of 111");
   });
 });
 

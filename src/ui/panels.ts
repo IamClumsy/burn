@@ -12,6 +12,7 @@ import { PERKS, JUNK, RECIPES } from "../data/perks";
 import { STORY } from "../data/story";
 import { MEDALS } from "../data/medals";
 import { ARCS } from "../data/arcs";
+import { MISSIONS, epLabel, seasonsOpen } from "../data/missions";
 import { CASE_ACTIONS } from "../data/caseActions";
 import { FAQ } from "../data/faq";
 import { bossGapText } from "../data/pacing";
@@ -100,7 +101,9 @@ function upgrades(): string {
 }
 
 function missions(): string {
-  let h = `<div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Clients pay well. Michael keeps what he needs for expenses and hands the rest back. Send an ally for +25% success, but they're busy until it ends.</div>`;
+  const done = Object.keys(S.episodesDone).length;
+  let h = `<div class="small" style="margin-bottom:6px">Case files: <b style="color:var(--text)">${done} of ${MISSIONS.length}</b> episodes · Season ${seasonsOpen(S.life)} cases open</div>
+    <div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Clients pay well. Michael keeps what he needs for expenses and hands the rest back. Send an ally for +25% success, but they're busy until it ends.</div>`;
   const open = ARCS.filter(arcAvailable);
   if (open.length) {
     h += `<h2>Open Cases</h2>` + open.map(a => {
@@ -113,6 +116,7 @@ function missions(): string {
   }
   if (S.active.length) {
     h += `<h2 style="margin-top:12px">In Progress</h2>` + S.active.map(m => `<div class="box"><div class="row"><b>${m.n}</b><span class="small">${lv("t" + m.uid, `${Math.ceil(m.left)}s · ${Math.round(m.chance * 100)}%`)}</span></div>
+      ${m.ep ? `<div class="small">${epLabel(m.ep, m.epTitle || "")}</div>` : ""}
       <div class="bar"><i class="mbar" ${lvBar("b" + m.uid, (1 - m.left / m.dur) * 100)}></i></div>
       <span class="small">Pays ${money(m.reward)} · +${m.fav} favor${m.sent ? " · " + ALLIES.find(a => a.id === m.sent)!.name + " is out" : ""}</span></div>`).join("");
   }
@@ -124,7 +128,7 @@ function missions(): string {
     const why = !S.allies[m.ally] ? `Hire ${first} in Crew to send ${al.she ? "her" : "him"} (+25%)`
       : out ? `${first} is out on "${out.n}", back in ${lv("w" + m.uid, Math.ceil(out.left) + "s")}`
       : !allyHere(m.ally) ? `${first} has wandered off` : "";
-    return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}</b><div class="small">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
+    return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}${m.ep && S.episodesDone[m.ep] ? ' <span class="chip">Seen</span>' : ""}</b>${m.ep ? `<div class="small" style="margin-bottom:2px">${epLabel(m.ep, m.epTitle || "")}</div>` : ""}<div class="small">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
       ${why ? `<div class="small" style="margin-top:4px;color:var(--gold)">${why}</div>` : ""}
       <div class="btns">${S.allies[m.ally] ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Send ${first} (+25%)</button>` : ""}
       <button data-act="start" data-arg="${m.uid}" ${S.active.length >= 3 ? "disabled" : ""}>Start mission</button></div></div>`;

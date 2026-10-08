@@ -45,6 +45,8 @@ export const FAQ: FaqSection[] = [
      a: () => "On a running mission, the seconds are how long until it finishes and the percentage is its chance to succeed. That chance is locked in when you start. If it fails, you take extra heat and get nothing."},
     {q: "Why can't I send an ally on a mission?",
      a: () => "The mission card says why. They're either not hired yet (hire them from Crew), already out on another mission, or, for Nate, wandered off. An ally can only be on one mission at a time, and the case missions send theirs in automatically."},
+    {q: "Where do the missions come from?",
+     a: () => "Every mission is adapted from an episode of the show, and the board shows which one. Season 1 cases are open from the start, and later seasons open as you earn more, so the cases get bigger as Michael's reputation grows. The Missions card keeps count of how many episodes you've worked."},
     {q: "Why do missions with kids never fail?",
      a: () => "It's Michael's rule. Anything involving a kid always succeeds, no matter how hot things are. Those missions are marked \"Never fails.\""},
     {q: "Who is Nate, and why does he keep disappearing?",

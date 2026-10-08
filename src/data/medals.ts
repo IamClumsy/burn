@@ -3,6 +3,7 @@ import { ALLIES } from "./allies";
 import { BOSSES } from "./bosses";
 import { STORY } from "./story";
 import { ARCS } from "./arcs";
+import { MISSIONS } from "./missions";
 import { totalOps } from "../calc";
 
 export const MEDALS: Medal[] = [
@@ -34,5 +35,8 @@ export const MEDALS: Medal[] = [
   {id:"a27",n:"Slipping Away",    d:"Wear the Organization's grip down to 50%", t:s=>s.grip<=50},
   {id:"a28",n:"Clean Record",     d:"Complete the List and lift the burn", t:s=>s.cleanRecord},
   {id:"a29",n:"Handled",          d:"Take on 5 errands for a handler", t:s=>s.stats.errands>=5},
+  {id:"a30",n:"Binge Watcher",    d:"Complete missions from 25 different episodes", t:s=>Object.keys(s.episodesDone).length>=25},
+  {id:"a31",n:"Marathon",         d:"Complete missions from 60 different episodes", t:s=>Object.keys(s.episodesDone).length>=60},
+  {id:"a32",n:"Series Finale",    d:"Complete a mission from every episode", t:s=>Object.keys(s.episodesDone).length>=MISSIONS.length},
   {id:"a21",n:"Case Files",       d:"Take on 25 missions",        t:s=>s.stats.mDone+s.stats.mFail>=25},
 ];

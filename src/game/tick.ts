@@ -4,19 +4,28 @@ import { checkEnding, tickOrg } from "./org";
 import { GENS } from "../data/ops";
 import { STORY } from "../data/story";
 import { MEDALS } from "../data/medals";
+import { seasonsOpen } from "../data/missions";
 import { chime } from "../audio";
 import { pick } from "../util";
 import { say, toast } from "../ui/fx";
 import { LINES } from "../data/text";
 import { choiceBusy, showChoice } from "../ui/choice";
 import { checkAmbush, checkBurn, layLow } from "./heat";
-import { resolveMission } from "./missions";
+import { fillBoard, resolveMission } from "./missions";
 import { tickBoss } from "./bosses";
 
 let sec = 0;
 
 export function milestones(): void {
   checkEnding();
+  fillBoard(); // the board is never left short, whatever happened to it
+  const open = seasonsOpen(S.life);
+  if (open > S.seasonOpen) {
+    S.seasonOpen = open;
+    toast(`Season ${open} cases are open`, "New clients are knocking, and the cases are getting bigger.");
+    say(`Word spreads. Season ${open} cases start turning up on your board.`);
+    chime();
+  }
   while (S.story < STORY.length && S.life >= STORY[S.story].at) {
     const i = S.story, s = STORY[i];
     // A decision needs the dialog free; try again next second if something else is open.

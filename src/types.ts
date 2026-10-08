@@ -16,12 +16,15 @@ export interface Ally {
 
 export interface MissionTpl {
   n: string; dur: number; succ: number; heat: number; rm: number; fav: number; ally: string; kid?: boolean;
+  /** The episode this mission is adapted from: code (season x 100 + episode) and title. */
+  ep?: string; epTitle?: string;
 }
 export interface Mission {
   uid: number; n: string; dur: number; succ: number; heat: number; rm: number; fav: number;
   ally: string; kid: boolean; send: boolean;
   /** Set when this mission is one step of a multi-step case. */
   arc?: { id: string; step: number };
+  ep?: string; epTitle?: string;
 }
 export interface ActiveMission extends Mission { sent: string | null; left: number; chance: number; reward: number }
 
@@ -104,6 +107,10 @@ export interface GameState {
   cleanRecord: boolean;
   /** The fixer currently offering a payoff. */
   fixer: FixerQuote | null;
+  /** Episodes whose mission you've completed, by code. */
+  episodesDone: Dict<boolean>;
+  /** Highest season of cases announced as open. */
+  seasonOpen: number;
   /** Michael is tied up with someone (like Seymour) and can't take jobs for a bit. */
   busy: { who: string; left: number } | null;
   /** Story choices: beat index -> option index. */

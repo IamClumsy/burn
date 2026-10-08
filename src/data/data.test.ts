@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { GENS } from "./ops";
 import { UPGS } from "./upgrades";
 import { ALLIES } from "./allies";
-import { MISSIONS } from "./missions";
+import { MISSIONS, SEASON_UNLOCK, epLabel, missionUnlocked, seasonOf } from "./missions";
 import { BOSSES } from "./bosses";
 import { COVERS } from "./covers";
 import { STORY } from "./story";
@@ -25,6 +25,45 @@ describe("data integrity", () => {
     expect(unique(MEDALS.map(m => m.id))).toBe(true);
     expect(unique(PERKS.map(p => p.id))).toBe(true);
     expect(unique(MISSIONS.map(m => m.n))).toBe(true);
+  });
+
+  it("there is exactly one mission for every episode of the show", () => {
+    const perSeason: Record<number, number> = {};
+    for (const m of MISSIONS) perSeason[seasonOf(m.ep!)] = (perSeason[seasonOf(m.ep!)] || 0) + 1;
+    // 12 + 16 + 16 + 18 + 18 + 18 + 13 = 111 episodes
+    expect(perSeason).toEqual({ 1: 12, 2: 16, 3: 16, 4: 18, 5: 18, 6: 18, 7: 13 });
+    expect(MISSIONS.length).toBe(111);
+    expect(unique(MISSIONS.map(m => m.ep!))).toBe(true);
+    for (const m of MISSIONS) expect(m.epTitle, m.ep).toBeTruthy();
+  });
+
+  it("episode credits read naturally", () => {
+    expect(epLabel("203", "Trust Me")).toBe("Season 2, Episode 3: Trust Me");
+    expect(epLabel("713", "Reckoning")).toBe("Season 7, Episode 13: Reckoning");
+  });
+
+  it("seasons unlock in order, and season 1 is open from the start", () => {
+    expect(SEASON_UNLOCK.length).toBe(7);
+    expect(SEASON_UNLOCK[0]).toBe(0);
+    for (let i = 1; i < SEASON_UNLOCK.length; i++) expect(SEASON_UNLOCK[i]).toBeGreaterThan(SEASON_UNLOCK[i - 1]);
+    const first = MISSIONS.filter(m => missionUnlocked(m, 0));
+    expect(first.length).toBe(12);
+    expect(first.every(m => seasonOf(m.ep!) === 1)).toBe(true);
+  });
+
+  it("Michael only does good: no mission is framed as helping the wrong people", () => {
+    for (const m of MISSIONS) {
+      expect(m.n, m.n).not.toMatch(/launder|frame a|dirty|steal from|rob a/i);
+    }
+  });
+
+  it("harder episodes pay more, and kid cases are never the long shots", () => {
+    const avg = (season: number) => {
+      const ms = MISSIONS.filter(m => seasonOf(m.ep!) === season);
+      return ms.reduce((a, m) => a + m.rm, 0) / ms.length;
+    };
+    expect(avg(7)).toBeGreaterThan(avg(1));
+    expect(avg(4)).toBeGreaterThan(avg(2));
   });
 
   it("upgrades have real names, not just a multiplier", () => {

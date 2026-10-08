@@ -26,38 +26,19 @@ let lastFx = "";
 let faceFor = "";
 let lastModal = "";
 
-// ---- the rotating case tile: cycles through Michael's tools, skipping ones that aren't ready
-const ROTATE_MS = 2200;
-let rotIdx = 0, rotAt = 0, rotHover = false;
-
-/** Move the tile on to the next tool that's ready (or just the next one, if none are). */
-export function advanceCase(): void {
-  rotAt = performance.now();
-  for (let i = 1; i <= ROTATING.length; i++) {
-    const n = (rotIdx + i) % ROTATING.length;
-    if (!actionBlock(ROTATING[n])) { rotIdx = n; return; }
-  }
-  rotIdx = (rotIdx + 1) % ROTATING.length;
+// ---- the case tile: always offers whichever tool is ready (free ones first, so favors and parts aren't spent by accident)
+function pickCase(): CaseAction {
+  const ready = ROTATING.find(k => !actionBlock(k));
+  if (ready) return ready;
+  // nothing ready: show the one that's closest to being ready
+  const cds = ROTATING.map(k => [k, S.boss?.cd?.[k] || 0] as const).filter(([k, c]) => c > 0 && actionBlock(k)?.startsWith("Ready in"));
+  cds.sort((x, y) => x[1] - y[1]);
+  return cds.length ? cds[0][0] : ROTATING[0];
 }
 
-export function initCaseTile(): void {
-  const t = document.getElementById("rottile");
-  if (!t) return;
-  t.addEventListener("mouseenter", () => { rotHover = true; });
-  t.addEventListener("mouseleave", () => { rotHover = false; rotAt = performance.now(); });
-}
-
-function rotateCase(): void {
+function updateCaseTile(): void {
   const tile = document.getElementById("rottile") as HTMLButtonElement | null;
-  if (!tile) return;
-  const now = performance.now();
-  const stuck = !!actionBlock(ROTATING[rotIdx]) && ROTATING.some(k => !actionBlock(k)); // current tool is cooling down, another is ready
-  if ((!rotHover && now - rotAt >= ROTATE_MS) || (stuck && !rotHover)) advanceCase();
-  const kind = ROTATING[rotIdx];
-  if (tile.dataset.case !== kind) {
-    tile.dataset.case = kind;
-    tile.classList.remove("swap"); void tile.offsetWidth; tile.classList.add("swap");
-  }
+  if (tile) tile.dataset.case = pickCase();
 }
 
 export function render(): void {
@@ -100,7 +81,7 @@ export function render(): void {
     setText($("bosstime"), Math.ceil(S.boss.left) + "s left");
     const leads = S.boss.leads || 0;
     setText($("bossleads"), "●".repeat(leads) + "○".repeat(MAX_LEADS - leads));
-    rotateCase();
+    updateCaseTile();
     document.querySelectorAll<HTMLButtonElement>("#bossacts [data-case]").forEach(btn => {
       const kind = btn.dataset.case as CaseAction, why = actionBlock(kind);
       const def = CASE_ACTIONS.find(a => a.id === kind)!, hint = def.hint;

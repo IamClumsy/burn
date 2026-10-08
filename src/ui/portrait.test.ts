@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// These tests are about the drawn sketches, whatever photos happen to be in the assets folder.
+vi.mock("../data/photos", () => ({ PHOTOS: {} }));
 import { LOOKS } from "../data/portraits";
 import { ALLIES } from "../data/allies";
 import { BOSSES } from "../data/bosses";

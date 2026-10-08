@@ -1,43 +1,60 @@
 import type { Look } from "../ui/portrait";
 
-const skin = { pale: "#f1d3b8", fair: "#ecc4a0", tan: "#d6a47a", olive: "#c9965f", brown: "#a8683f", deep: "#7a4a2c" };
-const hair = {
-  black: "#1b1320", dark: "#2f1d14", brown: "#5a3820", auburn: "#7a3320", blond: "#d9b25c",
-  gray: "#a7a2b0", silver: "#cfc9d6", salt: "#8d889a",
-};
-
 /**
- * Who looks like what. These are original sketches built from each character's manner and style
- * (clothes, hair, attitude), keyed by the same ids the game uses for allies, contacts and bosses.
+ * Who looks like what. Each is an original illustration drawn from how the character looks on screen:
+ * hair, build, skin tone, beard, glasses and usual clothes. Keyed by the same ids the game uses for
+ * allies, contacts and bosses. Olivia Riley is the one exception: there's no reference photo for her
+ * on the wiki, so hers is drawn from her role.
  */
 export const LOOKS: Record<string, Look> = {
-  // ---- the star
-  michael: { skin: skin.tan, hair: "short", hairColor: hair.dark, facial: "stubble", glasses: "shades", outfit: "shirt", outfitColor: "#2d3a5a", accent: "#2ee6d6", bg: ["#ff7a59", "#7b2a6b"], mood: "calm" },
+  // ---- the star: lean, angular, short dark hair, a khaki polo
+  michael: { skin: "#e2b48c", hair: "short", hairColor: "#2a1d16", jaw: "square", face: 0.97, outfit: "polo", outfitColor: "#cdbb9a", accent: "#8a7a5c", bg: ["#ff7a59", "#7b2a6b"], mood: "calm" },
 
   // ---- crew
-  sam: { skin: skin.tan, hair: "short", hairColor: hair.silver, glasses: "none", outfit: "hawaiian", outfitColor: "#1aa89c", accent: "#ff4fa3", bg: ["#2ee6d6", "#7b2a6b"], mood: "warm", face: 1.05 },
-  fiona: { skin: skin.fair, hair: "long", hairColor: hair.auburn, outfit: "leather", outfitColor: "#1d1426", accent: "#ff4fa3", bg: ["#ff4fa3", "#3a0f4a"], mood: "sly", extras: ["lipstick"] },
-  barry: { skin: skin.olive, hair: "receding", hairColor: hair.dark, facial: "stubble", glasses: "round", outfit: "shirt", outfitColor: "#c0562c", accent: "#ffd166", bg: ["#ffd166", "#7a3d6a"], mood: "worried", face: 1.05 },
-  madeline: { skin: skin.pale, hair: "bob", hairColor: "#e0c27a", outfit: "cardigan", outfitColor: "#6c4f9e", accent: "#f4eef8", bg: ["#c23bff", "#3a0f4a"], mood: "stern", extras: ["cig", "lipstick"] },
-  nate: { skin: skin.fair, hair: "tousled", hairColor: hair.brown, facial: "stubble", outfit: "coat", outfitColor: "#3b6e8f", accent: "#ffd166", bg: ["#2ee6d6", "#ff9a3c"], mood: "warm" },
-  jesse: { skin: skin.tan, hair: "short", hairColor: hair.brown, outfit: "shirt", outfitColor: "#2f4f6f", accent: "#5fe59a", bg: ["#5fe59a", "#2a1a50"], mood: "calm" },
+  // Sam: swept-back salt-and-pepper hair, a gray goatee, a cream floral shirt and a gold chain
+  sam: { skin: "#d6a47a", hair: "swept", hairColor: "#5d5864", facial: "goatee", facialColor: "#9a96a4", jaw: "square", face: 1.04, age: 1, outfit: "hawaiian", outfitColor: "#efe2c6", accent: "#8a5a3a", extras: ["chain"], bg: ["#2ee6d6", "#7b2a6b"], mood: "sly" },
+  // Fiona: long honey-brown hair and a narrow face
+  fiona: { skin: "#ecc4a0", hair: "long", hairColor: "#b08a5e", jaw: "narrow", face: 0.95, outfit: "leather", outfitColor: "#2a1e2e", accent: "#8e5bd6", bg: ["#ff4fa3", "#3a0f4a"], mood: "warm" },
+  // Barry: short salt-and-pepper hair, a goatee, dark aviators, an earring, a cream jacket over a striped shirt
+  barry: { skin: "#c9965f", hair: "short", hairColor: "#5a565f", facial: "goatee", facialColor: "#6c6872", glasses: "aviator", jaw: "round", face: 1.06, age: 1, outfit: "blazer", outfitColor: "#d9ccb4", accent: "#3a8f86", extras: ["earring"], bg: ["#ffd166", "#7a3d6a"], mood: "calm" },
+  // Madeline: short curly blond hair, big hoop earrings, and a black top
+  madeline: { skin: "#f1d3b8", hair: "curly", hairColor: "#e8d28c", jaw: "round", age: 2, outfit: "cardigan", outfitColor: "#1d1a24", accent: "#f4eef8", extras: ["hoops", "lipstick"], bg: ["#c23bff", "#3a0f4a"], mood: "warm" },
+  // Nate: short dark hair, clean-shaven, a black blazer over an open white shirt
+  nate: { skin: "#e8bd96", hair: "tousled", hairColor: "#2c1f19", jaw: "narrow", outfit: "blazer", outfitColor: "#16151c", accent: "#f4eef8", bg: ["#2ee6d6", "#ff9a3c"], mood: "warm" },
+  // Jesse: a nearly shaved head, a strong jaw, an orange-striped shirt
+  jesse: { skin: "#d9ac86", hair: "buzz", hairColor: "#4a3a2e", jaw: "square", face: 1.08, outfit: "shirt", outfitColor: "#e9906a", accent: "#f6e0d0", stripes: "#f6e0d0", bg: ["#5fe59a", "#2a1a50"], mood: "calm" },
 
   // ---- frienemies
-  seymour: { skin: skin.olive, hair: "wild", hairColor: "#4a3020", facial: "mustache", glasses: "shades", outfit: "blazer", outfitColor: "#8c2f6b", accent: "#ffd166", bg: ["#ffd166", "#c23bff"], mood: "warm", face: 1.05 },
-  simon: { skin: skin.pale, hair: "buzz", hairColor: "#2a2230", facial: "stubble", outfit: "coat", outfitColor: "#262033", accent: "#7b5cff", bg: ["#7b5cff", "#150c20"], mood: "stern", extras: ["scar"] },
+  // Seymour: wild dark curls, a full dark beard, big intense eyes, an earring, a white open shirt
+  seymour: { skin: "#c9966a", hair: "wild", hairColor: "#3a2417", facial: "beard", facialColor: "#2a1710", jaw: "round", face: 1.0, outfit: "shirt", outfitColor: "#eee6d6", accent: "#ffd166", extras: ["earring"], bg: ["#ffd166", "#c23bff"], mood: "worried" },
+  // Simon: short brown hair, stubble, a smirk, a dark open-collar shirt
+  simon: { skin: "#e6bd9a", hair: "short", hairColor: "#4a3426", facial: "stubble", jaw: "square", outfit: "shirt", outfitColor: "#3b3a42", accent: "#7b5cff", bg: ["#7b5cff", "#150c20"], mood: "sly" },
 
   // ---- the people who burned him
-  paxson: { skin: "#b8774a", hair: "tied", hairColor: hair.black, outfit: "blazer", outfitColor: "#2d3a5a", accent: "#f4eef8", bg: ["#4aa3ff", "#1b1034"], mood: "stern", extras: ["badge"] },
-  carla: { skin: skin.fair, hair: "long", hairColor: "#e2c36b", outfit: "suit", outfitColor: "#8c1d3f", accent: "#f4eef8", bg: ["#ff4d5e", "#3a0f4a"], mood: "sly", extras: ["lipstick"] },
-  cowan: { skin: skin.pale, hair: "receding", hairColor: hair.gray, glasses: "round", outfit: "suit", outfitColor: "#3a3550", accent: "#b0b0c0", bg: ["#8a8aa0", "#2a1f3a"], mood: "worried" },
-  larry: { skin: skin.tan, hair: "buzz", hairColor: "#bdb7c6", outfit: "coat", outfitColor: "#6a5a3a", accent: "#ffd166", bg: ["#ff9a3c", "#3a0f4a"], mood: "warm", face: 1.08, extras: ["scar"] },
-  brennen: { skin: skin.pale, hair: "short", hairColor: hair.brown, glasses: "round", outfit: "shirt", outfitColor: "#2a5a6a", accent: "#2ee6d6", bg: ["#2ee6d6", "#1b1034"], mood: "sly" },
-  strickler: { skin: skin.pale, hair: "slick", hairColor: hair.black, facial: "mustache", glasses: "square", outfit: "suit", outfitColor: "#1f2a44", accent: "#ffd166", bg: ["#ffd166", "#3a0f4a"], mood: "sly" },
-  gilroy: { skin: skin.fair, hair: "slick", hairColor: hair.blond, facial: "stubble", outfit: "coat", outfitColor: "#201a2c", accent: "#ff4d5e", bg: ["#ff4d5e", "#150c20"], mood: "sly" },
-  barrett: { skin: skin.tan, hair: "slick", hairColor: "#c9c5d2", outfit: "suit", outfitColor: "#16213a", accent: "#ffd166", bg: ["#4aa3ff", "#150c20"], mood: "stern", face: 1.06 },
-  anson: { skin: skin.pale, hair: "receding", hairColor: "#9a95a6", glasses: "round", outfit: "cardigan", outfitColor: "#4a5a6a", accent: "#f4eef8", bg: ["#7b5cff", "#2a1f3a"], mood: "calm" },
-  vaughn: { skin: skin.deep, hair: "bald", hairColor: hair.black, outfit: "suit", outfitColor: "#12203a", accent: "#ff4d5e", bg: ["#4aa3ff", "#150c20"], mood: "stern", extras: ["earpiece"] },
-  card: { skin: skin.pale, hair: "short", hairColor: hair.salt, facial: "mustache", outfit: "suit", outfitColor: "#2d2a40", accent: "#ff9a3c", bg: ["#ff9a3c", "#2a1f3a"], mood: "sly", face: 1.04 },
-  gray: { skin: skin.tan, hair: "buzz", hairColor: "#6b5a3a", facial: "stubble", outfit: "tactical", outfitColor: "#3a4a3a", accent: "#ffd166", bg: ["#5fe59a", "#150c20"], mood: "stern", extras: ["earpiece"] },
-  riley: { skin: skin.brown, hair: "short", hairColor: hair.black, glasses: "square", outfit: "blazer", outfitColor: "#1f2a44", accent: "#f4eef8", bg: ["#ff4fa3", "#150c20"], mood: "calm" },
+  // Paxson: dark hair pulled sleekly back, a navy blazer over a white blouse, a badge
+  paxson: { skin: "#dcb08a", hair: "tied", hairColor: "#2a1e1a", jaw: "narrow", outfit: "blazer", outfitColor: "#1f2a4a", accent: "#f4eef8", extras: ["badge"], bg: ["#4aa3ff", "#1b1034"], mood: "stern" },
+  // Carla: long straight honey-blond hair, a white jacket over a dark top, a cold stare
+  carla: { skin: "#f1cfae", hair: "long", hairColor: "#c9a066", jaw: "narrow", outfit: "blazer", outfitColor: "#efeae4", accent: "#4a3f46", bg: ["#ff4d5e", "#3a0f4a"], mood: "stern" },
+  // Cowan: balding with gray sides, a salt-and-pepper beard, a dark blazer over an open white shirt
+  cowan: { skin: "#e3bf9e", hair: "receding", hairColor: "#8d889a", facial: "beard", facialColor: "#7c7886", jaw: "round", face: 1.08, age: 2, outfit: "blazer", outfitColor: "#1b2238", accent: "#f4eef8", bg: ["#8a8aa0", "#2a1f3a"], mood: "worried" },
+  // Larry: swept-back brown-gray hair, a weathered grin, a tan blazer over a light blue shirt
+  larry: { skin: "#cf9a6e", hair: "swept", hairColor: "#6a5a52", jaw: "square", face: 1.04, age: 2, outfit: "blazer", outfitColor: "#b99a73", accent: "#8fb4d6", bg: ["#ff9a3c", "#3a0f4a"], mood: "warm" },
+  // Brennen: light gray-blond hair, clean-shaven and pale, a gray suit with a gray-green tie
+  brennen: { skin: "#efd2b6", hair: "short", hairColor: "#b9b3a4", jaw: "narrow", face: 0.98, age: 1, outfit: "suit", outfitColor: "#7d7b86", accent: "#9aa38a", bg: ["#2ee6d6", "#1b1034"], mood: "worried" },
+  // Strickler: thick dark hair, aviators, a pink striped shirt open at the collar
+  strickler: { skin: "#d4a47c", hair: "tousled", hairColor: "#3a2a20", glasses: "aviator", jaw: "narrow", outfit: "shirt", outfitColor: "#e17fb8", accent: "#fbe7f2", stripes: "#fbe7f2", bg: ["#ffd166", "#3a0f4a"], mood: "sly" },
+  // Gilroy: short tousled dark hair, a self-satisfied smirk, a cream blazer over a white shirt
+  gilroy: { skin: "#ecc6a2", hair: "tousled", hairColor: "#3b2a22", jaw: "square", outfit: "blazer", outfitColor: "#dcc79c", accent: "#f4eef8", bg: ["#ff4d5e", "#150c20"], mood: "sly" },
+  // Barrett: combed dark-gray hair, a ruddy weathered face, a dark suit with a red tie
+  barrett: { skin: "#d9a384", hair: "short", hairColor: "#5b4c46", jaw: "square", face: 1.08, age: 2, outfit: "suit", outfitColor: "#171826", accent: "#7a1d2a", bg: ["#4aa3ff", "#150c20"], mood: "stern" },
+  // Anson: tousled ginger hair, a ginger mustache, tinted glasses, a pale blue shirt under a dark vest
+  anson: { skin: "#e8c4a0", hair: "tousled", hairColor: "#d99a5a", facial: "mustache", facialColor: "#c98a52", glasses: "square", tint: "#7a5a3a", jaw: "narrow", age: 2, outfit: "vest", outfitColor: "#23232e", accent: "#a9c4e8", bg: ["#7b5cff", "#2a1f3a"], mood: "warm" },
+  // Vaughn: bald, dark sunglasses, a gray blazer over an orange polo, a knowing smile
+  vaughn: { skin: "#7a4a2c", hair: "bald", hairColor: "#1b1320", glasses: "shades", jaw: "round", face: 1.1, age: 1, outfit: "blazer", outfitColor: "#a9a6ad", accent: "#e8a44a", bg: ["#4aa3ff", "#150c20"], mood: "warm" },
+  // Card: thin swept sandy-gray hair, a lined tan face, a white shirt with the sleeves rolled
+  card: { skin: "#dcae8c", hair: "short", hairColor: "#a89a82", jaw: "square", age: 2, outfit: "shirt", outfitColor: "#f1eeea", accent: "#cfc9c0", bg: ["#ff9a3c", "#2a1f3a"], mood: "stern" },
+  // Gray: messy sandy hair, stubble, a black leather vest over a dark shirt
+  gray: { skin: "#d9ac84", hair: "tousled", hairColor: "#9a7a4a", facial: "stubble", facialColor: "#7a5a34", jaw: "narrow", age: 1, outfit: "leather", outfitColor: "#17141c", accent: "#2a2430", bg: ["#5fe59a", "#150c20"], mood: "stern" },
+  // Riley: drawn from her role (a sharp, observant CIA officer); the wiki has no reference photo for her
+  riley: { skin: "#8a5230", hair: "short", hairColor: "#1b1320", glasses: "square", jaw: "narrow", outfit: "blazer", outfitColor: "#1f2a44", accent: "#f4eef8", bg: ["#ff4fa3", "#150c20"], mood: "calm" },
 };

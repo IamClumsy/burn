@@ -31,20 +31,52 @@ describe("character sketches", () => {
     expect(new Set(svgs).size).toBe(svgs.length);
   });
 
-  it("the look matches the character: Sam's shirt, Madeline's cigarette, Seymour's shades", () => {
+  it("the look matches the character, as seen on screen", () => {
     expect(LOOKS.sam.outfit).toBe("hawaiian");
-    expect(LOOKS.madeline.extras).toContain("cig");
-    expect(LOOKS.seymour.glasses).toBe("shades");
+    expect(LOOKS.sam.extras).toContain("chain");
+    expect(LOOKS.sam.facial).toBe("goatee");
+    expect(LOOKS.barry.glasses).toBe("aviator");
+    expect(LOOKS.barry.facial).toBe("goatee");
+    expect(LOOKS.seymour.facial).toBe("beard");
+    expect(LOOKS.seymour.hair).toBe("wild");
+    expect(LOOKS.madeline.extras).toContain("hoops");
+    expect(LOOKS.madeline.hair).toBe("curly");
     expect(LOOKS.paxson.extras).toContain("badge");
-    expect(LOOKS.fiona.outfit).toBe("leather");
-    expect(LOOKS.michael.glasses).toBe("shades");
-    expect(portraitSVG(LOOKS.madeline)).toContain("#ff8a1f"); // the cigarette's glowing tip
+    expect(LOOKS.fiona.hair).toBe("long");
+    expect(LOOKS.vaughn.hair).toBe("bald");
+    expect(LOOKS.vaughn.glasses).toBe("shades");
+    expect(LOOKS.strickler.stripes).toBeTruthy();
+    expect(LOOKS.jesse.hair).toBe("buzz");
+    expect(LOOKS.anson.tint).toBeTruthy();
+    expect(LOOKS.cowan.facial).toBe("beard");
   });
 
-  it("women and men are drawn with the right styling", () => {
+  it("older characters look older", () => {
+    for (const id of ["cowan", "larry", "barrett", "card", "madeline", "anson"]) expect(LOOKS[id].age, id).toBe(2);
+    for (const id of ["michael", "nate", "jesse"]) expect(LOOKS[id].age ?? 0, id).toBe(0);
+    expect(portraitSVG(LOOKS.cowan)).not.toBe(portraitSVG({ ...LOOKS.cowan, age: 0 }));
+  });
+
+  it("the new drawing features all draw something", () => {
+    const base = { ...LOOKS.michael };
+    const plain = portraitSVG(base);
+    for (const change of [
+      { jaw: "narrow" as const }, { jaw: "round" as const }, { glasses: "aviator" as const }, { glasses: "round" as const },
+      { facial: "beard" as const }, { stripes: "#ffffff", outfit: "shirt" as const }, { outfit: "vest" as const },
+      { extras: ["hoops" as const] }, { extras: ["earring" as const] }, { extras: ["chain" as const] }, { hair: "swept" as const },
+    ]) {
+      expect(portraitSVG({ ...base, ...change }), JSON.stringify(change)).not.toBe(plain);
+    }
+  });
+
+  it("every portrait's gradient and clip ids are unique, so sketches never clash on one page", () => {
+    const ids = Object.values(LOOKS).flatMap(l => [...portraitSVG(l).matchAll(/id="((?:bg|sh|body)-[a-z0-9]+)"/g)].map(m => m[1]));
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("women are drawn with hair that suits them", () => {
     for (const id of ["fiona", "madeline", "carla", "paxson", "riley"]) {
-      const l = LOOKS[id];
-      expect(["long", "bob", "tied", "short", "ponytail"], id).toContain(l.hair);
+      expect(["long", "bob", "tied", "short", "ponytail", "curly"], id).toContain(LOOKS[id].hair);
     }
   });
 

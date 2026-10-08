@@ -48,7 +48,7 @@ export const FAQ: FaqSection[] = [
     {q: "Where do the missions come from?",
      a: () => "Every mission is adapted from an episode of the show, and the board shows which one. Season 1 cases are open from the start, and later seasons open as you earn more, so the cases get bigger as Michael's reputation grows. The Missions card keeps count of how many episodes you've worked."},
     {q: "Who are the faces?",
-     a: () => "Original character sketches, drawn for the game from how each person looks and acts: Sam's loud shirt, Fiona's leather jacket, Seymour's shades. They show up in Crew, Rogues, The List and boss encounters, and someone you haven't met yet is a silhouette until you do. They're illustrations, not photos or likenesses of the actors."},
+     a: () => "Original character sketches, drawn for the game from how each character looks on screen: Sam's swept-back hair and gold chain, Barry's aviators, Seymour's curls and beard, Vaughn's shades. They show up in Crew, Rogues, The List and boss encounters, and someone you haven't met yet is a silhouette until you do. They're stylized illustrations, not photographs."},
     {q: "What's the spy notebook?",
      a: () => "Each episode's mission has a spy tip attached. Complete the mission and the tip goes into your Spy notebook, at the bottom of the Case File. Mission cards also name the client and who you're up against, and the narration mentions them when you win or lose."},
     {q: "Why do missions with kids never fail?",

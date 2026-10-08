@@ -1,7 +1,7 @@
 import { S } from "../state";
 import type { ContactId } from "../types";
 import {
-  REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
+  REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
@@ -234,8 +234,8 @@ function favors(): string {
 
 function rogues(): string {
   return `<div class="small" style="margin-bottom:8px">Bosses turn up about every ${bossGapText()}. Outmaneuver each one once for a permanent +3% income. Next one in about ${Math.ceil(Math.max(0, S.bossCd) / 60)} min.</div>` +
-    BOSSES.map(b => {
-      const open = S.life >= b.at, k = S.bossKills[b.id] || 0;
+    BOSSES.map(b0 => {
+      const b = bossView(b0), open = S.life >= b.at, k = S.bossKills[b.id] || 0;
       return `<div class="box" style="${open ? "" : "opacity:.5"}"><div class="who">${portrait(b.id, 56, open)}<div><div class="row"><b>${open ? b.n : "???"}</b><span class="small">${open ? "Outmaneuvered " + k + "×" : "Appears at " + money(b.at) + " lifetime"}</span></div>
         ${open ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">${b.mech}</div>
           ${k > 0 ? `<div class="small" style="margin-top:6px;color:var(--text)"><b>File:</b> ${b.file}</div>` : `<div class="small" style="margin-top:6px">Outmaneuver them once to open their file.</div>`}` : ""}</div></div></div>`;
@@ -295,7 +295,8 @@ function theList(): string {
   h += `<h2 style="margin-top:12px">The List (${beaten}/${BOSSES.length} crossed off)</h2>`;
   h += BOSSES.map(b => {
     const done = S.bossKills[b.id], known = S.listKnown[b.id];
-    const status = done ? "Crossed off" : known ? "Known, not yet faced" : "Unknown";
+    const note = bossView(b).listNote;
+    const status = done ? "Crossed off" : known ? "Known, not yet faced" + (note ? `. ${note}` : "") : "Unknown";
     return `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : known ? "color:var(--text)" : "color:var(--dim)"}"><span style="display:flex;align-items:center;gap:8px">${portrait(b.id, 30, !!(known || done))}${done ? "✓ " : "○ "}${known || done ? b.n : "??????"}</span><span>${status}</span></div>`;
   }).join("");
   h += S.cleanRecord

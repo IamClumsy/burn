@@ -1,5 +1,5 @@
 import { S, earn } from "../state";
-import { actionDmg, allyHere, bossDef, bossHP, conChance, cps, heatMult } from "../calc";
+import { actionDmg, allyHere, bossDef, bossHP, bossView, conChance, cps, heatMult } from "../calc";
 import { CASE_ACTIONS, CREW_LINES, MAX_LEADS, TRAP_MIN_LEADS } from "../data/caseActions";
 import type { CaseAction } from "../types";
 import { BOSSES } from "../data/bosses";
@@ -13,7 +13,7 @@ import { nextBossGap } from "../data/pacing";
 export function spawnBoss(): void {
   const pool = BOSSES.filter(b => S.life >= b.at && (!b.needs || S.allies[b.needs]));
   if (!pool.length) { S.bossCd = 60; return; }
-  const b = pick(pool), max = bossHP(b);
+  const b = bossView(pick(pool)), max = bossHP(b);
   S.boss = { id: b.id, hp: max, max, left: 75 };
   shake(); beep(100, 0.5, "sawtooth", 0.08, -40);
   toast("BOSS: " + b.n, b.title, "bad", true);
@@ -33,7 +33,7 @@ export function winBoss(): void {
     S.favors += 2;
     toast("Fiona's free", "She's furious, grateful, and has a few things to say to him first. +2 favors.", "good");
     say("Fiona walks out on her own two feet and takes a moment with Thomas O'Neill. Then she asks what took so long.");
-  } else say(b.n + " walks away with nothing, which is the best outcome you can ask for.");
+  } else say(b.win ?? b.n + " walks away with nothing, which is the best outcome you can ask for.");
 }
 
 export function loseBoss(): void {
@@ -43,7 +43,7 @@ export function loseBoss(): void {
   S.boss = null; S.bossCd = nextBossGap();
   beep(130, 0.4, "sawtooth", 0.06, -50);
   toast(b.n + " got away", b.m.includes("snatch") ? "−8% cash, extra heat and attention. Fiona is gone for 10 minutes." : "−8% cash, extra heat and attention.", "bad");
-  say(b.m.includes("snatch") ? b.n + " vanishes with Fiona. She'll find her own way out, and it will not be gentle." : b.n + " slips out with what they came for. You'll see them again.");
+  say(b.m.includes("snatch") ? b.n + " vanishes with Fiona. She'll find her own way out, and it will not be gentle." : b.lose ?? b.n + " slips out with what they came for. You'll see them again.");
 }
 
 const def = (k: CaseAction) => CASE_ACTIONS.find(x => x.id === k)!;
@@ -130,7 +130,8 @@ export function tickBoss(dt: number): void {
   }
   const b = S.boss;
   if (b.cd) for (const k in b.cd) if (b.cd[k] > 0) b.cd[k] = Math.max(0, b.cd[k] - dt);
-  const m = bossDef()!.m, has = (t: (typeof m)[number]) => m.includes(t);
+  const def = bossDef()!, m = def.m, has = (t: (typeof m)[number]) => m.includes(t);
+  if (def.lines && Math.random() < dt / 22) say(pick(def.lines)); // now and then, the fight gets a bit of color
   b.hp -= cps() * (has("weak") ? 0.5 : 1.5) * dt;
   b.left -= dt * (has("rush") ? 1.5 : 1);
   const mult = has("heat") && has("att") ? 0.6 : 1;

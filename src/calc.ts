@@ -174,7 +174,11 @@ export const missionReward = (m: Mission): number => Math.floor(capFee((cps() * 
 export const missionKeep = (m: Mission): number => missionReward(m) * KEEP_RATE;
 
 // ---- bosses
-export const bossDef = (): Boss | null => (S.boss ? BOSSES.find(b => b.id === S.boss!.id) || null : null);
+/** Has the story moved past the beat that changes this boss? */
+const afterBeat = (b: Boss): boolean => !!b.after && S.story > STORY.findIndex(s => s.t === b.after!.beat);
+/** The boss as the game should show them now: after their story beat, the rewritten version. */
+export const bossView = (b: Boss): Boss => (b.after && afterBeat(b) ? { ...b, ...b.after, listNote: b.after.listNote } : b);
+export const bossDef = (): Boss | null => { const b = S.boss ? BOSSES.find(x => x.id === S.boss!.id) : undefined; return b ? bossView(b) : null; };
 export const bossHP = (b: Boss): number => (cps() * 400 + clickVal() * 200 + 500) * b.hpm;
 /**
  * Progress an action makes against a boss's cover, as a fraction of it (pct). Tougher bosses

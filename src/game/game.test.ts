@@ -33,7 +33,7 @@ import { formatWait } from "../util";
 import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss, tickBoss } from "./bosses";
-import { awayWhy, clickVal, tierDef } from "../calc";
+import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
 import { spawnClient, spawnEvent } from "./events";
 import { seasonOf } from "../data/missions";
 import { EP_NOTES } from "../data/episodeNotes";
@@ -887,6 +887,48 @@ describe("Event options that need an ally", () => {
   it("and shows when he is", () => {
     S.allies.jesse = true;
     expect(showFootballEvent()).toContain("Bring Jesse in");
+  });
+});
+
+describe("Carla's Last Orders", () => {
+  const carla = () => BOSSES.find(b => b.id === "carla")!;
+  const lesser = () => STORY.findIndex(b => b.t === "Lesser Evil");
+
+  it("is the plain Carla until the story passes her death, then her Last Orders", () => {
+    S.story = lesser();
+    expect(bossView(carla()).n).toBe("Carla Baxter");
+    S.story = lesser() + 1;
+    const v = bossView(carla());
+    expect(v.n).toBe("Carla's Last Orders");
+    expect(v.m).toContain("rush");
+    expect(v.hpm).toBe(carla().hpm); // same fight
+    expect(v.intro).toMatch(/recording/);
+  });
+
+  it("uses the new voice for arrival, the card, the fight, the file and The List", () => {
+    S.story = lesser() + 1; S.life = 1e12;
+    S.boss = { id: "carla", hp: 1e15, max: 1e15, left: 60 };
+    expect(bossDef()!.n).toBe("Carla's Last Orders");
+    expect(tabTitle()).toContain("Carla's Last Orders");
+    S.bossKills.carla = 1;
+    expect(panelHTML("rogue")).toContain("Carla's Last Orders");
+    expect(panelHTML("rogue")).toContain("shot by Fiona");
+    S.bossKills.carla = 0; S.listKnown.carla = true;
+    expect(panelHTML("list")).toContain("Carla Baxter");
+    expect(panelHTML("list")).toContain("Dead, but not finished.");
+  });
+
+  it("winning and losing use her lines", () => {
+    S.story = lesser() + 1; S.life = 1e12;
+    S.boss = { id: "carla", hp: 0, max: 1e6, left: 60 };
+    tickBoss(1);
+    expect(document.getElementById("log")!.textContent).toMatch(/Carla isn't in the room/);
+  });
+
+  it("before her death she's the same Carla as ever", () => {
+    S.story = 0; S.life = 1e12;
+    S.boss = { id: "carla", hp: 1e15, max: 1e15, left: 60 };
+    expect(bossDef()!.n).toBe("Carla Baxter");
   });
 });
 

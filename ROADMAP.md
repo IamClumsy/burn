@@ -69,4 +69,4 @@ Say what the reset would give you before you do it:
 
 ## Done recently, for reference
 
-Full-rate offline progress (24 h cap), a "Welcome back" summary card, a live tab title, number safety (finite totals, a scientific-notation switch, sanitized saves), a backup reminder, Barry selling favors, Victor then Simon then Pearce as the intel contact, Thomas O'Neill as a Rogue, staged Nate story beats, Michael's File, the rotating-to-ready case tile, and the header skyline.
+Crew events, automation unlocks, a Stats card, a Reinstate preview with Fiona's time off, the epilogue, and Cowan's and Anson's after-the-story fights; 30 fixers; full-rate offline progress (24 h cap), a "Welcome back" summary card, a live tab title, number safety (finite totals, a scientific-notation switch, sanitized saves), a backup reminder, Barry selling favors, Victor then Simon then Pearce as the intel contact, Thomas O'Neill as a Rogue, staged Nate story beats, Michael's File, the rotating-to-ready case tile, and the header skyline.

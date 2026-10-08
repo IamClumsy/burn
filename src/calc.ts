@@ -114,10 +114,13 @@ export const bribeDrop = (): number => S.fixer?.drop ?? 40;
  * and Barry negotiates a discount.
  */
 const CONTACT_PRICING = { seymour: { base: 0.8, grow: 1.12 }, simon: { base: 1.3, grow: 1.15 } } as const;
+/** Michael never has that kind of money: whatever your income, a frienemy never asks more than this. */
+export const CONTACT_CAP = 100_000;
 export const contactPrice = (id: "seymour" | "simon"): number => {
   const { base, grow } = CONTACT_PRICING[id];
   const bought = id === "seymour" ? S.seymourBought : S.simonBought;
-  return Math.max(500, cps() * 90) * base * Math.pow(grow, bought) * (S.allies.barry ? 0.75 : 1);
+  const raw = Math.max(500, cps() * 90) * base * Math.pow(grow, bought);
+  return Math.min(CONTACT_CAP, raw) * (S.allies.barry ? 0.75 : 1); // Barry's discount comes off the capped price
 };
 /** Seymour will take about half in cash if you'll spend the afternoon with him. */
 export const hangOutPrice = (): number => contactPrice("seymour") * 0.55;

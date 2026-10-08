@@ -21,7 +21,7 @@ import { loftBadges } from "../ui/badges";
 import { say, toast } from "../ui/fx";
 import { dismissAllNotices, dismissNotice, initNotices, noticeCount, noticeOpen } from "../ui/notice";
 import { showChoice, choiceBusy } from "../ui/choice";
-import { allyFree, allyHere, contactPrice, hangOutPrice, succChance } from "../calc";
+import { CONTACT_CAP, allyFree, allyHere, contactPrice, hangOutPrice, succChance } from "../calc";
 import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss } from "./bosses";
@@ -708,6 +708,43 @@ describe("FAQ pop-up", () => {
     const html = panelHTML("faq");
     expect(html).toContain('id="faqSearch"');
     for (const sec of FAQ) for (const it of sec.items) expect(html).toContain(it.q);
+  });
+});
+
+describe("what Michael can afford to pay frienemies", () => {
+  it("favors never cost more than $100K, however rich you get", () => {
+    S.gens.inf = 1e9; // an absurd income
+    expect(contactPrice("seymour")).toBe(CONTACT_CAP);
+    expect(contactPrice("simon")).toBe(CONTACT_CAP);
+    S.seymourBought = 40; S.simonBought = 40;
+    expect(contactPrice("seymour")).toBe(CONTACT_CAP);
+    expect(contactPrice("simon")).toBe(CONTACT_CAP);
+  });
+
+  it("Barry still gets his discount off the capped price", () => {
+    S.gens.inf = 1e9; S.allies.barry = true;
+    expect(contactPrice("seymour")).toBe(CONTACT_CAP * 0.75);
+  });
+
+  it("spending the afternoon with Seymour is never more than about half that", () => {
+    S.gens.inf = 1e9;
+    expect(hangOutPrice()).toBeCloseTo(CONTACT_CAP * 0.55);
+    expect(hangOutPrice()).toBeLessThan(CONTACT_CAP);
+  });
+
+  it("early on, prices are unchanged and still climb with each favor", () => {
+    S.gens.inf = 20; S.cash = 1e6;
+    const before = contactPrice("seymour");
+    expect(before).toBeLessThan(CONTACT_CAP);
+    buyFavorFrom("seymour");
+    expect(contactPrice("seymour")).toBeGreaterThan(before);
+  });
+
+  it("the Favors pop-up never shows a price over $100K", () => {
+    S.gens.inf = 1e9; S.life = 1e12;
+    const html = panelHTML("fav");
+    expect(html).not.toMatch(/\$\d+(\.\d+)?M/); // no millions in the frienemy rows
+    expect(html).toContain("$100K");
   });
 });
 

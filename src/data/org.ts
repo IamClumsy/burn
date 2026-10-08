@@ -1,3 +1,5 @@
+import type { FixerQuote } from "../types";
+
 /** Everything about the Organization: how closely they watch you, how tight their grip is, what they know. */
 
 export interface Tier { name: string; min: number; heat: number; succ: number; note: string }
@@ -57,3 +59,28 @@ export const ERRANDS: Errand[] = [
   {n:"Keep an eye on a man for a week", d:"A quiet watch job on someone they're curious about. No contact, no trouble, no excuses."},
   {n:"Escort a witness out of the city", d:"A frightened witness needs to leave Miami before dawn. They'd rather it wasn't official."},
 ];
+
+// ---- fixers ----
+
+const FIXER_NAMES = [
+  "Eddie from the docks", "Walt from customs", "Marisol at the courthouse", "Lou the bookie",
+  "Ray, the retired agent with a grudge", "Dee, the night manager", "Nico, a fixer's cousin", "Priya, a lawyer who owes Sam",
+];
+export const FIXER_MIN_MULT = 0.6;
+export const FIXER_MAX_MULT = 1.8;
+
+/**
+ * A fixer turns up with their own price and their own reach. Dearer fixers tend to do more good,
+ * but there's luck in it: a cheap one is sometimes great, and a pricey one sometimes isn't.
+ */
+export function rollFixer(rand: () => number = Math.random): FixerQuote {
+  const mult = FIXER_MIN_MULT + rand() * (FIXER_MAX_MULT - FIXER_MIN_MULT);
+  const quality = (mult - FIXER_MIN_MULT) / (FIXER_MAX_MULT - FIXER_MIN_MULT);
+  const drop = Math.round(25 + quality * 25 + rand() * 6);
+  return {
+    name: FIXER_NAMES[Math.floor(rand() * FIXER_NAMES.length)],
+    mult: Math.round(mult * 100) / 100,
+    drop,
+    left: 45 + rand() * 45,
+  };
+}

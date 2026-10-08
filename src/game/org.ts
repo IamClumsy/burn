@@ -1,7 +1,7 @@
 import { S, KEEP_RATE, payClient } from "../state";
 import { attTier, cps } from "../calc";
 import { BOSSES } from "../data/bosses";
-import { ERRANDS, GRIP_PERKS, TIERS, TIER_DOWN, TIER_UP, handlerFor } from "../data/org";
+import { ERRANDS, GRIP_PERKS, TIERS, TIER_DOWN, TIER_UP, handlerFor, rollFixer } from "../data/org";
 import { chime } from "../audio";
 import { money, pick } from "../util";
 import { say, toast } from "../ui/fx";
@@ -14,9 +14,14 @@ let lastTier = 0;
 /** Call after loading a save so the current stage isn't announced as news. */
 export const syncTier = (): void => { lastTier = attTier(); };
 
-/** Track the attention peak (fills in their dossier) and narrate stage changes. */
-export function tickOrg(): void {
+/** Fixers come and go: when one moves on, another turns up asking something different. */
+export function newFixer(): void { S.fixer = rollFixer(); }
+
+/** Track the attention peak (fills in their dossier), the fixer on offer, and narrate stage changes. */
+export function tickOrg(dt = 0): void {
   if (S.att > S.attPeak) S.attPeak = S.att;
+  if (!S.fixer) newFixer();
+  else { S.fixer.left -= dt; if (S.fixer.left <= 0) newFixer(); }
   const t = attTier();
   if (t === lastTier) return;
   const up = t > lastTier;

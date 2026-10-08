@@ -1,7 +1,7 @@
 import { S } from "../state";
 import { fresh, setState } from "../state";
 import {
-  allyHere, bribeCost, bulkCost, buyN, credGain, owned, perk, perkCost, contactPrice,
+  allyHere, bribeCost, bribeDrop, bulkCost, buyN, credGain, owned, perk, perkCost, contactPrice,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -14,7 +14,7 @@ import { pick } from "../util";
 import { say, toast } from "../ui/fx";
 import { ABILITIES } from "./abilities";
 import { checkBurn } from "./heat";
-import { simonTip } from "./org";
+import { newFixer, simonTip } from "./org";
 import { fillBoard, startMission } from "./missions";
 
 export function buyGen(id: string): void {
@@ -111,8 +111,10 @@ export function buyFavorFrom(id: string): void {
 export function payOffFixer(): void {
   const c = bribeCost();
   if (S.cash < c) return;
-  S.cash -= c; S.att = Math.max(0, S.att - 40);
-  say("A fat envelope reaches the right desk. The Organization loses interest for now.");
+  const who = S.fixer?.name ?? "A fixer", drop = bribeDrop();
+  S.cash -= c; S.att = Math.max(0, S.att - drop);
+  say(`${who} takes the envelope and makes some calls. The Organization loses interest, by about ${drop} points, for now.`);
+  newFixer(); // that fixer's done; someone else will be along with a different price
 }
 
 export function prestige(): void {

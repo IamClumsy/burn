@@ -46,6 +46,17 @@ export type CaseAction = "investigate" | "con" | "gadget" | "favor" | "trap";
 /** A frienemy: not crew, sells a specific kind of necessary favor for cash. */
 export interface Contact { id: "seymour" | "simon"; name: string; kind: string; bio: string; pitch: string }
 
+/** The fixer currently on offer: a different price and result each time one turns up. */
+export interface FixerQuote {
+  name: string;
+  /** Price multiplier (cheaper or pricier than the going rate). */
+  mult: number;
+  /** How much Organization attention they can take off. */
+  drop: number;
+  /** Seconds until this fixer moves on and another shows up. */
+  left: number;
+}
+
 export interface Perk { id: string; name: string; desc: string }
 export interface Recipe { id: string; name: string; desc: string; need: Dict<number> }
 /** Permanent bonuses a story choice can grant. Values are fractions: inc 0.1 means +10% income. */
@@ -91,6 +102,8 @@ export interface GameState {
   attPeak: number;
   /** True once the List is complete and the burn is lifted. */
   cleanRecord: boolean;
+  /** The fixer currently offering a payoff. */
+  fixer: FixerQuote | null;
   /** Story choices: beat index -> option index. */
   choices: Dict<number>;
   /** Multi-step cases: current step per arc, and which are closed. */

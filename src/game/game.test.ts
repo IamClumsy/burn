@@ -10,7 +10,10 @@ import { arcAvailable, startArc } from "./arcs";
 import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
 import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missionReward } from "../calc";
-import { allBeaten, checkEnding, reduceGrip, simonTip, spawnErrand } from "./org";
+import { allBeaten, checkEnding, newFixer, reduceGrip, simonTip, spawnErrand, tickOrg } from "./org";
+import { FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
+import { bribeCost, bribeDrop } from "../calc";
+import { payOffFixer } from "./actions";
 import { GRIP_PERKS, TIERS } from "../data/org";
 import { FAQ } from "../data/faq";
 import { allyFree, allyHere, contactPrice, succChance } from "../calc";
@@ -273,6 +276,63 @@ describe("client at the door", () => {
     spawnClient(); // would overwrite the open dialog if it didn't wait
     expect(document.getElementById("evtT")!.textContent).toBe(first);
     buttons()[1].click();
+  });
+});
+
+describe("fixers", () => {
+  it("every fixer asks something different, within sane bounds", () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 200; i++) {
+      const f = rollFixer();
+      expect(f.mult).toBeGreaterThanOrEqual(FIXER_MIN_MULT);
+      expect(f.mult).toBeLessThanOrEqual(FIXER_MAX_MULT);
+      expect(f.drop).toBeGreaterThanOrEqual(25);
+      expect(f.drop).toBeLessThanOrEqual(56);
+      seen.add(f.mult + ":" + f.drop);
+    }
+    expect(seen.size).toBeGreaterThan(50);
+  });
+
+  it("dearer fixers do more good on average", () => {
+    let cheap = 0, dear = 0, nCheap = 0, nDear = 0;
+    for (let i = 0; i < 2000; i++) {
+      const f = rollFixer();
+      if (f.mult < 1) { cheap += f.drop; nCheap++; } else { dear += f.drop; nDear++; }
+    }
+    expect(dear / nDear).toBeGreaterThan(cheap / nCheap);
+  });
+
+  it("the price depends on who's offering and how close the Organization is", () => {
+    S.gens.inf = 20; S.att = 0;
+    S.fixer = { name: "A", mult: 1, drop: 40, left: 60 };
+    const base = bribeCost();
+    S.fixer = { name: "B", mult: 1.5, drop: 40, left: 60 };
+    expect(bribeCost()).toBeCloseTo(base * 1.5);
+    S.fixer = { name: "A", mult: 1, drop: 40, left: 60 };
+    S.att = 50;
+    expect(bribeCost()).toBeCloseTo(base * 1.5);
+    S.att = 100;
+    expect(bribeCost()).toBeCloseTo(base * 2);
+  });
+
+  it("paying uses that fixer's reach, then someone new turns up", () => {
+    S.gens.inf = 20; S.cash = 1e9; S.att = 80;
+    const lou = { name: "Lou the bookie", mult: 1, drop: 33, left: 60 };
+    S.fixer = lou;
+    expect(bribeDrop()).toBe(33);
+    payOffFixer();
+    expect(S.att).toBe(47);
+    expect(S.fixer).not.toBe(lou); // Lou's done; a different fixer is on offer now
+    expect(S.fixer!.left).toBeGreaterThan(40);
+  });
+
+  it("fixers move on after a while", () => {
+    newFixer();
+    const first = S.fixer!;
+    first.left = 0.5;
+    tickOrg(1);
+    expect(S.fixer).not.toBe(first);
+    expect(S.fixer!.left).toBeGreaterThan(40);
   });
 });
 

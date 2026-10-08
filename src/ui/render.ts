@@ -1,5 +1,5 @@
 import { S } from "../state";
-import { bossDef, bribeCost, clickVal, cover, cps, layAmt, tierDef } from "../calc";
+import { bossDef, bribeCost, bribeDrop, clickVal, cover, cps, layAmt, tierDef } from "../calc";
 import { FX_NAMES } from "../data/perks";
 import { money } from "../util";
 import type { CaseAction } from "../types";
@@ -38,7 +38,7 @@ export function render(): void {
   $("attbar").style.width = Math.min(100, S.att) + "%";
   setText($("lay"), S.layCd > 0 ? `Lay Low (${Math.ceil(S.layCd)}s)` : `Lay Low (−${layAmt()} heat)`);
   $<HTMLButtonElement>("lay").disabled = S.layCd > 0 || layBlocked();
-  setText($("bribe"), `Pay Off a Fixer (${money(bribeCost())}, −40)`);
+  setText($("bribe"), `${S.fixer ? "Pay off " + S.fixer.name : "Pay Off a Fixer"} (${money(bribeCost())}, −${bribeDrop()})`);
   $<HTMLButtonElement>("bribe").disabled = S.cash < bribeCost();
 
   const bd = bossDef();

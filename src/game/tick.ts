@@ -72,7 +72,7 @@ export function tick(dt: number): void {
 
   tickBoss(dt);
   tickNate(dt);
-  tickOrg();
+  tickOrg(dt);
 
   if (S.upgs.h3 && S.heat >= 90) layLow();
   if (S.allies.madeline && S.heat >= 95) layLow();

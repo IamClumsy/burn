@@ -96,7 +96,14 @@ export function maxAfford(g: Gen): number {
 }
 export const buyN = (g: Gen): number => (S.buyAmt === "max" ? Math.max(1, maxAfford(g)) : S.buyAmt);
 
-export const bribeCost = (): number => Math.max(100, cps() * 60) * (S.allies.barry ? 0.5 : 1) * gripFixer();
+/**
+ * What the current fixer wants. It varies with who's on offer, climbs as the Organization closes in
+ * (up to double at full attention), and Barry and a loosened grip bring it down.
+ */
+export const bribeCost = (): number =>
+  Math.max(100, cps() * 60) * (S.fixer?.mult ?? 1) * (1 + S.att / 100) * (S.allies.barry ? 0.5 : 1) * gripFixer();
+/** How much attention the current fixer can take off. */
+export const bribeDrop = (): number => S.fixer?.drop ?? 40;
 /** Frienemy favors get pricier with each purchase (resets on reinstatement). Barry negotiates a discount. */
 export const contactPrice = (id: "seymour" | "simon"): number =>
   Math.max(500, cps() * 90) * Math.pow(1.12, id === "seymour" ? S.seymourBought : S.simonBought) * (S.allies.barry ? 0.75 : 1);

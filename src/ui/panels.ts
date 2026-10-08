@@ -135,7 +135,7 @@ function upgrades(): string {
 
 function missions(): string {
   const done = Object.keys(S.episodesDone).length;
-  let h = `<div class="small" style="margin-bottom:6px">Case files: <b style="color:var(--text)">${done} of ${MISSIONS.length}</b> episodes · Season ${seasonsOpen(S.life)} cases open</div>
+  let h = `<div class="small mishead">Case files: <b style="color:var(--text)">${done} of ${MISSIONS.length}</b> episodes · Season ${seasonsOpen(S.life)} cases open</div>
     <div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Clients pay well. Michael keeps what he needs for expenses and hands the rest back. Ask an ally for help for +25% success (or +1 favor on cases that can't fail). They're busy until it ends.</div>`;
   const open = ARCS.filter(arcAvailable);
   if (open.length) {

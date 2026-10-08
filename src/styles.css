@@ -41,6 +41,7 @@
   .portrait svg{display:block;width:100%;height:100%}
   .portrait img{display:block;width:100%;height:100%;object-fit:cover}
   .card{position:relative}
+  .mishead{position:sticky;top:0;z-index:3;background:var(--panel);padding:2px 0 7px;margin:0 0 6px;border-bottom:1px solid var(--line)}
   .loftface{position:absolute;top:12px;right:12px}
   .who{display:flex;gap:12px;align-items:flex-start}
   .who > div{min-width:0;flex:1}

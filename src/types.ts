@@ -101,7 +101,9 @@ export interface GameState {
   junk: Dict<number>;
   cover: string; coverCd: number; board: Mission[]; active: ActiveMission[]; uid: number;
   story: number; ach: string[]; stats: Stats;
-  buyAmt: 1 | 10 | 100 | "max"; mute: boolean; seymourBought: number; simonBought: number;
+  buyAmt: 1 | 10 | 100 | "max"; mute: boolean;
+  /** Show important news as centered pop-ups that wait to be accepted. Off means corner toasts. */
+  popups: boolean; seymourBought: number; simonBought: number;
   /** Nate wanders off and returns on a random timer. */
   nateAway: boolean; nateTimer: number;
   /** The Organization's grip on you: starts at 100 and is worn down by wins. */

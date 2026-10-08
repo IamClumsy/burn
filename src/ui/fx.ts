@@ -1,4 +1,6 @@
 import { $ } from "./dom";
+import { S } from "../state";
+import { notify, type NoticeKind } from "./notice";
 
 let freshTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -17,7 +19,18 @@ export function say(t: string): void {
   freshTimer = setTimeout(() => summary.classList.remove("fresh"), 1400);
 }
 
-export function toast(title: string, msg = ""): void {
+export type ToastKind = NoticeKind | "minor";
+
+/**
+ * Tell the player something. Important news pops up in the middle of the screen until they accept it;
+ * "minor" news (or everything, if pop-ups are off) slides into the corner for a few seconds instead.
+ */
+export function toast(title: string, msg = "", kind: ToastKind = "gold"): void {
+  if (kind === "minor" || !S.popups) { cornerToast(title, msg); return; }
+  notify(title, msg, kind);
+}
+
+function cornerToast(title: string, msg: string): void {
   const d = document.createElement("div");
   d.className = "toast";
   const b = document.createElement("b");

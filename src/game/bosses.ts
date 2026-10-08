@@ -16,7 +16,7 @@ export function spawnBoss(): void {
   const b = pick(pool), max = bossHP(b);
   S.boss = { id: b.id, hp: max, max, left: 75 };
   shake(); beep(100, 0.5, "sawtooth", 0.08, -40);
-  toast("BOSS: " + b.n, b.title);
+  toast("BOSS: " + b.n, b.title, "bad");
   say(b.intro);
 }
 
@@ -28,7 +28,7 @@ export function winBoss(): void {
   learnName(b.id); reduceGrip(5);
   S.boss = null; S.bossCd = nextBossGap();
   chime();
-  toast(b.n + " outmaneuvered", `+${money(reward)}, +${fav} favors${first ? " · first win: +3% income forever" : ""}`);
+  toast(b.n + " outmaneuvered", `+${money(reward)}, +${fav} favors${first ? " · first win: +3% income forever" : ""}`, "good");
   say(b.n + " walks away with nothing, which is the best outcome you can ask for.");
 }
 
@@ -37,7 +37,7 @@ export function loseBoss(): void {
   S.cash *= 0.92; S.heat += 15; S.att = Math.min(99, S.att + 20);
   S.boss = null; S.bossCd = nextBossGap();
   beep(130, 0.4, "sawtooth", 0.06, -50);
-  toast(b.n + " got away", "−8% cash, extra heat and attention.");
+  toast(b.n + " got away", "−8% cash, extra heat and attention.", "bad");
   say(b.n + " slips out with what they came for. You'll see them again.");
 }
 

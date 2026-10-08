@@ -22,7 +22,7 @@ export function milestones(): void {
   const open = seasonsOpen(S.life);
   if (open > S.seasonOpen) {
     S.seasonOpen = open;
-    toast(`Season ${open} cases are open`, "New clients are knocking, and the cases are getting bigger.");
+    toast(`Season ${open} cases are open`, "New clients are knocking, and the cases are getting bigger.", "story");
     say(`Word spreads. Season ${open} cases start turning up on your board.`);
     chime();
   }
@@ -31,7 +31,7 @@ export function milestones(): void {
     // A decision needs the dialog free; try again next second if something else is open.
     if (s.choice && choiceBusy()) break;
     S.story++; S.favors += s.fav;
-    toast("Case File: " + s.t, s.x.slice(0, 90) + "… (+" + s.fav + " favors)");
+    toast("Case File: " + s.t, s.x.slice(0, 90) + "… (+" + s.fav + " favors)", "story");
     say(s.x); chime();
     if (s.choice) {
       showChoice(s.t, s.choice.prompt, s.choice.options.map((o, k): [string, () => string] => [o.label, () => {
@@ -67,7 +67,7 @@ export function tickNate(dt: number): void {
   S.nateAway = !S.nateAway;
   S.nateTimer = S.nateAway ? 45 + Math.random() * 105 : 60 + Math.random() * 120;
   const line = pick(S.nateAway ? LINES.nateAway : LINES.nateBack);
-  toast(S.nateAway ? "Nate wandered off" : "Nate's back", line);
+  toast(S.nateAway ? "Nate wandered off" : "Nate's back", line, "minor");
   say(line);
 }
 

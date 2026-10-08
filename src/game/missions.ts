@@ -57,7 +57,7 @@ export function resolveMission(m: ActiveMission): void {
     if (won) say(won);
     if (note) say("Spy tip: " + note.tip);
     if (Math.random() < 0.4) say(pick(LINES.returned));
-    toast("Mission complete: " + m.n, `Paid ${money(m.reward)}. Expenses covered, the rest went back to the people who needed it. +${m.fav} favor`);
+    toast("Mission complete: " + m.n, `Paid ${money(m.reward)}. Expenses covered, the rest went back to the people who needed it. +${m.fav} favor`, "good");
     chime();
   } else {
     S.heat += m.heat * 1.5 * heatMult(); S.stats.mFail++;
@@ -65,7 +65,7 @@ export function resolveMission(m: ActiveMission): void {
     say(pick(LINES.mBad));
     const lost = outcomeLine(m.ep ? EP_NOTES[m.ep] : undefined, false, pick);
     if (lost) say(lost);
-    toast("Mission failed: " + m.n, "Extra heat, no pay.");
+    toast("Mission failed: " + m.n, "Extra heat, no pay.", "bad");
     beep(130, 0.3, "sawtooth", 0.06, -50);
   }
 }

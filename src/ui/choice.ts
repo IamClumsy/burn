@@ -1,8 +1,12 @@
 import { $ } from "./dom";
 import { say, toast } from "./fx";
+import { noticeOpen, pumpNotices } from "./notice";
 
 let open = false;
-export const choiceBusy = (): boolean => open;
+/** A decision is on screen. */
+export const choiceOpen = (): boolean => open;
+/** A decision or a notification is on screen, so nothing new should open. */
+export const choiceBusy = (): boolean => open || noticeOpen();
 
 /**
  * Show a modal decision. Each option runs, returns a result message, and closes the dialog.
@@ -37,10 +41,11 @@ export function showChoice(
     b.onclick = () => {
       const result = run();
       say(result);
-      toast(title, result);
+      toast(title, result, "minor"); // the narrator already says it; no need to pop it up again
       $("evt").style.display = "none";
       open = false;
       onDone?.(result);
+      pumpNotices(); // anything that arrived while you were deciding can show now
     };
     $("evtO").appendChild(b);
   });

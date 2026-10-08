@@ -6,6 +6,7 @@ import { QUOTES } from "./data/text";
 import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
 import { render, showModal } from "./ui/render";
+import { initNotices } from "./ui/notice";
 import { buildLayout, type TabId } from "./ui/panels";
 import { beep } from "./audio";
 import { loadGame, save, wipeSave, exportSave, importSave } from "./persist";
@@ -89,20 +90,24 @@ $("bossacts").addEventListener("click", e => {
 
 // ---- footer
 const syncMute = () => { $("mute").textContent = "sound: " + (S.mute ? "off" : "on"); };
+const syncPopups = () => { $("popups").textContent = "pop-ups: " + (S.popups ? "on" : "off"); };
 $("mute").addEventListener("click", () => { S.mute = !S.mute; syncMute(); });
+$("popups").addEventListener("click", () => { S.popups = !S.popups; syncPopups(); });
 $("wipe").addEventListener("click", () => { if (confirm("Wipe your save and start over?")) wipeSave(); });
 $("export").addEventListener("click", exportSave);
 $("import").addEventListener("click", () => {
   const c = prompt("Paste your save code:");
   if (!c) return;
-  if (importSave(c)) { fillBoard(); toast("Save imported"); syncMute(); render(); }
+  if (importSave(c)) { fillBoard(); toast("Save imported", "", "minor"); syncMute(); syncPopups(); render(); }
   else alert("That code didn't work.");
 });
 
 // ---- boot
+initNotices();
 loadGame();
 fillBoard();
 syncMute();
+syncPopups();
 say("Burned. No cash, no credit, no agency. Time to take a job.");
 scheduleClient();
 scheduleEvent();

@@ -35,7 +35,7 @@ export function advanceArc(id: string, step: number): void {
     S.favors += a.favors;
     reduceGrip(8);
     chime();
-    toast("Case closed: " + a.title, `+${a.favors} favors. ${a.epilogue}`);
+    toast("Case closed: " + a.title, `+${a.favors} favors. ${a.epilogue}`, "good");
     say(a.epilogue);
   } else {
     say(`${a.title}: step ${step + 1} done. Next up: ${a.steps[step + 1].n}.`);

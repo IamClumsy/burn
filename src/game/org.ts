@@ -27,7 +27,7 @@ export function tickOrg(dt = 0): void {
   const up = t > lastTier;
   const lines = (up ? TIER_UP : TIER_DOWN)[t];
   if (lines) say(pick(lines));
-  if (up) toast("The Organization: " + TIERS[t].name, TIERS[t].note);
+  if (up) toast("The Organization: " + TIERS[t].name, TIERS[t].note, "bad");
   lastTier = t;
 }
 
@@ -39,7 +39,7 @@ export function reduceGrip(n: number): void {
   for (const p of GRIP_PERKS) {
     if (before > p.at && S.grip <= p.at) {
       chime();
-      toast("Their grip slips: " + p.name, p.desc);
+      toast("Their grip slips: " + p.name, p.desc, "good");
       say(`The Organization's hold on you loosens. ${p.name}: ${p.desc.toLowerCase()}.`);
     }
   }
@@ -53,7 +53,7 @@ export function learnName(id: string): void {
   const b = BOSSES.find(x => x.id === id);
   if (!b) return;
   S.listKnown[id] = true;
-  toast("A name on the List", b.n);
+  toast("A name on the List", b.n, "story");
 }
 
 /** Simon sometimes passes you a name you haven't learned yet. */

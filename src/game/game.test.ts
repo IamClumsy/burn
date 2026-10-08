@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 import { S, fresh, setState } from "../state";
 import { tick, tickNate } from "./tick";
-import { buyFavorFrom, hireAlly, useAbility } from "./actions";
+import { buyFavorFrom, hireAlly, prestige, useAbility } from "./actions";
 import { arcAvailable, startArc } from "./arcs";
 import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
@@ -18,7 +18,9 @@ import { GRIP_PERKS, TIERS } from "../data/org";
 import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
 import { loftBadges } from "../ui/badges";
-import { say } from "../ui/fx";
+import { say, toast } from "../ui/fx";
+import { dismissAllNotices, dismissNotice, initNotices, noticeCount, noticeOpen } from "../ui/notice";
+import { showChoice, choiceBusy } from "../ui/choice";
 import { allyFree, allyHere, contactPrice, hangOutPrice, succChance } from "../calc";
 import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
@@ -39,11 +41,14 @@ beforeAll(() => {
   const html = readFileSync(resolve(__dirname, "../../index.html"), "utf8");
   document.body.innerHTML = html.split("<body>")[1].split("<script")[0];
   buildLayout(document.getElementById("sections")!, document.getElementById("toolbar")!);
+  initNotices();
 });
 
 beforeEach(() => {
   setState(fresh()); fillBoard();
   document.getElementById("log")!.innerHTML = ""; // narration from one test shouldn't leak into the next
+  dismissAllNotices(); // nor should a notification left on screen
+  document.getElementById("toasts")!.innerHTML = "";
 });
 
 describe("frienemies", () => {
@@ -491,6 +496,117 @@ describe("Jesse joins in Season 4", () => {
       S.board = []; fillBoard();
       for (const m of S.board) if (m.ally === "jesse") expect(+m.ep!).toBeGreaterThanOrEqual(402);
     }
+  });
+});
+
+describe("notifications", () => {
+  const shown = () => document.getElementById("notice")!.style.display === "flex";
+  const title = () => document.getElementById("nT")!.textContent;
+
+  it("pop up in the middle of the screen and stay until accepted", () => {
+    toast("Medal: Hustler", "100 jobs");
+    expect(shown()).toBe(true);
+    expect(title()).toBe("Medal: Hustler");
+    expect(document.getElementById("nM")!.textContent).toBe("100 jobs");
+    expect(noticeOpen()).toBe(true);
+    // nothing times it out
+    tick(1);
+    expect(shown()).toBe(true);
+    document.getElementById("nOk")!.click();
+    expect(shown()).toBe(false);
+    expect(noticeOpen()).toBe(false);
+  });
+
+  it("queue up one at a time, in order", () => {
+    toast("First", "a"); toast("Second", "b"); toast("Third", "c");
+    expect(title()).toBe("First");
+    expect(noticeCount()).toBe(3);
+    expect(document.getElementById("nCount")!.textContent).toBe("2 more waiting");
+    dismissNotice();
+    expect(title()).toBe("Second");
+    dismissNotice();
+    expect(title()).toBe("Third");
+    expect(document.getElementById("nCount")!.textContent).toBe("");
+    dismissNotice();
+    expect(shown()).toBe(false);
+  });
+
+  it("can all be dismissed at once", () => {
+    toast("One", ""); toast("Two", ""); toast("Three", "");
+    document.getElementById("nAll")!.click();
+    expect(shown()).toBe(false);
+    expect(noticeCount()).toBe(0);
+  });
+
+  it("are colored by what kind of news they are", () => {
+    toast("Good", "", "good");
+    expect(document.getElementById("ndlg")!.className).toContain("good");
+    dismissNotice();
+    toast("Bad", "", "bad");
+    expect(document.getElementById("ndlg")!.className).toContain("bad");
+    dismissNotice();
+    toast("Plain", "");
+    expect(document.getElementById("ndlg")!.className).toBe("ndlg gold");
+  });
+
+  it("minor news stays in the corner and never blocks you", () => {
+    toast("Nate's back", "He's around again.", "minor");
+    expect(shown()).toBe(false);
+    expect(document.querySelectorAll("#toasts .toast").length).toBe(1);
+  });
+
+  it("go back to corner toasts if you turn pop-ups off", () => {
+    S.popups = false;
+    toast("Medal: Hustler", "100 jobs");
+    expect(shown()).toBe(false);
+    expect(document.querySelectorAll("#toasts .toast").length).toBe(1);
+    S.popups = true;
+  });
+
+  it("Enter, Space and Escape all accept it, and Escape doesn't close anything behind it", () => {
+    for (const key of ["Enter", " ", "Escape"]) {
+      toast("Hey", "");
+      document.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+      expect(shown(), key).toBe(false);
+    }
+  });
+
+  it("ignore keys when nothing is showing", () => {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(shown()).toBe(false);
+  });
+
+  it("wait while you're making a decision, then show", () => {
+    showChoice("A decision", "What do you do?", [["Do it", () => "Done."]]);
+    toast("Mission complete", "Nice.");
+    expect(shown()).toBe(false); // would have covered the decision
+    expect(noticeCount()).toBe(1);
+    (document.querySelector("#evtO button") as HTMLButtonElement).click();
+    expect(shown()).toBe(true);
+    expect(title()).toBe("Mission complete");
+  });
+
+  it("hold back new decisions while one is showing", () => {
+    toast("Heads up", "");
+    expect(choiceBusy()).toBe(true);
+    dismissNotice();
+    expect(choiceBusy()).toBe(false);
+  });
+
+  it("a decision's own result goes to the corner, not a second pop-up", () => {
+    showChoice("Pulled Over", "A cop taps your window.", [["Bluff", () => "He buys it."]]);
+    (document.querySelector("#evtO button") as HTMLButtonElement).click();
+    expect(shown()).toBe(false);
+    expect(document.querySelectorAll("#toasts .toast").length).toBe(1);
+  });
+
+  it("the pop-ups setting survives Reinstate", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    S.popups = false; S.run = 2e8;
+    prestige();
+    expect(S.stats.reinstated).toBe(1);
+    expect(S.popups).toBe(false);
+    vi.restoreAllMocks();
   });
 });
 

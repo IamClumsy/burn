@@ -21,7 +21,9 @@ import { loftBadges } from "../ui/badges";
 import { say, toast } from "../ui/fx";
 import { dismissAllNotices, dismissNotice, initNotices, noticeCount, noticeOpen } from "../ui/notice";
 import { showChoice, choiceBusy } from "../ui/choice";
-import { CONTACT_CAP, allyFree, allyHere, contactPrice, hangOutPrice, succChance } from "../calc";
+import { CONTACT_CAP, allyFree, allyHere, contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance } from "../calc";
+import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
+import { formatWait } from "../util";
 import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss } from "./bosses";
@@ -708,6 +710,98 @@ describe("FAQ pop-up", () => {
     const html = panelHTML("faq");
     expect(html).toContain('id="faqSearch"');
     for (const sec of FAQ) for (const it of sec.items) expect(html).toContain(it.q);
+  });
+});
+
+describe("the daily limit on frienemy favors", () => {
+  const rich = () => { S.cash = 1e12; S.gens.inf = 20; };
+
+  it("each frienemy sells four favors a day, then they're tapped out", () => {
+    rich();
+    expect(FAVORS_PER_DAY).toBe(4);
+    for (let i = 0; i < 4; i++) buyFavorFrom("seymour");
+    expect(S.favors).toBe(4);
+    expect(favorsLeft("seymour")).toBe(0);
+    buyFavorFrom("seymour"); // a fifth, refused
+    expect(S.favors).toBe(4);
+  });
+
+  it("counts down as you buy", () => {
+    rich();
+    expect(favorsLeft("simon")).toBe(4);
+    buyFavorFrom("simon");
+    expect(favorsLeft("simon")).toBe(3);
+    buyFavorFrom("simon");
+    expect(favorsLeft("simon")).toBe(2);
+  });
+
+  it("Seymour and Simon keep separate limits", () => {
+    rich();
+    for (let i = 0; i < 4; i++) buyFavorFrom("seymour");
+    expect(favorsLeft("simon")).toBe(4);
+    buyFavorFrom("simon");
+    expect(S.favors).toBe(5);
+  });
+
+  it("spending the afternoon with Seymour counts toward his limit", () => {
+    rich();
+    for (let i = 0; i < 4; i++) { S.busy = null; buyFavorFrom("seymour", "hangout"); }
+    expect(favorsLeft("seymour")).toBe(0);
+    S.busy = null;
+    buyFavorFrom("seymour", "hangout");
+    expect(S.favors).toBe(4);
+  });
+
+  it("a favor comes back after 24 hours, and not before", () => {
+    const now = Date.now();
+    S.favorLog.seymour = [now - 23 * 3600e3, now - 10 * 3600e3, now - 5 * 3600e3, now - 1 * 3600e3];
+    expect(favorsLeft("seymour", now)).toBe(0);
+    // the oldest was 23 hours ago, so it frees up in an hour
+    expect(nextFavorIn("seymour", now)).toBeCloseTo(3600e3, -3);
+    expect(favorsLeft("seymour", now + 3601e3)).toBe(1);
+    expect(nextFavorIn("seymour", now + 3601e3)).toBe(0);
+    // the second-oldest (10 hours ago) frees up 14 hours from now, so two are back by then
+    expect(favorsLeft("seymour", now + 14.1 * 3600e3)).toBe(2);
+    // and a full day on, all of them are
+    expect(favorsLeft("seymour", now + DAY_MS + 3600e3)).toBe(4);
+  });
+
+  it("old purchases don't pile up in your save", () => {
+    rich();
+    S.favorLog.seymour = [Date.now() - 3 * DAY_MS, Date.now() - 2 * DAY_MS];
+    buyFavorFrom("seymour");
+    expect(S.favorLog.seymour.length).toBe(1);
+  });
+
+  it("the limit survives Reinstate, so it can't be dodged", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    rich(); S.run = 2e8;
+    for (let i = 0; i < 4; i++) buyFavorFrom("seymour");
+    prestige();
+    expect(S.stats.reinstated).toBe(1);
+    expect(favorsLeft("seymour")).toBe(0);
+    vi.restoreAllMocks();
+  });
+
+  it("the Favors pop-up and Crew card say how many are left, and disable buying when none are", () => {
+    rich(); S.life = 1e12;
+    expect(panelHTML("fav")).toContain("4 of 4 left today");
+    buyFavorFrom("simon");
+    expect(panelHTML("fav")).toContain("3 of 4 left today");
+    for (let i = 0; i < 3; i++) buyFavorFrom("simon");
+    const fav = panelHTML("fav"), crew = panelHTML("crew");
+    expect(fav).toContain("Tapped out for today. Back in");
+    expect(crew).toContain("Tapped out for today. Back in");
+    expect(crew).toMatch(/data-act="contact" data-arg="simon" disabled/);
+    expect(crew).not.toMatch(/data-act="contact" data-arg="seymour" disabled/);
+  });
+
+  it("waiting times read naturally", () => {
+    expect(formatWait(30_000)).toBe("30s");
+    expect(formatWait(42 * 60_000)).toBe("42m");
+    expect(formatWait(5 * 3600_000 + 12 * 60_000)).toBe("5h 12m");
+    expect(formatWait(3 * 3600_000)).toBe("3h");
+    expect(formatWait(0)).toBe("1s");
   });
 });
 

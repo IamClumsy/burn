@@ -11,3 +11,13 @@ export function fmt(n: number): string {
 }
 
 export const money = (n: number): string => "$" + fmt(n);
+
+/** "5h 12m", "42m" or "30s", for how long until something is ready. */
+export function formatWait(ms: number): string {
+  const s = Math.max(1, Math.ceil(ms / 1000));
+  if (s < 60) return `${s}s`;
+  const m = Math.ceil(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60), rem = m % 60;
+  return rem ? `${h}h ${rem}m` : `${h}h`;
+}

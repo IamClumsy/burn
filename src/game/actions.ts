@@ -1,7 +1,7 @@
 import { S } from "../state";
 import { fresh, setState } from "../state";
 import {
-  allyHere, bribeCost, bribeDrop, bulkCost, buyN, contactPrice, credGain, hangOutPrice, owned, perk, perkCost,
+  allyHere, bribeCost, bribeDrop, bulkCost, buyN, contactPrice, credGain, favorsLeft, hangOutPrice, owned, perk, perkCost, recentFavors,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -95,11 +95,13 @@ const SIMON_LINES = [
  */
 export function buyFavorFrom(id: string, mode: "cash" | "hangout" = "cash"): void {
   if (id !== "seymour" && id !== "simon") return;
+  if (favorsLeft(id) <= 0) return; // tapped out for today
   const hang = id === "seymour" && mode === "hangout";
   if (hang && S.busy) return; // already tied up with someone
   const c = hang ? hangOutPrice() : contactPrice(id);
   if (S.cash < c) return;
   S.cash -= c; S.favors++;
+  S.favorLog[id] = [...recentFavors(id), Date.now()];
   beep(300, 0.1, "triangle", 0.05);
   if (id === "seymour") {
     S.seymourBought++; S.stats.seymourFavors++;
@@ -137,7 +139,7 @@ export function prestige(): void {
     stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
     choices: S.choices, arcStep: S.arcStep, arcsDone: S.arcsDone,
     grip: S.grip, listKnown: S.listKnown, attPeak: S.attPeak, cleanRecord: S.cleanRecord,
-    episodesDone: S.episodesDone, seasonOpen: S.seasonOpen,
+    episodesDone: S.episodesDone, seasonOpen: S.seasonOpen, favorLog: S.favorLog,
   };
   setState(Object.assign(fresh(), keep));
   S.stats.reinstated++;

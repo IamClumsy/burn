@@ -5,6 +5,7 @@ import { COVERS } from "./data/covers";
 import { BOSSES } from "./data/bosses";
 import { STORY } from "./data/story";
 import { seasonsOpen } from "./data/missions";
+import { DAY_MS, FAVORS_PER_DAY } from "./data/pacing";
 import { GRIP_PERKS, TIERS } from "./data/org";
 import type { Boss, ChoiceFx, Gen, Mission } from "./types";
 
@@ -122,6 +123,18 @@ export const contactPrice = (id: "seymour" | "simon"): number => {
   const raw = Math.max(500, cps() * 90) * base * Math.pow(grow, bought);
   return Math.min(CONTACT_CAP, raw) * (S.allies.barry ? 0.75 : 1); // Barry's discount comes off the capped price
 };
+/** Favors bought from a frienemy in the last 24 hours of real time. */
+export const recentFavors = (id: "seymour" | "simon", now = Date.now()): number[] =>
+  S.favorLog[id].filter(t => now - t < DAY_MS);
+/** How many more they'll sell you today. */
+export const favorsLeft = (id: "seymour" | "simon", now = Date.now()): number =>
+  Math.max(0, FAVORS_PER_DAY - recentFavors(id, now).length);
+/** Milliseconds until they'll sell you another, or 0 if they will now. */
+export function nextFavorIn(id: "seymour" | "simon", now = Date.now()): number {
+  const r = recentFavors(id, now);
+  return r.length < FAVORS_PER_DAY ? 0 : Math.min(...r) + DAY_MS - now;
+}
+
 /** Seymour will take about half in cash if you'll spend the afternoon with him. */
 export const hangOutPrice = (): number => contactPrice("seymour") * 0.55;
 export const perkCost = (id: string): number => Math.ceil(2 * Math.pow(1.5, perk(id)));

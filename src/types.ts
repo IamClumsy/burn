@@ -116,6 +116,8 @@ export interface GameState {
   cleanRecord: boolean;
   /** The fixer currently offering a payoff. */
   fixer: FixerQuote | null;
+  /** When each frienemy last sold you a favor (real timestamps), for their daily limit. */
+  favorLog: { seymour: number[]; simon: number[] };
   /** Episodes whose mission you've completed, by code. */
   episodesDone: Dict<boolean>;
   /** Highest season of cases announced as open. */

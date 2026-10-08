@@ -1,7 +1,7 @@
 import { S } from "../state";
 import {
   REINSTATE_MIN, allyAvailable, baseIncome, tierDef, allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
-  contactPrice, hangOutPrice, succChance,
+  contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -17,11 +17,11 @@ import { EP_NOTES } from "../data/episodeNotes";
 import { CASE_ACTIONS } from "../data/caseActions";
 import { FAQ } from "../data/faq";
 import { portrait } from "./portrait";
-import { bossGapText } from "../data/pacing";
+import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS } from "../data/contacts";
-import { fmt, money } from "../util";
+import { fmt, formatWait, money } from "../util";
 
 export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "med" | "rep";
 
@@ -147,20 +147,27 @@ function missions(): string {
   return h;
 }
 
+/** "3 of 4 left today", or when they'll deal again. */
+function favorStatus(id: "seymour" | "simon"): string {
+  const left = favorsLeft(id);
+  return left > 0 ? `${left} of ${FAVORS_PER_DAY} left today` : `Tapped out for today. Back in ${formatWait(nextFavorIn(id))}`;
+}
+
 function contactItems(): string {
-  return CONTACTS.map(c => item("contact", c.id, S.cash >= contactPrice(c.id), `${c.name}: ${c.kind}`,
-    `${c.pitch}${S.allies.barry ? " Barry negotiates 25% off." : ""}`,
+  return CONTACTS.map(c => item("contact", c.id, S.cash >= contactPrice(c.id) && favorsLeft(c.id) > 0, `${c.name}: ${c.kind}`,
+    `${c.pitch} ${favorStatus(c.id)}.${S.allies.barry ? " Barry negotiates 25% off." : ""}`,
     `<div class="cost">${money(contactPrice(c.id))}</div>`, "", portrait(c.id, 44))).join("") +
-    item("hangout", "seymour", !S.busy && S.cash >= hangOutPrice(), "Seymour Talbot: Spend the afternoon",
-      "He'd sooner be paid in company: he wants you to teach him a move, or come see something he's proud of. About half the cash, but Michael's tied up for 30 to 45 seconds and can't take jobs.",
+    item("hangout", "seymour", !S.busy && S.cash >= hangOutPrice() && favorsLeft("seymour") > 0, "Seymour Talbot: Spend the afternoon",
+      "He'd sooner be paid in company: he wants you to teach him a move, or come see something he's proud of. About half the cash, but Michael's tied up for 30 to 45 seconds and can't take jobs. Counts toward his daily limit.",
       `<div class="cost">${money(hangOutPrice())}</div>`, "", portrait("seymour", 44));
 }
 
 function crew(): string {
   const contact = CONTACTS.map(c => `<div class="box"><div class="who">${portrait(c.id, 64)}<div><div class="row"><b>${c.name}</b><span class="small">Frienemy: ${c.kind.toLowerCase()}</span></div>
     <div class="small">${c.bio}</div>
-    <div class="btns"><button data-act="contact" data-arg="${c.id}" ${S.cash >= contactPrice(c.id) ? "" : "disabled"}>Buy a favor — ${money(contactPrice(c.id))}</button>
-    ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div></div></div></div>`).join("");
+    <div class="btns"><button data-act="contact" data-arg="${c.id}" ${S.cash >= contactPrice(c.id) && favorsLeft(c.id) > 0 ? "" : "disabled"}>Buy a favor — ${money(contactPrice(c.id))}</button>
+    ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() && favorsLeft("seymour") > 0 ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div>
+    <div class="small" style="margin-top:4px">${favorStatus(c.id)}</div></div></div></div>`).join("");
   return contact + ALLIES.map(a => {
     if (!S.allies[a.id] && !allyAvailable(a.debut)) {
       return item("hire", a.id, false, a.name, `${a.bio} Doesn't join the story until Season ${a.debut}.`, `<div class="small">Season ${a.debut}</div>`, "", portrait(a.id, 48, false));

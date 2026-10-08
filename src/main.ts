@@ -7,6 +7,7 @@ import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
 import { render, showModal } from "./ui/render";
 import { initNotices } from "./ui/notice";
+import { portrait } from "./ui/portrait";
 import { buildLayout, type TabId } from "./ui/panels";
 import { beep } from "./audio";
 import { loadGame, save, wipeSave, exportSave, importSave } from "./persist";
@@ -104,6 +105,7 @@ $("import").addEventListener("click", () => {
 
 // ---- boot
 initNotices();
+$("loftface").innerHTML = portrait("michael", 54);
 loadGame();
 fillBoard();
 syncMute();

@@ -6,6 +6,7 @@ import type { CaseAction } from "../types";
 import { CASE_ACTIONS, MAX_LEADS } from "../data/caseActions";
 import { actionBlock } from "../game/bosses";
 import { loftBadges } from "./badges";
+import { portrait } from "./portrait";
 import { $ } from "./dom";
 import { setText } from "./fx";
 import { SECTIONS, panelHTML, patchLive, resetLive, titleOf, type TabId } from "./panels";
@@ -22,6 +23,7 @@ export function showModal(id: TabId | null): void {
 
 const last = new Map<string, string>();
 let lastFx = "";
+let faceFor = "";
 let lastModal = "";
 
 export function render(): void {
@@ -56,6 +58,7 @@ export function render(): void {
   const bd = bossDef();
   $("bosscard").style.display = bd ? "block" : "none";
   if (bd && S.boss) {
+    if (faceFor !== bd.id) { $("bossface").innerHTML = portrait(bd.id, 64); faceFor = bd.id; }
     setText($("bossname"), bd.n);
     setText($("bossmech"), bd.mech);
     $("bosshp").style.width = Math.max(0, S.boss.hp / S.boss.max * 100) + "%";

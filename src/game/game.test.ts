@@ -610,6 +610,49 @@ describe("notifications", () => {
   });
 });
 
+describe("sketches around the game", () => {
+  it("the Crew pop-up shows a portrait for every contact and ally", () => {
+    S.life = 1e12; S.allies.sam = true;
+    const html = panelHTML("crew");
+    for (const id of ["seymour", "simon", "sam", "fiona", "barry", "madeline", "nate", "jesse"]) {
+      expect(html, id).toContain(`Sketch of ${id}`);
+    }
+  });
+
+  it("an ally who hasn't joined the story yet is a silhouette", () => {
+    S.life = 1e6; // before Season 4
+    const html = panelHTML("crew");
+    expect(html).not.toContain("Sketch of jesse");
+    expect(html).toContain("Someone you haven't met");
+  });
+
+  it("Rogues shows faces for the people you've met and silhouettes for the rest", () => {
+    S.life = 1e6; // only the early bosses are open
+    const html = panelHTML("rogue");
+    expect(html).toContain("Sketch of paxson");
+    expect(html).not.toContain("Sketch of riley");
+  });
+
+  it("The List only reveals the faces of names you know", () => {
+    S.life = 1e12;
+    let html = panelHTML("list");
+    expect(html).not.toContain("Sketch of paxson");
+    S.listKnown.paxson = true; S.bossKills.carla = 1;
+    html = panelHTML("list");
+    expect(html).toContain("Sketch of paxson");
+    expect(html).toContain("Sketch of carla");
+    expect(html).not.toContain("Sketch of riley");
+  });
+
+  it("Michael is in The Loft, and the boss gets a face while you work the case", () => {
+    expect(document.getElementById("loftface")).not.toBeNull();
+    S.life = 1e13; S.gens.inf = 5;
+    spawnBoss();
+    render();
+    expect(document.getElementById("bossface")!.innerHTML).toContain(`Sketch of ${S.boss!.id}`);
+  });
+});
+
 describe("narration strip", () => {
   it("sits right under the toolbar, above the game, where it can't be scrolled past", () => {
     const toolbar = document.getElementById("toolbar")!, strip = document.getElementById("voiceover")!, main = document.querySelector("main")!;

@@ -16,6 +16,7 @@ import { MISSIONS, epLabel, episodeOf, seasonOf, seasonsOpen } from "../data/mis
 import { EP_NOTES } from "../data/episodeNotes";
 import { CASE_ACTIONS } from "../data/caseActions";
 import { FAQ } from "../data/faq";
+import { portrait } from "./portrait";
 import { bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
@@ -83,9 +84,10 @@ function castLine(ep: string | undefined): string {
   return bits.length ? `<div class="small" style="color:var(--text)">${bits.join(" · ")}</div>` : "";
 }
 
-function item(act: string, arg: string | number, can: boolean, title: string, desc: string, right: string, cls = ""): string {
+function item(act: string, arg: string | number, can: boolean, title: string, desc: string, right: string, cls = "", lead = ""): string {
+  const left = `<div><b>${title}</b><span>${desc}</span></div>`;
   return `<div class="item ${can ? "can" : "no"} ${cls}" data-act="${act}" data-arg="${arg}">
-    <div><b>${title}</b><span>${desc}</span></div><div style="text-align:right">${right}</div></div>`;
+    ${lead ? `<div class="who">${lead}${left}</div>` : left}<div style="text-align:right">${right}</div></div>`;
 }
 
 const costAndOwn = (cost: string, own: string | number) =>
@@ -148,28 +150,28 @@ function missions(): string {
 function contactItems(): string {
   return CONTACTS.map(c => item("contact", c.id, S.cash >= contactPrice(c.id), `${c.name}: ${c.kind}`,
     `${c.pitch}${S.allies.barry ? " Barry negotiates 25% off." : ""}`,
-    `<div class="cost">${money(contactPrice(c.id))}</div>`)).join("") +
+    `<div class="cost">${money(contactPrice(c.id))}</div>`, "", portrait(c.id, 44))).join("") +
     item("hangout", "seymour", !S.busy && S.cash >= hangOutPrice(), "Seymour Talbot: Spend the afternoon",
       "He'd sooner be paid in company: he wants you to teach him a move, or come see something he's proud of. About half the cash, but Michael's tied up for 30 to 45 seconds and can't take jobs.",
-      `<div class="cost">${money(hangOutPrice())}</div>`);
+      `<div class="cost">${money(hangOutPrice())}</div>`, "", portrait("seymour", 44));
 }
 
 function crew(): string {
-  const contact = CONTACTS.map(c => `<div class="box"><div class="row"><b>${c.name}</b><span class="small">Frienemy: ${c.kind.toLowerCase()}</span></div>
+  const contact = CONTACTS.map(c => `<div class="box"><div class="who">${portrait(c.id, 64)}<div><div class="row"><b>${c.name}</b><span class="small">Frienemy: ${c.kind.toLowerCase()}</span></div>
     <div class="small">${c.bio}</div>
     <div class="btns"><button data-act="contact" data-arg="${c.id}" ${S.cash >= contactPrice(c.id) ? "" : "disabled"}>Buy a favor — ${money(contactPrice(c.id))}</button>
-    ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div></div>`).join("");
+    ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div></div></div></div>`).join("");
   return contact + ALLIES.map(a => {
     if (!S.allies[a.id] && !allyAvailable(a.debut)) {
-      return item("hire", a.id, false, a.name, `${a.bio} Doesn't join the story until Season ${a.debut}.`, `<div class="small">Season ${a.debut}</div>`);
+      return item("hire", a.id, false, a.name, `${a.bio} Doesn't join the story until Season ${a.debut}.`, `<div class="small">Season ${a.debut}</div>`, "", portrait(a.id, 48, false));
     }
-    if (!S.allies[a.id]) return item("hire", a.id, S.cash >= a.cost, "Hire " + a.name, `${a.bio} Perk: ${a.perk}`, `<div class="cost">${money(a.cost)}</div>`);
+    if (!S.allies[a.id]) return item("hire", a.id, S.cash >= a.cost, "Hire " + a.name, `${a.bio} Perk: ${a.perk}`, `<div class="cost">${money(a.cost)}</div>`, "", portrait(a.id, 48));
     const cd = Math.ceil(S.allyCd[a.id] || 0), busy = S.active.some(m => m.sent === a.id), here = allyHere(a.id);
     const status = !here ? "Wandered off. No idea when he'll be back" : busy ? "On a mission" : "Available";
-    return `<div class="box"${here ? "" : ' style="opacity:.6"'}><div class="row"><b>${a.name}</b><span class="small">${status}</span></div>
+    return `<div class="box"${here ? "" : ' style="opacity:.6"'}><div class="who">${portrait(a.id, 64)}<div><div class="row"><b>${a.name}</b><span class="small">${status}</span></div>
       <div class="small">${a.bio}</div><div class="small">Perk: ${a.perk}</div>
       <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd > 0 || !here ? "disabled" : ""}>${a.ab} — ${!here ? "Away" : cd > 0 ? lv("cd" + a.id, cd + "s") : "Ready"}</button></div>
-      <div class="small" style="margin-top:4px">${a.abDesc}</div></div>`;
+      <div class="small" style="margin-top:4px">${a.abDesc}</div></div></div></div>`;
   }).join("");
 }
 
@@ -204,9 +206,9 @@ function rogues(): string {
   return `<div class="small" style="margin-bottom:8px">Bosses turn up about every ${bossGapText()}. Outmaneuver each one once for a permanent +3% income. Next one in about ${Math.ceil(Math.max(0, S.bossCd) / 60)} min.</div>` +
     BOSSES.map(b => {
       const open = S.life >= b.at, k = S.bossKills[b.id] || 0;
-      return `<div class="box" style="${open ? "" : "opacity:.5"}"><div class="row"><b>${open ? b.n : "???"}</b><span class="small">${open ? "Outmaneuvered " + k + "×" : "Appears at " + money(b.at) + " lifetime"}</span></div>
+      return `<div class="box" style="${open ? "" : "opacity:.5"}"><div class="who">${portrait(b.id, 56, open)}<div><div class="row"><b>${open ? b.n : "???"}</b><span class="small">${open ? "Outmaneuvered " + k + "×" : "Appears at " + money(b.at) + " lifetime"}</span></div>
         ${open ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">${b.mech}</div>
-          ${k > 0 ? `<div class="small" style="margin-top:6px;color:var(--text)"><b>File:</b> ${b.file}</div>` : `<div class="small" style="margin-top:6px">Beat them once to open their file.</div>`}` : ""}</div>`;
+          ${k > 0 ? `<div class="small" style="margin-top:6px;color:var(--text)"><b>File:</b> ${b.file}</div>` : `<div class="small" style="margin-top:6px">Outmaneuver them once to open their file.</div>`}` : ""}</div></div></div>`;
     }).join("");
 }
 
@@ -264,7 +266,7 @@ function theList(): string {
   h += BOSSES.map(b => {
     const done = S.bossKills[b.id], known = S.listKnown[b.id];
     const status = done ? "Crossed off" : known ? "Known, not yet faced" : "Unknown";
-    return `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : known ? "color:var(--text)" : "color:var(--dim)"}"><span>${done ? "✓ " : "○ "}${known || done ? b.n : "??????"}</span><span>${status}</span></div>`;
+    return `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : known ? "color:var(--text)" : "color:var(--dim)"}"><span style="display:flex;align-items:center;gap:8px">${portrait(b.id, 30, !!(known || done))}${done ? "✓ " : "○ "}${known || done ? b.n : "??????"}</span><span>${status}</span></div>`;
   }).join("");
   h += S.cleanRecord
     ? `<div class="box" style="margin-top:8px;border-color:var(--gold)"><b>The burn is lifted.</b><div class="small" style="color:var(--text)">Every name is crossed off. You're clear, and your income is up 25% for good.</div></div>`

@@ -44,6 +44,29 @@ export function buildLayout(host: HTMLElement, toolbar: HTMLElement): void {
     .map(([id, t]) => `<button data-modal="${id}">${t}</button>`).join("");
 }
 
+// ---- live values ----
+// Countdowns and progress bars change every tick. Rebuilding a whole card for that is wasteful and
+// can stall taps on slower devices, so those values are written into placeholders in place instead.
+const liveText = new Map<string, string>();
+const liveBars = new Map<string, number>();
+export function resetLive(): void { liveText.clear(); liveBars.clear(); }
+/** A text placeholder whose content is patched in place each tick. */
+const lv = (id: string, text: string): string => { liveText.set(id, text); return `<span data-live="${id}"></span>`; };
+/** Attributes for a progress bar whose width is patched in place each tick. */
+const lvBar = (id: string, pct: number): string => { liveBars.set(id, pct); return `data-bar="${id}" style="width:0%"`; };
+export function patchLive(root: ParentNode): void {
+  root.querySelectorAll<HTMLElement>("[data-live]").forEach(el => {
+    const t = liveText.get(el.dataset.live!);
+    if (t !== undefined && el.textContent !== t) el.textContent = t;
+  });
+  root.querySelectorAll<HTMLElement>("[data-bar]").forEach(el => {
+    const p = liveBars.get(el.dataset.bar!);
+    if (p === undefined) return;
+    const w = p + "%";
+    if (el.style.width !== w) el.style.width = w;
+  });
+}
+
 function item(act: string, arg: string | number, can: boolean, title: string, desc: string, right: string, cls = ""): string {
   return `<div class="item ${can ? "can" : "no"} ${cls}" data-act="${act}" data-arg="${arg}">
     <div><b>${title}</b><span>${desc}</span></div><div style="text-align:right">${right}</div></div>`;
@@ -83,8 +106,8 @@ function missions(): string {
     }).join("");
   }
   if (S.active.length) {
-    h += `<h2 style="margin-top:12px">In Progress</h2>` + S.active.map(m => `<div class="box"><div class="row"><b>${m.n}</b><span class="small">${Math.ceil(m.left)}s · ${Math.round(m.chance * 100)}%</span></div>
-      <div class="bar"><i class="mbar" style="width:${(1 - m.left / m.dur) * 100}%"></i></div>
+    h += `<h2 style="margin-top:12px">In Progress</h2>` + S.active.map(m => `<div class="box"><div class="row"><b>${m.n}</b><span class="small">${lv("t" + m.uid, `${Math.ceil(m.left)}s · ${Math.round(m.chance * 100)}%`)}</span></div>
+      <div class="bar"><i class="mbar" ${lvBar("b" + m.uid, (1 - m.left / m.dur) * 100)}></i></div>
       <span class="small">Pays ${money(m.reward)} · +${m.fav} favor${m.sent ? " · " + ALLIES.find(a => a.id === m.sent)!.name + " is out" : ""}</span></div>`).join("");
   }
   h += `<h2 style="margin-top:12px">Board</h2>`;
@@ -93,7 +116,7 @@ function missions(): string {
     const out = S.active.find(a => a.sent === m.ally);
     // Say exactly why the ally can't go, so a greyed-out button is never a mystery.
     const why = !S.allies[m.ally] ? `Hire ${first} in Crew to send him (+25%)`
-      : out ? `${first} is out on "${out.n}", back in ${Math.ceil(out.left)}s`
+      : out ? `${first} is out on "${out.n}", back in ${lv("w" + m.uid, Math.ceil(out.left) + "s")}`
       : !allyHere(m.ally) ? `${first} has wandered off` : "";
     return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}</b><div class="small">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
       ${why ? `<div class="small" style="margin-top:4px;color:var(--gold)">${why}</div>` : ""}
@@ -119,7 +142,7 @@ function crew(): string {
     const status = !here ? "Wandered off. No idea when he'll be back" : busy ? "On a mission" : "Available";
     return `<div class="box"${here ? "" : ' style="opacity:.6"'}><div class="row"><b>${a.name}</b><span class="small">${status}</span></div>
       <div class="small">${a.bio}</div><div class="small">Perk: ${a.perk}</div>
-      <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd > 0 || !here ? "disabled" : ""}>${a.ab} — ${!here ? "Away" : cd > 0 ? cd + "s" : "Ready"}</button></div>
+      <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd > 0 || !here ? "disabled" : ""}>${a.ab} — ${!here ? "Away" : cd > 0 ? lv("cd" + a.id, cd + "s") : "Ready"}</button></div>
       <div class="small" style="margin-top:4px">${a.abDesc}</div></div>`;
   }).join("");
 }
@@ -135,7 +158,7 @@ function gadgets(): string {
 }
 
 function covers(): string {
-  return `<div class="small" style="margin-bottom:8px">Change cover anytime (20s between changes${S.coverCd > 0 ? `, ${Math.ceil(S.coverCd)}s left` : ""}).</div>` +
+  return `<div class="small" style="margin-bottom:8px">Change cover anytime (20s between changes${S.coverCd > 0 ? `, ${lv("cvcd", Math.ceil(S.coverCd) + "s")} left` : ""}).</div>` +
     COVERS.map(c => {
       const locked = S.life < c.unlock;
       return item("cover", c.id, !locked && cover().id !== c.id && S.coverCd <= 0, c.name, c.desc,

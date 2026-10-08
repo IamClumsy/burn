@@ -4,7 +4,7 @@ import { FX_NAMES } from "../data/perks";
 import { fmt, money } from "../util";
 import { $ } from "./dom";
 import { setText } from "./fx";
-import { SECTIONS, panelHTML, titleOf, type TabId } from "./panels";
+import { SECTIONS, panelHTML, patchLive, resetLive, titleOf, type TabId } from "./panels";
 import { layBlocked } from "../game/heat";
 
 let openModal: TabId | null = null;
@@ -17,23 +17,25 @@ export function showModal(id: TabId | null): void {
 }
 
 const last = new Map<string, string>();
+let lastFx = "";
 let lastModal = "";
 
 export function render(): void {
-  $("cash").textContent = money(S.cash);
-  $("rate").textContent = "+" + money(cps()) + "/s  ·  job: " + money(clickVal());
-  $("cred").textContent = S.cred ? `Credibility ${S.cred} · ${cover().name} cover` : `${cover().name} cover`;
-  $("fx").innerHTML = Object.entries(S.fx).filter(([, v]) => v > 0)
+  setText($("cash"), money(S.cash));
+  setText($("rate"), "+" + money(cps()) + "/s  ·  job: " + money(clickVal()));
+  setText($("cred"), S.cred ? `Credibility ${S.cred} · ${cover().name} cover` : `${cover().name} cover`);
+  const fx = Object.entries(S.fx).filter(([, v]) => v > 0)
     .map(([k, v]) => `<span class="chip">${FX_NAMES[k]} ${Math.ceil(v)}s</span>`).join("");
-  $("heatnum").textContent = Math.floor(S.heat) + "%";
+  if (fx !== lastFx) { $("fx").innerHTML = fx; lastFx = fx; }
+  setText($("heatnum"), Math.floor(S.heat) + "%");
   $("heatbar").style.width = Math.min(100, S.heat) + "%";
   setText($("attnum"), `${Math.floor(S.att)}% · ${tierDef().name}`);
   setText($("gripnum"), Math.ceil(S.grip) + "%");
   $("gripbar").style.width = S.grip + "%";
   $("attbar").style.width = Math.min(100, S.att) + "%";
-  $("lay").textContent = S.layCd > 0 ? `Lay Low (${Math.ceil(S.layCd)}s)` : `Lay Low (−${layAmt()} heat)`;
+  setText($("lay"), S.layCd > 0 ? `Lay Low (${Math.ceil(S.layCd)}s)` : `Lay Low (−${layAmt()} heat)`);
   $<HTMLButtonElement>("lay").disabled = S.layCd > 0 || layBlocked();
-  $("bribe").textContent = `Pay Off a Fixer (${money(bribeCost())}, −40)`;
+  setText($("bribe"), `Pay Off a Fixer (${money(bribeCost())}, −40)`);
   $<HTMLButtonElement>("bribe").disabled = S.cash < bribeCost();
 
   const bd = bossDef();
@@ -47,7 +49,8 @@ export function render(): void {
     setText($("strike"), `STRIKE (${fmt(strikeDmg())} dmg)`);
   }
 
-  // Only touch a card's DOM when its content changed.
+  // Only touch a card's DOM when its structure changed; moving numbers are patched in place.
+  resetLive();
   for (const [id] of SECTIONS) {
     const h = panelHTML(id);
     if (last.get(id) !== h) { $("sec-" + id).innerHTML = h; last.set(id, h); }
@@ -56,4 +59,5 @@ export function render(): void {
     const h = panelHTML(openModal);
     if (h !== lastModal) { $("modalBody").innerHTML = h; lastModal = h; }
   }
+  patchLive(document);
 }

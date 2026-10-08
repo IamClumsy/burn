@@ -71,7 +71,7 @@ export const FAQ: FaqSection[] = [
   ]},
   {title: "Bosses, cases and the story", items: [
     {q: "How do boss encounters work?",
-     a: () => `A boss appears about every ${bossGapText()}. You're not fighting, you're outmaneuvering them: the bar is their cover, and your network wears it down on its own. Work the Angle builds leads, Run a Con is a risky big hit, a Gadget or a Favor costs resources, and Spring the Trap spends your leads for the biggest hit. If the clock runs out they get away: you lose some cash and take heat.`},
+     a: () => `A boss appears about every ${bossGapText()}. You're not fighting, you're outmaneuvering them: the bar is their cover, and your network wears it down on its own. Work the Angle builds leads, Run a Con is a risky big hit, a Gadget or a Favor costs resources, and Spring the Trap spends your leads for the biggest hit. If the clock runs out they get away: you lose some cash and take heat. While a case is on, everything else holds still: missions stop their clocks, Nate stays put, new clients and errands wait, and news pop-ups queue up until it's over.`},
     {q: "What are Open Cases?",
      a: () => "Multi-step missions at the top of the Missions card, adapted from big episodes. Finish every step to close the case: it writes a Case File epilogue, pays favors, and weakens the Organization. A failed step can be retried."},
     {q: "What do story choices do?",

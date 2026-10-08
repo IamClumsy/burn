@@ -7,7 +7,7 @@ import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
 import { render, showModal } from "./ui/render";
 import { returnFromAway } from "./game/offline";
-import { initNotices } from "./ui/notice";
+import { initNotices, setNoticeGate } from "./ui/notice";
 import { portrait, portraitScope } from "./ui/portrait";
 import { buildLayout, type TabId } from "./ui/panels";
 import { beep } from "./audio";
@@ -108,6 +108,7 @@ $("import").addEventListener("click", () => {
 
 // ---- boot
 initNotices();
+setNoticeGate(() => !!S.boss); // nothing else interrupts a case encounter
 portraitScope("loft"); $("loftface").innerHTML = portrait("michael", 54);
 loadGame();
 fillBoard();

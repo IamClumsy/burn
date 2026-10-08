@@ -43,7 +43,7 @@ export function milestones(): void {
   while (S.story < STORY.length && S.life >= STORY[S.story].at) {
     const i = S.story, s = STORY[i];
     // A decision needs the dialog free; try again next second if something else is open.
-    if (s.choice && choiceBusy()) break;
+    if (s.choice && (choiceBusy() || S.boss)) break;
     S.story++; S.favors += s.fav;
     toast("Case File: " + s.t, s.x.slice(0, 90) + "… (+" + s.fav + " favors)", "story");
     say(s.x); chime();
@@ -108,14 +108,13 @@ export function tick(dt: number): void {
   for (const k in S.allyCd) if (S.allyCd[k] > 0) S.allyCd[k] = Math.max(0, S.allyCd[k] - dt);
 
   const speed = S.fx.fast > 0 ? 2 : 1;
-  for (const m of [...S.active]) { m.left -= dt * speed; if (m.left <= 0) resolveMission(m); }
+  if (!S.boss) for (const m of [...S.active]) { m.left -= dt * speed; if (m.left <= 0) resolveMission(m); } // missions wait while a case encounter is on
 
   if (Math.random() < Math.min(0.02, owned("tape") * 0.0004)) S.junk[pick(Object.keys(S.junk))]++;
 
   tickBoss(dt);
-  tickNate(dt);
-  tickBusy(dt);
-  tickOrg(dt);
+  if (!S.boss) { tickNate(dt); tickBusy(dt); } // Nate, and afternoons with Seymour, wait too
+  tickOrg(S.boss ? 0 : dt);
 
   if (S.upgs.h3 && S.heat >= 90) layLow();
   if (S.allies.madeline && S.heat >= 95) layLow();

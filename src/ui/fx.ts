@@ -24,9 +24,9 @@ export function say(t: string): void {
  * Tell the player something. Everything pops up in the middle of the screen until they accept it.
  * (If they've turned pop-ups off, it slides into the corner for a few seconds instead.)
  */
-export function toast(title: string, msg = "", kind: NoticeKind = "gold"): void {
+export function toast(title: string, msg = "", kind: NoticeKind = "gold", urgent = false): void {
   if (!S.popups) { cornerToast(title, msg); return; }
-  notify(title, msg, kind);
+  notify(title, msg, kind, urgent);
 }
 
 function cornerToast(title: string, msg: string): void {

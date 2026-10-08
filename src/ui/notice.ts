@@ -2,7 +2,7 @@ import { $ } from "./dom";
 import { choiceOpen } from "./choice";
 
 export type NoticeKind = "gold" | "good" | "bad" | "story";
-interface Notice { title: string; msg: string; kind: NoticeKind }
+interface Notice { title: string; msg: string; kind: NoticeKind; urgent?: boolean }
 
 const queue: Notice[] = [];
 let showing = false;
@@ -12,6 +12,10 @@ export const noticeOpen = (): boolean => showing;
 /** How many are waiting, including the one on screen. */
 export const noticeCount = (): number => queue.length;
 
+/** While this says true, only urgent notifications show; the rest wait their turn (during a boss encounter, say). */
+let gate: () => boolean = () => false;
+export const setNoticeGate = (f: () => boolean): void => { gate = f; };
+
 let held: Notice[] | null = null;
 /** Start collecting notifications instead of showing them, so a long absence can be summarized in one card. */
 export const holdNotices = (): void => { held = []; };
@@ -19,9 +23,9 @@ export const holdNotices = (): void => { held = []; };
 export function releaseNotices(): Notice[] { const h = held ?? []; held = null; return h; }
 
 /** Queue a notification. It pops up in the middle of the screen and stays until accepted. */
-export function notify(title: string, msg: string, kind: NoticeKind = "gold"): void {
-  if (held) { held.push({ title, msg, kind }); return; }
-  queue.push({ title, msg, kind });
+export function notify(title: string, msg: string, kind: NoticeKind = "gold", urgent = false): void {
+  if (held) { held.push({ title, msg, kind, urgent }); return; }
+  queue.push({ title, msg, kind, urgent });
   if (showing) paintCount(); // more arrived while one is up: keep the count honest
   pumpNotices();
 }
@@ -29,6 +33,11 @@ export function notify(title: string, msg: string, kind: NoticeKind = "gold"): v
 /** Show the next notification, unless one is already up or a decision is being made. */
 export function pumpNotices(): void {
   if (showing || !queue.length || choiceOpen()) return;
+  if (gate()) { // only what can't wait
+    const i = queue.findIndex(q => q.urgent);
+    if (i < 0) return;
+    if (i > 0) queue.unshift(...queue.splice(i, 1));
+  }
   const n = queue[0];
   showing = true;
   $("nT").textContent = n.title;

@@ -8,7 +8,7 @@ import { render } from "../ui/render";
 import { checkBurn } from "./heat";
 
 export function spawnEvent(): void {
-  if (choiceBusy()) { scheduleEvent(); return; }
+  if (choiceBusy() || S.boss) { setTimeout(spawnEvent, 15000); return; }
   const ev = pick(EVENTS);
   showChoice(ev.t, ev.d, ev.o, () => { checkBurn(); render(); scheduleEvent(); });
 }
@@ -27,7 +27,7 @@ const CLIENTS = [
 export function scheduleClient(): void { setTimeout(spawnClient, 45000 + Math.random() * 60000); }
 
 export function spawnClient(): void {
-  if (choiceBusy()) { setTimeout(spawnClient, 20000); return; }
+  if (choiceBusy() || S.boss) { setTimeout(spawnClient, 20000); return; }
   const reward = Math.max(500, capFee((cps() * 45 + clickVal() * 10) / KEEP_RATE));
   chime();
   showChoice(

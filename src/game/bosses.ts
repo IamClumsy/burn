@@ -16,7 +16,7 @@ export function spawnBoss(): void {
   const b = pick(pool), max = bossHP(b);
   S.boss = { id: b.id, hp: max, max, left: 75 };
   shake(); beep(100, 0.5, "sawtooth", 0.08, -40);
-  toast("BOSS: " + b.n, b.title, "bad");
+  toast("BOSS: " + b.n, b.title, "bad", true);
   say(b.intro);
 }
 

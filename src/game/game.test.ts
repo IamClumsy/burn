@@ -24,7 +24,7 @@ import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
 import { loftBadges } from "../ui/badges";
 import { say, toast } from "../ui/fx";
-import { dismissAllNotices, dismissNotice, initNotices, noticeCount, noticeOpen } from "../ui/notice";
+import { dismissAllNotices, dismissNotice, initNotices, noticeCount, noticeOpen, setNoticeGate } from "../ui/notice";
 import { showChoice, choiceBusy } from "../ui/choice";
 import { CONTACT_CAP, allyFree, allyHere, contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance } from "../calc";
 import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
@@ -831,6 +831,39 @@ describe("Barry sells favors", () => {
     const m = merge({ favorLog: { seymour: [1], simon: [] } as unknown as GameState["favorLog"] });
     expect(m.favorLog.barry).toEqual([]);
     expect(m.favorLog.seymour).toEqual([1]);
+  });
+});
+
+describe("Case encounters pause everything else", () => {
+  afterEach(() => setNoticeGate(() => false));
+
+  it("missions, Nate and the Organization's fixer wait while a boss is on", () => {
+    S.board = []; fillBoard(); startMission(S.board[0].uid);
+    const left = S.active[0].left;
+    S.allies.nate = true; S.nateAway = false; S.nateTimer = 0.05;
+    S.boss = { id: "paxson", hp: 1e15, max: 1e15, left: 60 };
+    for (let i = 0; i < 20; i++) tick(0.1);
+    expect(S.active[0].left).toBe(left);
+    expect(S.nateTimer).toBeCloseTo(0.05, 5);
+    S.boss = null;
+    tick(1);
+    expect(S.active[0].left).toBeLessThan(left);
+  });
+
+  it("other news waits behind the fight, and the boss's own arrival still shows", () => {
+    setNoticeGate(() => !!S.boss);
+    S.boss = { id: "paxson", hp: 1e15, max: 1e15, left: 60 };
+    toast("A new season", "Season 4 is open");
+    expect(noticeOpen()).toBe(false);
+    toast("BOSS: Someone", "Here they come", "bad", true);
+    expect(noticeOpen()).toBe(true);
+    expect(document.getElementById("nT")!.textContent).toBe("BOSS: Someone");
+    dismissNotice();
+    expect(noticeOpen()).toBe(false); // the season news is still held
+    S.boss = null;
+    toast("It's over", "You won", "good");
+    expect(noticeOpen()).toBe(true);
+    expect(document.getElementById("nT")!.textContent).toBe("A new season");
   });
 });
 

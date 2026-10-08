@@ -40,7 +40,7 @@ export const EP_NOTES: Record<string, EpisodeNote> = {
   '305': {client:'Spencer', villain:'Shannon Park', tip:'A burned spy gets ignored. Find someone still in the field.'},
   '306': {client:'Beck', villain:'Tom Strickler', tip:'Training with someone close helps, and it gets personal too.'},
   '307': {client:'Joey', villain:'Erik Luna', tip:'Spies avoid noisy clubs. You can\'t hear, and you can\'t watch the crowd.'},
-  '308': {client:'Barry', villain:'Tom Strickler', tip:'Small things save missions. Fresh batteries beat extra firepower.'},
+  '308': {client:'Barry', villain:'Natalie Rice', tip:'Small things save missions. Fresh batteries beat extra firepower.'},
   '309': {client:'Sean Glenanne', villain:'Thomas O\'Neill', tip:'When you\'re always playing a role, it\'s easy to forget who you are.'},
   '310': {client:'Calia', villain:'Connor', tip:'Field medicine means no police questions, but a risky patient.'},
   '311': {client:'Mack', villain:'Rincon', tip:'A meeting at a hotel pool offers exits and crowds. It\'s a gesture of good faith.'},

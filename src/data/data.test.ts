@@ -49,6 +49,11 @@ describe("data integrity", () => {
     expect(unique(Object.values(EP_NOTES).map(n => n.tip))).toBe(true);
   });
 
+  it("the stolen-ledger case is credited to the thief who took it", () => {
+    expect(EP_NOTES["308"].client).toBe("Barry");
+    expect(EP_NOTES["308"].villain).toBe("Natalie Rice");
+  });
+
   it("outcome narration names the people involved", () => {
     const first = <T,>(a: readonly T[]) => a[0];
     const both = { client: "Javier", villain: "Graham Pyne", tip: "x" };

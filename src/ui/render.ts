@@ -6,6 +6,8 @@ import type { CaseAction } from "../types";
 import { CASE_ACTIONS, MAX_LEADS, ROTATING } from "../data/caseActions";
 import { actionBlock } from "../game/bosses";
 import { loftBadges } from "./badges";
+import { noticeOpen } from "./notice";
+import { choiceOpen } from "./choice";
 import { portrait } from "./portrait";
 import { $ } from "./dom";
 import { setText } from "./fx";
@@ -41,7 +43,26 @@ function updateCaseTile(): void {
   if (tile) tile.dataset.case = pickCase();
 }
 
+// ---- the tab title doubles as a status line, since an idle game mostly lives in a background tab
+let lastTitle = "";
+/** What the browser tab should say right now. */
+export function tabTitle(): string {
+  if (S.boss) return `(!) Case: ${bossDef()?.n ?? "encounter"} · ${Math.ceil(S.boss.left)}s`;
+  if (noticeOpen() || choiceOpen()) return "(!) News waiting · Burned";
+  return `${money(S.cash)} · Burned: Miami Idle`;
+}
+
+let titleAt = 0;
+function paintTitle(): void {
+  const t = tabTitle(), now = Date.now();
+  // The cash figure changes every tick, so the plain title is refreshed once a second; alerts show at once.
+  if (t !== lastTitle && (t.startsWith("(!)") !== lastTitle.startsWith("(!)") || now - titleAt >= 1000)) {
+    document.title = t; lastTitle = t; titleAt = now;
+  }
+}
+
 export function render(): void {
+  paintTitle();
   setText($("cash"), money(S.cash));
   setText($("rate"), "+" + money(cps()) + "/s  ·  job: " + money(clickVal()));
   setText($("cred"), S.cred ? `Credibility ${S.cred} · ${cover().name} cover` : `${cover().name} cover`);

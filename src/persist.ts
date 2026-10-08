@@ -1,5 +1,5 @@
 import { S, SAVE_KEY, fresh, merge, setState } from "./state";
-import { catchUp, welcomeBack } from "./game/offline";
+import { returnFromAway } from "./game/offline";
 import { $ } from "./ui/dom";
 import type { GameState } from "./types";
 
@@ -49,7 +49,7 @@ export function loadGame(): void {
   if (!saved) { setState(fresh()); return; }
   setState(merge(saved));
   const away = (Date.now() - S.last) / 1000;
-  if (away > 30) welcomeBack(away, catchUp(away));
+  if (away > 30) returnFromAway(away);
 }
 
 export function wipeSave(): void {

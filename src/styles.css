@@ -123,7 +123,7 @@
   .ndlg.bad{--k:var(--bad)}
   .ndlg.story{--k:var(--pink)}
   .ndlg h3{margin:0 0 8px;color:var(--k);font-size:20px;letter-spacing:1.5px;text-transform:uppercase;line-height:1.25}
-  .ndlg p{margin:0 0 18px;color:var(--text);font-size:15px;line-height:1.5}
+  .ndlg p{white-space:pre-line;margin:0 0 18px;color:var(--text);font-size:15px;line-height:1.5}
   .nfoot{display:flex;align-items:center;gap:10px;justify-content:flex-end}
   #nCount{margin-right:auto;font-size:12px;color:var(--dim)}
   .nfoot button{padding:10px 18px}

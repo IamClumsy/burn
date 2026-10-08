@@ -150,7 +150,7 @@ export function prestige(): void {
   if (!confirm(`Get reinstated? You reset cash, ops, upgrades and missions, but gain ${gain} Credibility (+${gain * 10}% income) and ${gain} favors. Allies who joined late in the story, like Jesse, have to be hired again. Perks, medals and story are kept.`)) return;
   const keep = {
     cred: S.cred + gain, life: S.life, favors: S.favors + gain, perks: S.perks, allies: keptAllies(), ach: S.ach,
-    stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
+    stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, sci: S.sci, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
     choices: S.choices, arcStep: S.arcStep, arcsDone: S.arcsDone,
     grip: S.grip, listKnown: S.listKnown, attPeak: S.attPeak, cleanRecord: S.cleanRecord,
     episodesDone: S.episodesDone, seasonOpen: S.seasonOpen, favorLog: S.favorLog, backupNudged: S.backupNudged, nateAway: S.nateAway, nateTimer: S.nateTimer, nateStage: S.nateStage,

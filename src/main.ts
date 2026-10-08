@@ -1,12 +1,12 @@
 import "./styles.css";
 import { S, earn } from "./state";
 import { clickVal, heatMult } from "./calc";
-import { pick, money } from "./util";
+import { pick, money, setScientific } from "./util";
 import { QUOTES } from "./data/text";
 import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
 import { render, showModal } from "./ui/render";
-import { catchUp, welcomeBack } from "./game/offline";
+import { returnFromAway } from "./game/offline";
 import { initNotices } from "./ui/notice";
 import { portrait } from "./ui/portrait";
 import { buildLayout, type TabId } from "./ui/panels";
@@ -92,6 +92,8 @@ $("bossacts").addEventListener("click", e => {
 
 // ---- footer
 const syncMute = () => { $("mute").textContent = "sound: " + (S.mute ? "off" : "on"); };
+const syncNumbers = () => { setScientific(S.sci); $("numfmt").textContent = "numbers: " + (S.sci ? "scientific" : "letters"); };
+$("numfmt").addEventListener("click", () => { S.sci = !S.sci; syncNumbers(); render(); });
 const syncPopups = () => { $("popups").textContent = "pop-ups: " + (S.popups ? "on" : "off"); };
 $("mute").addEventListener("click", () => { S.mute = !S.mute; syncMute(); });
 $("popups").addEventListener("click", () => { S.popups = !S.popups; syncPopups(); });
@@ -100,7 +102,7 @@ $("export").addEventListener("click", exportSave);
 $("import").addEventListener("click", () => {
   const c = prompt("Paste your save code:");
   if (!c) return;
-  if (importSave(c)) { fillBoard(); toast("Save imported", "Your game is loaded.", "good"); syncMute(); syncPopups(); render(); }
+  if (importSave(c)) { fillBoard(); toast("Save imported", "Your game is loaded.", "good"); syncMute(); syncPopups(); syncNumbers(); render(); }
   else alert("That code didn't work.");
 });
 
@@ -111,6 +113,7 @@ loadGame();
 fillBoard();
 syncMute();
 syncPopups();
+syncNumbers();
 say("Burned. No cash, no credit, no agency. Time to take a job.");
 scheduleClient();
 scheduleEvent();
@@ -123,7 +126,7 @@ setInterval(() => {
   const now = Date.now(), gap = (now - last) / 1000;
   last = now;
   // A throttled background tab or a sleeping laptop leaves a long gap: catch up on all of it, not just a second.
-  if (gap > 2) welcomeBack(gap, catchUp(gap)); else tick(gap);
+  if (gap > 2) returnFromAway(gap); else tick(gap);
   render();
 }, 100);
 

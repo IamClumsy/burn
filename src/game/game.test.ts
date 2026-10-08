@@ -5,7 +5,9 @@ import { resolve } from "node:path";
 
 import { S, fresh, setState } from "../state";
 import { milestones, tick, tickNate } from "./tick";
-import { AWAY_CAP, catchUp } from "./offline";
+import { AWAY_CAP, catchUp, returnFromAway } from "./offline";
+import { fmt, setScientific } from "../util";
+import { tabTitle } from "../ui/render";
 import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
 import { arcAvailable, startArc } from "./arcs";
 import { ARCS } from "../data/arcs";
@@ -39,7 +41,7 @@ import { checkBurn } from "./heat";
 import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
 import { MISSIONS } from "../data/missions";
-import { merge } from "../state";
+import { earn, merge } from "../state";
 import { render } from "../ui/render";
 import { MODALS, SECTIONS, buildLayout, panelHTML } from "../ui/panels";
 
@@ -843,6 +845,54 @@ describe("Idle while away", () => {
     expect(S.layCd).toBe(0);
     expect(S.boss).toBeNull();
     expect(S.bossCd).toBeGreaterThanOrEqual(30);
+  });
+});
+
+describe("Away card, tab title and number safety", () => {
+  it("a long absence is summed up in one card, not a pile of pop-ups", () => {
+    S.gens.inf = 5; S.board = []; fillBoard(); startMission(S.board[0].uid);
+    returnFromAway(7200);
+    expect(noticeCount()).toBe(1);
+    expect(document.getElementById("nT")!.textContent).toMatch(/Welcome back/);
+    expect(document.getElementById("nM")!.textContent).toMatch(/earned \$/);
+    expect(document.getElementById("nM")!.textContent).toMatch(/mission/);
+  });
+
+  it("a short gap catches up quietly", () => {
+    returnFromAway(10);
+    expect(noticeCount()).toBe(0);
+  });
+
+  it("the tab title shows cash, and flags a case or waiting news", () => {
+    S.cash = 1500; S.boss = null; dismissAllNotices();
+    expect(tabTitle()).toMatch(/^\$1\.50K · Burned/);
+    S.boss = { id: "paxson", hp: 1, max: 1, left: 42 };
+    expect(tabTitle()).toMatch(/^\(!\) Case: Detective Paxson · 42s/);
+    S.boss = null;
+    toast("Hello", "there");
+    expect(tabTitle()).toMatch(/^\(!\) News waiting/);
+  });
+
+  it("numbers stay finite and readable at any size", () => {
+    expect(fmt(NaN)).toBe("0");
+    expect(fmt(1e30)).toBe("1.00No");
+    expect(fmt(1e30)).toMatch(/^\d/);
+    expect(fmt(1e40)).toBe("1.00e40");
+    setScientific(true);
+    expect(fmt(2.5e9)).toBe("2.50e9");
+    setScientific(false);
+    expect(fmt(2.5e9)).toBe("2.50B");
+    earn(NaN); earn(Infinity); earn(-5);
+    expect(Number.isFinite(S.cash)).toBe(true);
+    S.cash = 1e299; earn(1e299); earn(1e299);
+    expect(S.cash).toBeLessThanOrEqual(1e300);
+  });
+
+  it("a damaged save can't put NaN into the game", () => {
+    const m = merge({ cash: NaN, life: Infinity, heat: "oops" as unknown as number });
+    expect(m.cash).toBe(0);
+    expect(m.life).toBeLessThanOrEqual(1e300);
+    expect(m.heat).toBe(0);
   });
 });
 

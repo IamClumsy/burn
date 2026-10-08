@@ -107,7 +107,7 @@ export interface GameState {
   junk: Dict<number>;
   cover: string; coverCd: number; board: Mission[]; active: ActiveMission[]; uid: number;
   story: number; ach: string[]; stats: Stats;
-  buyAmt: 1 | 10 | 100 | "max"; mute: boolean;
+  buyAmt: 1 | 10 | 100 | "max"; mute: boolean; sci: boolean;
   /** Show important news as centered pop-ups that wait to be accepted. Off means corner toasts. */
   popups: boolean; seymourBought: number; simonBought: number;
   /** Nate wanders off and returns on a random timer. */

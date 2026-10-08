@@ -12,8 +12,15 @@ export const noticeOpen = (): boolean => showing;
 /** How many are waiting, including the one on screen. */
 export const noticeCount = (): number => queue.length;
 
+let held: Notice[] | null = null;
+/** Start collecting notifications instead of showing them, so a long absence can be summarized in one card. */
+export const holdNotices = (): void => { held = []; };
+/** Stop collecting and hand back what arrived. */
+export function releaseNotices(): Notice[] { const h = held ?? []; held = null; return h; }
+
 /** Queue a notification. It pops up in the middle of the screen and stays until accepted. */
 export function notify(title: string, msg: string, kind: NoticeKind = "gold"): void {
+  if (held) { held.push({ title, msg, kind }); return; }
   queue.push({ title, msg, kind });
   if (showing) paintCount(); // more arrived while one is up: keep the count honest
   pumpNotices();

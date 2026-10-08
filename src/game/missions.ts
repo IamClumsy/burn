@@ -17,7 +17,7 @@ export function newMission(): Mission {
   const t = pick(fresh.length ? fresh : open);
   return {
     uid: S.uid++, n: t.n, dur: t.dur, succ: t.succ, heat: t.heat, rm: t.rm, fav: t.fav, ally: t.ally,
-    kid: !!t.kid, send: false, ep: t.ep, epTitle: t.epTitle,
+    kid: !!t.kid, elder: !!t.elder, send: false, ep: t.ep, epTitle: t.epTitle,
   };
 }
 
@@ -47,6 +47,7 @@ export function resolveMission(m: ActiveMission): void {
   if (Math.random() < m.chance) {
     payClient(m.reward); S.favors += m.fav; S.heat += m.heat * heatMult(); S.stats.mDone++;
     if (m.kid) S.stats.kidMissions++;
+    if (m.kid && m.sent) { S.favors += 1; say("Having the right person along made all the difference. +1 favor."); }
     if (m.arc) advanceArc(m.arc.id, m.arc.step);
     if (m.ep) S.episodesDone[m.ep] = true;
     reduceGrip(1);

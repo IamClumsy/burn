@@ -35,7 +35,7 @@ export const ARCS: Arc[] = [
      {n:"Work Out His Plan",           dur:60, succ:.7,  heat:14, rm:3.8},
      {n:"Stop It Before It Starts",    dur:75, succ:.65, heat:24, rm:5.2},
    ]},
-  {id:"laststand", title:"Last Stand", at:8e9, ally:"madeline", favors:8,
+  {id:"laststand", title:"Last Stand", at:8e9, ally:"sam", favors:8,
    blurb:"A tactical team is closing in, and the only place left to hold is an unfinished construction site. Your whole crew is in the line of fire.",
    epilogue:"You walk out. Not everyone does so cleanly, but everyone who matters does. Someone is going to pay for the construction site.",
    steps:[

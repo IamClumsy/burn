@@ -112,7 +112,7 @@ function upgrades(): string {
 function missions(): string {
   const done = Object.keys(S.episodesDone).length;
   let h = `<div class="small" style="margin-bottom:6px">Case files: <b style="color:var(--text)">${done} of ${MISSIONS.length}</b> episodes · Season ${seasonsOpen(S.life)} cases open</div>
-    <div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Clients pay well. Michael keeps what he needs for expenses and hands the rest back. Send an ally for +25% success, but they're busy until it ends.</div>`;
+    <div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Clients pay well. Michael keeps what he needs for expenses and hands the rest back. Send an ally for +25% success (or +1 favor on cases that can't fail), but they're busy until it ends.</div>`;
   const open = ARCS.filter(arcAvailable);
   if (open.length) {
     h += `<h2>Open Cases</h2>` + open.map(a => {
@@ -134,12 +134,12 @@ function missions(): string {
     const al = ALLIES.find(a => a.id === m.ally)!, free = allyFree(m.ally), first = al.name.split(" ")[0];
     const out = S.active.find(a => a.sent === m.ally);
     // Say exactly why the ally can't go, so a greyed-out button is never a mystery.
-    const why = !S.allies[m.ally] ? `Hire ${first} in Crew to send ${al.she ? "her" : "him"} (+25%)`
+    const why = !S.allies[m.ally] ? `Hire ${first} in Crew to send ${al.she ? "her" : "him"} (${m.kid ? "+1 favor" : "+25%"})`
       : out ? `${first} is out on "${out.n}", back in ${lv("w" + m.uid, Math.ceil(out.left) + "s")}`
       : !allyHere(m.ally) ? `${first} has wandered off` : "";
     return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}${m.ep && S.episodesDone[m.ep] ? ' <span class="chip">Seen</span>' : ""}</b>${m.ep ? `<div class="small" style="margin-bottom:2px">${epLabel(m.ep, m.epTitle || "")}</div>` : ""}${castLine(m.ep)}<div class="small" style="margin-top:2px">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
       ${why ? `<div class="small" style="margin-top:4px;color:var(--gold)">${why}</div>` : ""}
-      <div class="btns">${S.allies[m.ally] ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Send ${first} (+25%)</button>` : ""}
+      <div class="btns">${S.allies[m.ally] ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Send ${first} (${m.kid ? "+1 favor" : "+25%"})</button>` : ""}
       <button data-act="start" data-arg="${m.uid}" ${S.active.length >= 3 ? "disabled" : ""}>Start mission</button></div></div>`;
   }).join("");
   return h;

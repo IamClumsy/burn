@@ -429,12 +429,44 @@ describe("boss pacing", () => {
   });
 });
 
+describe("allies on kid missions", () => {
+  const kidMission = { uid: 1, n: "t", dur: 1, succ: 1, heat: 1, rm: 1, fav: 1, ally: "madeline", kid: true, send: true };
+
+  it("sending an ally earns a favor, since better odds would do nothing", () => {
+    S.allies.madeline = true; S.life = 1e6; S.board = [{ ...kidMission }];
+    startMission(1);
+    expect(S.active[0].sent).toBe("madeline");
+    resolveMission(S.active[0]);
+    expect(S.favors).toBe(2); // 1 from the mission, 1 for sending her
+  });
+
+  it("without an ally there's no bonus favor", () => {
+    S.allies.madeline = true; S.life = 1e6; S.board = [{ ...kidMission, send: false }];
+    startMission(1);
+    resolveMission(S.active[0]);
+    expect(S.favors).toBe(1);
+  });
+
+  it("the card says +1 favor instead of +25% on a case that can't fail", () => {
+    S.allies.madeline = true; S.life = 1e6; S.board = [{ ...kidMission }];
+    expect(panelHTML("mis")).toContain("Send Madeline (+1 favor)");
+    S.board = [{ ...kidMission, kid: false, succ: .7 }];
+    expect(panelHTML("mis")).toContain("Send Madeline (+25%)");
+  });
+
+  it("older-folk missions carry through to the board", () => {
+    S.life = 1e12; let sawElder = false;
+    for (let i = 0; i < 400 && !sawElder; i++) { S.board = []; fillBoard(); sawElder = S.board.some(m => m.elder); }
+    expect(sawElder).toBe(true);
+  });
+});
+
 describe("Crew pop-up order", () => {
   it("lists allies cheapest first, after the frienemies", () => {
     S.life = 1e12;
     const html = panelHTML("crew");
     const at = (name: string) => html.indexOf(name);
-    const order = ["Seymour Talbot", "Simon Escher", "Sam Axe", "Fiona Glenanne", "Madeline Westen", "Barry Burkowski", "Nate Westen", "Jesse Porter"].map(at);
+    const order = ["Seymour Talbot", "Simon Escher", "Sam Axe", "Fiona Glenanne", "Barry Burkowski", "Madeline Westen", "Nate Westen", "Jesse Porter"].map(at);
     expect(order.every(i => i >= 0)).toBe(true);
     expect(order).toEqual([...order].sort((a, b) => a - b));
   });

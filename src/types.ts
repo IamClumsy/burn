@@ -18,6 +18,8 @@ export interface MissionTpl {
   n: string; dur: number; succ: number; heat: number; rm: number; fav: number; ally: string; kid?: boolean;
   /** The episode this mission is adapted from: code (season x 100 + episode) and title. */
   ep?: string; epTitle?: string;
+  /** The people helped are older folks. Madeline only works cases with kids or older folks. */
+  elder?: boolean;
 }
 export interface Mission {
   uid: number; n: string; dur: number; succ: number; heat: number; rm: number; fav: number;
@@ -25,6 +27,7 @@ export interface Mission {
   /** Set when this mission is one step of a multi-step case. */
   arc?: { id: string; step: number };
   ep?: string; epTitle?: string;
+  elder?: boolean;
 }
 export interface ActiveMission extends Mission { sent: string | null; left: number; chance: number; reward: number }
 

@@ -114,7 +114,20 @@ describe("data integrity", () => {
   it("the crew is listed in order of cost", () => {
     const costs = ALLIES.map(a => a.cost);
     expect(costs).toEqual([...costs].sort((a, b) => a - b));
-    expect(ALLIES.map(a => a.id)).toEqual(["sam", "fiona", "madeline", "barry", "nate", "jesse"]);
+    expect(ALLIES.map(a => a.id)).toEqual(["sam", "fiona", "barry", "madeline", "nate", "jesse"]);
+  });
+
+  it("Madeline costs more than Barry, who helps from the start", () => {
+    const cost = (id: string) => ALLIES.find(a => a.id === id)!.cost;
+    expect(cost("madeline")).toBeGreaterThan(cost("barry"));
+  });
+
+  it("Madeline only gets missions with kids or older folks", () => {
+    const hers = MISSIONS.filter(m => m.ally === "madeline");
+    expect(hers.length).toBeGreaterThanOrEqual(8);
+    for (const m of hers) expect(m.kid || m.elder, m.n).toBeTruthy();
+    for (const a of ARCS) expect(a.ally, a.id).not.toBe("madeline");
+    expect(MISSIONS.filter(m => m.elder).length).toBeGreaterThanOrEqual(3);
   });
 
   it("women on the crew are flagged so game text uses the right pronouns", () => {

@@ -24,6 +24,7 @@ import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 import { AUTOS } from "../data/automation";
+import { EPILOGUE, EPILOGUE_CLOSE, EPILOGUE_TITLE } from "../data/epilogue";
 
 export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "med" | "rep";
 
@@ -267,7 +268,10 @@ function story(): string {
     : `<div class="small">The file is closed. The game isn't. Keep stacking.</div>`;
 
   const empty = !beats ? `<div class="small">Nothing yet. Earn some money and the story finds you.</div>` : "";
-  return empty + beats + cases + next + notebook;
+  const epilogue = S.cleanRecord
+    ? `<h2 style="margin-top:12px">${EPILOGUE_TITLE}</h2>` + EPILOGUE.map(e => `<div class="box"><b>${e.who}</b><div class="small" style="font-size:13px;color:var(--text)">${e.text}</div></div>`).join("") + `<div class="small" style="margin:6px 0 10px">${EPILOGUE_CLOSE}</div>`
+    : "";
+  return empty + beats + cases + epilogue + next + notebook;
 }
 
 function medals(): string {

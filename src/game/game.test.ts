@@ -1117,6 +1117,38 @@ describe("Fixer variety", () => {
   });
 });
 
+describe("Late-story changes to bosses and the ending", () => {
+  it("Cowan and Anson turn into what they left behind after their story beats", () => {
+    const cowan = BOSSES.find(b => b.id === "cowan")!, anson = BOSSES.find(b => b.id === "anson")!;
+    S.story = 0;
+    expect(bossView(cowan).n).toBe("Phillip Cowan");
+    S.story = STORY.findIndex(b => b.t === "The Man Who Burned You") + 1;
+    expect(bossView(cowan).n).toBe("Cowan's Unfinished Sentence");
+    expect(bossView(cowan).m).toContain("freeze");
+    S.story = STORY.findIndex(b => b.t === "Brothers and Strings");
+    expect(bossView(anson).n).toBe("Anson Fullerton");
+    S.story = STORY.findIndex(b => b.t === "Brothers and Strings") + 1;
+    expect(bossView(anson).n).toBe("Anson's Contingencies");
+    expect(bossView(anson).m).toContain("att");
+  });
+
+  it("completing the List gives an epilogue pop-up with the crew, and it stays in the Case File", () => {
+    for (const b of BOSSES) S.bossKills[b.id] = 1;
+    checkEnding();
+    const msg = document.getElementById("nM")!.textContent!;
+    expect(document.getElementById("nT")!.textContent).toBe("The Burn Is Lifted");
+    for (const who of ["Michael", "Fiona", "Sam", "Madeline", "Charlie"]) expect(msg).toContain(who);
+    expect(msg).toMatch(/Miami never closes/);
+    dismissAllNotices();
+    expect(panelHTML("story")).toContain("The Burn Is Lifted");
+    expect(panelHTML("story")).toContain("Charlie");
+  });
+
+  it("before the burn is lifted there's no epilogue", () => {
+    expect(panelHTML("story")).not.toContain("The Burn Is Lifted");
+  });
+});
+
 describe("Handlers follow the show", () => {
   it("Carla hands out errands only until her death in the Season 2 finale", () => {
     expect(handlerFor(1e5)).toBe("Carla");

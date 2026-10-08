@@ -1,6 +1,7 @@
 import { S, KEEP_RATE, capFee, payClient } from "../state";
 import { attTier, cps } from "../calc";
 import { BOSSES } from "../data/bosses";
+import { EPILOGUE_TITLE, epilogueText } from "../data/epilogue";
 import { ERRANDS, GRIP_PERKS, TIERS, TIER_DOWN, TIER_UP, handlerFor, rollFixer } from "../data/org";
 import { chime } from "../audio";
 import { money, pick } from "../util";
@@ -75,7 +76,7 @@ export function checkEnding(): void {
   S.cleanRecord = true;
   S.favors += 15;
   chime();
-  toast("The List is complete", "The burn is lifted. +15 favors and +25% income, forever.");
+  toast(EPILOGUE_TITLE, `+15 favors and +25% income, forever.\n\n${epilogueText()}`, "story");
   say("You cross out the last name. The phone doesn't ring. For the first time in a long time, nobody is watching. Miami still has problems, though, and so do the people in it.");
 }
 

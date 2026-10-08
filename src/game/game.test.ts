@@ -7,6 +7,7 @@ import { S, fresh, setState } from "../state";
 import { milestones, tick, tickNate } from "./tick";
 import { AWAY_CAP, catchUp, returnFromAway } from "./offline";
 import { fmt, setScientific } from "../util";
+import { portrait, portraitScope } from "../ui/portrait";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { tabTitle } from "../ui/render";
 import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
@@ -929,6 +930,29 @@ describe("Carla's Last Orders", () => {
     S.story = 0; S.life = 1e12;
     S.boss = { id: "carla", hp: 1e15, max: 1e15, left: 60 };
     expect(bossDef()!.n).toBe("Carla Baxter");
+  });
+});
+
+describe("Nate's two looks", () => {
+  it("his picture changes once he's back from Vegas", () => {
+    S.nateStage = 0; portraitScope("t");
+    const before = portrait("nate", 64);
+    S.nateStage = 1; portraitScope("t");
+    const after = portrait("nate", 64);
+    expect(after).not.toBe(before);
+    expect(after).toContain("Sketch of nate");
+    S.nateStage = 0; portraitScope("t");
+    expect(portrait("nate", 64)).toBe(before);
+    S.nateStage = 3; portraitScope("t");
+    expect(portrait("nate", 64)).toBe(after);
+  });
+
+  it("and the Crew pop-up shows whichever he is right now", () => {
+    S.life = 1e12; S.allies.nate = true; S.nateStage = 0;
+    const a = panelHTML("crew");
+    S.nateStage = 1;
+    const b = panelHTML("crew");
+    expect(b).not.toBe(a);
   });
 });
 

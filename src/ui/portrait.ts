@@ -1,4 +1,5 @@
 import { LOOKS } from "../data/portraits";
+import { S } from "../state";
 import { PHOTOS } from "../data/photos";
 
 /**
@@ -418,15 +419,17 @@ export function portraitScope(name: string): void { scope = name; slot = 0; }
 
 /** An inline portrait for a character id, or a silhouette if we don't have one. `known: false` hides the face. */
 export function portrait(id: string, px = 56, known = true, label?: string): string {
-  const key = `${id}:${known}`;
+  // Nate comes back from Vegas a different man: once he's returned (with Ruth), he gets his Vegas look.
+  const face = id === "nate" && S.nateStage >= 1 ? "natelv" : id;
+  const key = `${face}:${known}`;
   let entry = cache.get(key);
   if (!entry) {
-    const look = LOOKS[id];
+    const look = LOOKS[face];
     const svg = known && look ? portraitSVG(look, label || `Sketch of ${id}`) : silhouetteSVG(known ? "Unknown" : "Someone you haven't met");
     entry = { svg, base: known && look ? uid(look) : "" };
     cache.set(key, entry);
   }
-  const photo = known ? PHOTOS[id] : undefined;
+  const photo = known ? PHOTOS[face] ?? PHOTOS[id] : undefined; // a photo of the old Nate is better than a mismatched sketch
   if (photo) return `<span class="portrait photo" style="width:${px}px;height:${px}px"><img src="${photo}" alt="${label || `Sketch of ${id}`}" width="${px}" height="${px}" loading="lazy" decoding="async"></span>`;
   const suffix = `${scope}${slot++}`;
   const svg = entry.base ? entry.svg.replace(new RegExp(`-${entry.base}(?=["')])`, "g"), `-${entry.base}${suffix}`) : entry.svg;

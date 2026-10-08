@@ -36,7 +36,7 @@ Say what the reset would give you before you do it:
 
 ## 4. Smaller ideas
 
-- **Real portraits:** the drawn sketches are as lifelike as vector art gets. For true realism, drop images named after each character's id (`michael.webp`, `sam.jpg`, ...) into `src/assets/portraits/` and the game uses them instead of the drawings, falling back to the sketch for anyone without a file. Only use images you have the rights to.
+- **Real portraits:** the drawn sketches are as lifelike as vector art gets. For true realism, drop images named after each character's id (`michael.webp`, `sam.jpg`, ...) into `src/assets/portraits/` and the game uses them instead of the drawings, falling back to the sketch for anyone without a file. Nate has a second image, `natelv`, that replaces `nate` once he's back from Vegas (if there's no `natelv` file, the `nate` picture stays). Only use images you have the rights to.
 - **Share preview image:** the page has Open Graph tags but no picture. A 1200×630 PNG (the header art with the title) would make links look right in chats.
 - **Browser notifications:** an opt-in "a boss is at the door" alert when the tab is in the background. The tab title already flags it.
 - **Cloud save or a short save code:** export works, but a long base64 string is awkward on a phone.

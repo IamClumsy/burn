@@ -20,6 +20,8 @@ export const LOOKS: Record<string, Look> = {
   // Madeline: short curly blond hair, big hoop earrings, and a black top
   madeline: { skin: "#f1d3b8", hair: "curly", hairColor: "#e8d28c", jaw: "round", age: 2, outfit: "cardigan", outfitColor: "#1d1a24", accent: "#f4eef8", extras: ["hoops", "lipstick"], bg: ["#c23bff", "#3a0f4a"], mood: "warm" },
   // Nate: short dark hair, clean-shaven, a black blazer over an open white shirt
+  // Nate after Vegas: a few months of sun, a loud open-collar shirt, a gold chain, and a newly married grin
+  natelv: { skin: "#d9a97c", hair: "tousled", hairColor: "#2c1f19", jaw: "narrow", outfit: "shirt", outfitColor: "#f0e6d2", accent: "#e0603a", stripes: "#e0603a", extras: ["chain"], bg: ["#ff9a3c", "#7b2a6b"], mood: "warm" },
   nate: { skin: "#e8bd96", hair: "tousled", hairColor: "#2c1f19", jaw: "narrow", outfit: "blazer", outfitColor: "#16151c", accent: "#f4eef8", bg: ["#2ee6d6", "#ff9a3c"], mood: "warm" },
   // Jesse: a nearly shaved head, a strong jaw, an orange-striped shirt
   jesse: { skin: "#d9ac86", hair: "buzz", hairColor: "#4a3a2e", jaw: "square", face: 1.08, outfit: "shirt", outfitColor: "#e9906a", accent: "#f6e0d0", stripes: "#f6e0d0", bg: ["#5fe59a", "#2a1a50"], mood: "calm" },

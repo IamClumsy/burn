@@ -111,6 +111,12 @@ describe("data integrity", () => {
     expect(MISSIONS.filter(m => m.kid).length).toBeGreaterThanOrEqual(5);
   });
 
+  it("the crew is listed in order of cost", () => {
+    const costs = ALLIES.map(a => a.cost);
+    expect(costs).toEqual([...costs].sort((a, b) => a - b));
+    expect(ALLIES.map(a => a.id)).toEqual(["sam", "fiona", "madeline", "barry", "nate", "jesse"]);
+  });
+
   it("women on the crew are flagged so game text uses the right pronouns", () => {
     const she = ALLIES.filter(a => a.she).map(a => a.id).sort();
     expect(she).toEqual(["fiona", "madeline"]);

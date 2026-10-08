@@ -1,6 +1,7 @@
 import type { Ally } from "../types";
 
 // Ability effects live in game/abilities.ts so this file stays pure data.
+// Keep this list in order of cost: it's the order the Crew pop-up shows.
 export const ALLIES: Ally[] = [
   {id:"sam", name:"Sam Axe", cost:5000,
    bio:"Retired Navy SEAL, Michael's best friend, and a man who loves a free drink.",
@@ -12,6 +13,10 @@ export const ALLIES: Ally[] = [
    bio:"Michael's mother. Chain-smoking, sharp, and always three phone calls ahead.",
    perk:"Lay Low cools down twice as fast; auto Lay Low at 95% heat",
    ab:"Family Dinner", abDesc:"−50 heat, −30 Organization attention", cd:100},
+  {id:"barry", name:"Barry Burkowski", cost:1e6,
+   bio:"Miami's money launderer, the Yellow Pages for criminals. He always takes Michael's call.",
+   perk:"Fixer payoffs cost 50% less; Seymour's and Simon's favor prices −25%",
+   ab:"Follow the Money", abDesc:"Barry traces a payoff to a crook: gain 90s of income and −25 heat", cd:110},
   {id:"nate", name:"Nate Westen", cost:1.5e6, flaky: true,
    bio:"Michael's younger brother. Charming, well-meaning, and about as reliable as Miami weather.",
    perk:"+15% income while he's around. He comes and goes, so don't count on him.",
@@ -19,8 +24,4 @@ export const ALLIES: Ally[] = [
   {id:"jesse", name:"Jesse Porter", cost:3e6,
    bio:"A former counterintelligence agent who got burned himself and now works with Michael.",
    perk:"+10% mission success", ab:"Fast Talk", abDesc:"Missions run 2× faster for 60s", cd:150},
-  {id:"barry", name:"Barry Burkowski", cost:1e6,
-   bio:"Miami's money launderer, the Yellow Pages for criminals. He always takes Michael's call.",
-   perk:"Fixer payoffs cost 50% less; Seymour's and Simon's favor prices −25%",
-   ab:"Follow the Money", abDesc:"Barry traces a payoff to a crook: gain 90s of income and −25 heat", cd:110},
 ];

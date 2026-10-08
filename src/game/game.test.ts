@@ -429,6 +429,17 @@ describe("boss pacing", () => {
   });
 });
 
+describe("Crew pop-up order", () => {
+  it("lists allies cheapest first, after the frienemies", () => {
+    S.life = 1e12;
+    const html = panelHTML("crew");
+    const at = (name: string) => html.indexOf(name);
+    const order = ["Seymour Talbot", "Simon Escher", "Sam Axe", "Fiona Glenanne", "Madeline Westen", "Barry Burkowski", "Nate Westen", "Jesse Porter"].map(at);
+    expect(order.every(i => i >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+});
+
 describe("FAQ pop-up", () => {
   it("renders every question and a search box", () => {
     const html = panelHTML("faq");

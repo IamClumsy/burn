@@ -14,6 +14,21 @@ export const CONTACTS: Contact[] = [
 ];
 
 /**
+ * Simon dies in Season 7 ("Tipping Point"). After that, his slot is taken by Dani Pearce, who passes
+ * intel from her post in Mumbai: the same favors, a steadier hand. (The id stays "simon" so saves still line up.)
+ */
+export const PEARCE_CONTACT: Contact = {
+  id:"simon", name:"Dani Pearce", kind:"Intel favors",
+  bio:"The CIA officer who came to Miami to find a killer and stayed to keep Michael honest. Transferred to a quiet post in Mumbai, she still picks up when he calls, and she still knows who's looking for you. A friend, on her terms.",
+  pitch:"Gets you intel: +1 favor and the Organization loses interest in you. She's steadier than Simon was, and only occasionally pulls rank. Never more than $100K, and only four favors a day.",
+};
+
+/** The contact as the game should show them right now (Pearce, once Simon is gone). */
+export const contactFor = (c: Contact, simonEnded: boolean): Contact => (c.id === "simon" && simonEnded ? PEARCE_CONTACT : c);
+/** Whose face goes with the contact. */
+export const contactFace = (id: string, simonEnded: boolean): string => (id === "simon" && simonEnded ? "pearce" : id);
+
+/**
  * What Seymour wants instead of full price: time with Michael. Each is a little odd, and he's thrilled.
  * `lines` are what happens; he always wants one more story.
  */

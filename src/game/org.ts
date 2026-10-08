@@ -62,7 +62,9 @@ export function simonTip(): void {
   if (!unknown.length || Math.random() > 0.3) return;
   const b = pick(unknown);
   learnName(b.id);
-  say(`Simon slides you a name on a napkin: ${b.n}. He doesn't say how he knows.`);
+  say(S.simonEnded
+    ? `Pearce adds a name to the end of her message: ${b.n}. She doesn't say how she knows.`
+    : `Simon slides you a name on a napkin: ${b.n}. He doesn't say how he knows.`);
 }
 
 /** Every name crossed off: the burn is lifted. */

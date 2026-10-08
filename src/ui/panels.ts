@@ -20,7 +20,7 @@ import { portrait } from "./portrait";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
-import { CONTACTS } from "../data/contacts";
+import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 
 export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "med" | "rep";
@@ -174,20 +174,20 @@ function favorStatus(id: "seymour" | "simon"): string {
 }
 
 function contactItems(): string {
-  return CONTACTS.map(c => item("contact", c.id, S.cash >= contactPrice(c.id) && favorsLeft(c.id) > 0, `${c.name}: ${c.kind}`,
+  return CONTACTS.map(c0 => { const c = contactFor(c0, S.simonEnded); return item("contact", c.id, S.cash >= contactPrice(c.id) && favorsLeft(c.id) > 0, `${c.name}: ${c.kind}`,
     `${c.pitch} ${favorStatus(c.id)}.${S.allies.barry ? " Barry negotiates 25% off." : ""}`,
-    `<div class="cost">${money(contactPrice(c.id))}</div>`, "", portrait(c.id, 44))).join("") +
+    `<div class="cost">${money(contactPrice(c.id))}</div>`, "", portrait(contactFace(c.id, S.simonEnded), 44)); }).join("") +
     item("hangout", "seymour", !S.busy && S.cash >= hangOutPrice() && favorsLeft("seymour") > 0, "Seymour Talbot: Spend the afternoon",
       "He'd sooner be paid in company: he wants you to teach him a move, or come see something he's proud of. About half the cash, but Michael's tied up for 30 to 45 seconds and can't take jobs. Counts toward his daily limit.",
       `<div class="cost">${money(hangOutPrice())}</div>`, "", portrait("seymour", 44));
 }
 
 function crew(): string {
-  const contact = CONTACTS.map(c => `<div class="box"><div class="who">${portrait(c.id, 64)}<div><div class="row"><b>${c.name}</b><span class="small">Frienemy: ${c.kind.toLowerCase()}</span></div>
+  const contact = CONTACTS.map(c0 => { const c = contactFor(c0, S.simonEnded); return `<div class="box"><div class="who">${portrait(contactFace(c.id, S.simonEnded), 64)}<div><div class="row"><b>${c.name}</b><span class="small">Frienemy: ${c.kind.toLowerCase()}</span></div>
     <div class="small">${c.bio}</div>
     <div class="btns"><button data-act="contact" data-arg="${c.id}" ${S.cash >= contactPrice(c.id) && favorsLeft(c.id) > 0 ? "" : "disabled"}>Buy a favor — ${money(contactPrice(c.id))}</button>
     ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() && favorsLeft("seymour") > 0 ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div>
-    <div class="small" style="margin-top:4px">${favorStatus(c.id)}</div></div></div></div>`).join("");
+    <div class="small" style="margin-top:4px">${favorStatus(c.id)}</div></div></div></div>`; }).join("");
   return contact + ALLIES.map(a => {
     if (!S.allies[a.id] && !allyAvailable(a.debut)) {
       return item("hire", a.id, false, a.name, `${a.bio} Doesn't join the story until Season ${a.debut}.`, `<div class="small">Season ${a.debut}</div>`, "", portrait(a.id, 48, false));
@@ -297,7 +297,7 @@ function theList(): string {
   }).join("");
   h += S.cleanRecord
     ? `<div class="box" style="margin-top:8px;border-color:var(--gold)"><b>The burn is lifted.</b><div class="small" style="color:var(--text)">Every name is crossed off. You're clear, and your income is up 25% for good.</div></div>`
-    : `<div class="small" style="margin-top:6px">Beat each of them to cross them off. Simon sometimes passes you a name. Finish the List to lift the burn.</div>`;
+    : `<div class="small" style="margin-top:6px">Beat each of them to cross them off. Your intel contact sometimes passes you a name. Finish the List to lift the burn.</div>`;
 
   return h;
 }

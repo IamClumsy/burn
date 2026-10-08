@@ -19,6 +19,11 @@ let sec = 0;
 export function milestones(): void {
   checkEnding();
   fillBoard(); // the board is never left short, whatever happened to it
+  if (!S.simonEnded && S.episodesDone["711"]) {
+    S.simonEnded = true;
+    toast("Simon is gone", "Michael had to end it, and he didn't like it. Simon Escher is dead, and his number goes dead with him. Dani Pearce, now at a quiet post in Mumbai, quietly offers to take his place: same kind of favors, steadier hands.", "story");
+    say("Simon's number is disconnected. A few days later, a message from Mumbai: \"If you need something, you know who to call.\"");
+  }
   if (!S.backupNudged && S.stats.time >= 7200) {
     S.backupNudged = true;
     toast("Back up your save", "Your game lives in this browser only. Use export at the bottom of the page to keep a copy, just in case.");

@@ -7,6 +7,7 @@ import { S, fresh, setState } from "../state";
 import { milestones, tick, tickNate } from "./tick";
 import { AWAY_CAP, catchUp, returnFromAway } from "./offline";
 import { fmt, setScientific } from "../util";
+import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { tabTitle } from "../ui/render";
 import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
 import { arcAvailable, startArc } from "./arcs";
@@ -893,6 +894,29 @@ describe("Away card, tab title and number safety", () => {
     expect(m.cash).toBe(0);
     expect(m.life).toBeLessThanOrEqual(1e300);
     expect(m.heat).toBe(0);
+  });
+});
+
+describe("Simon's replacement", () => {
+  it("Simon dies after Tipping Point and Pearce takes over his intel favors", () => {
+    const simon = CONTACTS.find(c => c.id === "simon")!;
+    expect(contactFor(simon, false).name).toBe("Simon Escher");
+    expect(contactFor(simon, true).name).toBe("Dani Pearce");
+    expect(contactFace("simon", true)).toBe("pearce");
+    expect(contactFace("seymour", true)).toBe("seymour");
+    S.episodesDone["711"] = true;
+    milestones();
+    expect(S.simonEnded).toBe(true);
+    expect(panelHTML("fav")).toContain("Dani Pearce");
+    expect(panelHTML("fav")).not.toContain("Simon Escher");
+    S.cash = 1e9; S.favors = 0;
+    buyFavorFrom("simon");
+    expect(S.favors).toBe(1);
+  });
+
+  it("Simon stays Simon until then", () => {
+    milestones();
+    expect(S.simonEnded).toBe(false);
   });
 });
 

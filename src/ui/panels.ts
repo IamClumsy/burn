@@ -1,7 +1,7 @@
 import { S } from "../state";
 import {
   REINSTATE_MIN, baseIncome, tierDef, allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
-  contactPrice, succChance,
+  contactPrice, hangOutPrice, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -134,13 +134,17 @@ function missions(): string {
 function contactItems(): string {
   return CONTACTS.map(c => item("contact", c.id, S.cash >= contactPrice(c.id), `${c.name}: ${c.kind}`,
     `${c.pitch}${S.allies.barry ? " Barry negotiates 25% off." : ""}`,
-    `<div class="cost">${money(contactPrice(c.id))}</div>`)).join("");
+    `<div class="cost">${money(contactPrice(c.id))}</div>`)).join("") +
+    item("hangout", "seymour", !S.busy && S.cash >= hangOutPrice(), "Seymour Talbot: Spend the afternoon",
+      "He'd sooner be paid in company: he wants you to teach him a move, or come see something he's proud of. About half the cash, but Michael's tied up for 30 to 45 seconds and can't take jobs.",
+      `<div class="cost">${money(hangOutPrice())}</div>`);
 }
 
 function crew(): string {
   const contact = CONTACTS.map(c => `<div class="box"><div class="row"><b>${c.name}</b><span class="small">Frienemy: ${c.kind.toLowerCase()}</span></div>
     <div class="small">${c.bio}</div>
-    <div class="btns"><button data-act="contact" data-arg="${c.id}" ${S.cash >= contactPrice(c.id) ? "" : "disabled"}>Buy a favor — ${money(contactPrice(c.id))}</button></div></div>`).join("");
+    <div class="btns"><button data-act="contact" data-arg="${c.id}" ${S.cash >= contactPrice(c.id) ? "" : "disabled"}>Buy a favor — ${money(contactPrice(c.id))}</button>
+    ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div></div>`).join("");
   return contact + ALLIES.map(a => {
     if (!S.allies[a.id]) return item("hire", a.id, S.cash >= a.cost, "Hire " + a.name, `${a.bio} Perk: ${a.perk}`, `<div class="cost">${money(a.cost)}</div>`);
     const cd = Math.ceil(S.allyCd[a.id] || 0), busy = S.active.some(m => m.sent === a.id), here = allyHere(a.id);

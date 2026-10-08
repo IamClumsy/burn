@@ -104,9 +104,19 @@ export const bribeCost = (): number =>
   Math.max(100, cps() * 60) * (S.fixer?.mult ?? 1) * (1 + S.att / 100) * (S.allies.barry ? 0.5 : 1) * gripFixer();
 /** How much attention the current fixer can take off. */
 export const bribeDrop = (): number => S.fixer?.drop ?? 40;
-/** Frienemy favors get pricier with each purchase (resets on reinstatement). Barry negotiates a discount. */
-export const contactPrice = (id: "seymour" | "simon"): number =>
-  Math.max(500, cps() * 90) * Math.pow(1.12, id === "seymour" ? S.seymourBought : S.simonBought) * (S.allies.barry ? 0.75 : 1);
+/**
+ * Each frienemy prices differently. Seymour is cheaper and climbs gently; Simon's intel is higher stakes,
+ * so he starts dearer and climbs faster. Both get pricier with each purchase (reset on reinstatement),
+ * and Barry negotiates a discount.
+ */
+const CONTACT_PRICING = { seymour: { base: 0.8, grow: 1.12 }, simon: { base: 1.3, grow: 1.15 } } as const;
+export const contactPrice = (id: "seymour" | "simon"): number => {
+  const { base, grow } = CONTACT_PRICING[id];
+  const bought = id === "seymour" ? S.seymourBought : S.simonBought;
+  return Math.max(500, cps() * 90) * base * Math.pow(grow, bought) * (S.allies.barry ? 0.75 : 1);
+};
+/** Seymour will take about half in cash if you'll spend the afternoon with him. */
+export const hangOutPrice = (): number => contactPrice("seymour") * 0.55;
 export const perkCost = (id: string): number => Math.ceil(2 * Math.pow(1.5, perk(id)));
 /** Earnings needed in a single run before Reinstate unlocks. Tune pacing here. */
 export const REINSTATE_MIN = 1e8;

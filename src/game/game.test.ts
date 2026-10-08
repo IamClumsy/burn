@@ -17,7 +17,8 @@ import { payOffFixer } from "./actions";
 import { GRIP_PERKS, TIERS } from "../data/org";
 import { FAQ } from "../data/faq";
 import { loftBadges } from "../ui/badges";
-import { allyFree, allyHere, contactPrice, succChance } from "../calc";
+import { allyFree, allyHere, contactPrice, hangOutPrice, succChance } from "../calc";
+import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss } from "./bosses";
 import { spawnClient } from "./events";
@@ -59,10 +60,20 @@ describe("frienemies", () => {
     expect(S.att).toBe(40);
   });
 
-  it("each frienemy keeps their own price", () => {
-    S.cash = 1e6; S.gens.inf = 20;
-    buyFavorFrom("seymour"); buyFavorFrom("seymour");
-    expect(contactPrice("simon")).toBeLessThan(contactPrice("seymour"));
+  it("Seymour and Simon don't cost the same", () => {
+    S.gens.inf = 20;
+    expect(contactPrice("simon")).toBeGreaterThan(contactPrice("seymour")); // intel is higher stakes
+  });
+
+  it("each keeps their own price, and Simon's climbs faster", () => {
+    S.cash = 1e9; S.gens.inf = 20;
+    const s0 = contactPrice("seymour"), n0 = contactPrice("simon");
+    buyFavorFrom("seymour");
+    expect(contactPrice("seymour")).toBeGreaterThan(s0);
+    expect(contactPrice("simon")).toBe(n0); // buying from Seymour doesn't move Simon's price
+    buyFavorFrom("simon");
+    expect(contactPrice("simon") / n0).toBeCloseTo(1.15);
+    expect(contactPrice("seymour") / s0).toBeCloseTo(1.12);
   });
 
   it("does nothing if you can't afford them", () => {
@@ -380,6 +391,62 @@ describe("FAQ pop-up", () => {
     const html = panelHTML("faq");
     expect(html).toContain('id="faqSearch"');
     for (const sec of FAQ) for (const it of sec.items) expect(html).toContain(it.q);
+  });
+});
+
+describe("Seymour wants company", () => {
+  it("hanging out costs about half in cash", () => {
+    S.gens.inf = 20;
+    expect(hangOutPrice()).toBeCloseTo(contactPrice("seymour") * 0.55);
+    expect(hangOutPrice()).toBeLessThan(contactPrice("seymour"));
+  });
+
+  it("spending the afternoon gets the favor and gear, and ties Michael up for a bit", () => {
+    S.cash = 1e6; S.gens.inf = 20;
+    const price = hangOutPrice();
+    buyFavorFrom("seymour", "hangout");
+    expect(S.favors).toBe(1);
+    expect(S.cash).toBeCloseTo(1e6 - price);
+    expect(S.busy?.who).toBe("Seymour");
+    expect(S.busy!.left).toBeGreaterThanOrEqual(30);
+    expect(S.busy!.left).toBeLessThanOrEqual(45);
+    expect(Object.values(S.junk).reduce((a, b) => a + b, 0)).toBe(2);
+  });
+
+  it("can't spend two afternoons at once, but cash still works while busy", () => {
+    S.cash = 1e6; S.gens.inf = 20;
+    buyFavorFrom("seymour", "hangout");
+    const favors = S.favors;
+    buyFavorFrom("seymour", "hangout");
+    expect(S.favors).toBe(favors);
+    buyFavorFrom("seymour");
+    expect(S.favors).toBe(favors + 1);
+  });
+
+  it("Michael is free again when the time is up", () => {
+    S.busy = { who: "Seymour", left: 1 };
+    tickBusy(0.5);
+    expect(S.busy).not.toBeNull();
+    tickBusy(1);
+    expect(S.busy).toBeNull();
+  });
+
+  it("Simon never asks for company", () => {
+    S.cash = 1e6; S.gens.inf = 20;
+    buyFavorFrom("simon", "hangout"); // the option only exists for Seymour
+    expect(S.busy).toBeNull();
+  });
+
+  it("the Take a Job button is disabled while he's busy", () => {
+    S.busy = { who: "Seymour", left: 20 };
+    render();
+    const job = document.getElementById("job") as HTMLButtonElement;
+    expect(job.disabled).toBe(true);
+    expect(job.textContent).toMatch(/With Seymour/);
+    S.busy = null;
+    render();
+    expect(job.disabled).toBe(false);
+    expect(job.textContent).toBe("TAKE A JOB");
   });
 });
 

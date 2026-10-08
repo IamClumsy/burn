@@ -104,6 +104,8 @@ export interface GameState {
   cleanRecord: boolean;
   /** The fixer currently offering a payoff. */
   fixer: FixerQuote | null;
+  /** Michael is tied up with someone (like Seymour) and can't take jobs for a bit. */
+  busy: { who: string; left: number } | null;
   /** Story choices: beat index -> option index. */
   choices: Dict<number>;
   /** Multi-step cases: current step per arc, and which are closed. */

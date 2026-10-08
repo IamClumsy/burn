@@ -1,7 +1,7 @@
 import { S } from "../state";
 import { fresh, setState } from "../state";
 import {
-  allyHere, bribeCost, bribeDrop, bulkCost, buyN, credGain, owned, perk, perkCost, contactPrice,
+  allyHere, bribeCost, bribeDrop, bulkCost, buyN, contactPrice, credGain, hangOutPrice, owned, perk, perkCost,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -15,6 +15,7 @@ import { say, toast } from "../ui/fx";
 import { ABILITIES } from "./abilities";
 import { checkBurn } from "./heat";
 import { newFixer, simonTip } from "./org";
+import { SEYMOUR_HANGOUTS } from "../data/contacts";
 import { fillBoard, startMission } from "./missions";
 
 export function buyGen(id: string): void {
@@ -87,10 +88,15 @@ const SIMON_LINES = [
   "Simon smiles, and the favor is yours. Necessary, and worth keeping where you can see him.",
 ];
 
-/** Buy a favor from a frienemy. Seymour sells hardware; Simon sells intel, with a volatile streak. */
-export function buyFavorFrom(id: string): void {
+/**
+ * Buy a favor from a frienemy. Seymour sells hardware, and would sooner be paid in company: pass
+ * "hangout" to pay about half in cash and spend the afternoon with him. Simon sells intel, with a volatile streak.
+ */
+export function buyFavorFrom(id: string, mode: "cash" | "hangout" = "cash"): void {
   if (id !== "seymour" && id !== "simon") return;
-  const c = contactPrice(id);
+  const hang = id === "seymour" && mode === "hangout";
+  if (hang && S.busy) return; // already tied up with someone
+  const c = hang ? hangOutPrice() : contactPrice(id);
   if (S.cash < c) return;
   S.cash -= c; S.favors++;
   beep(300, 0.1, "triangle", 0.05);
@@ -98,7 +104,11 @@ export function buyFavorFrom(id: string): void {
     S.seymourBought++; S.stats.seymourFavors++;
     S.att = Math.min(100, S.att + 3);
     for (let i = 0; i < 2; i++) S.junk[pick(Object.keys(S.junk))]++;
-    say(pick(SEYMOUR_LINES));
+    if (hang) {
+      const h = pick(SEYMOUR_HANGOUTS);
+      S.busy = { who: "Seymour", left: 30 + Math.random() * 15 };
+      say(h.story);
+    } else say(pick(SEYMOUR_LINES));
   } else {
     S.simonBought++; S.stats.simonFavors++;
     simonTip();

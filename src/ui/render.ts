@@ -42,6 +42,10 @@ export function render(): void {
   setText($("bribe"), `${S.fixer ? "Pay off " + S.fixer.name : "Pay Off a Fixer"} (${money(bribeCost())}, −${bribeDrop()})`);
   $<HTMLButtonElement>("bribe").disabled = S.cash < bribeCost();
 
+  const jobBtn = $<HTMLButtonElement>("job");
+  setText(jobBtn, S.busy ? `With ${S.busy.who} (${Math.ceil(S.busy.left)}s)` : "TAKE A JOB");
+  jobBtn.disabled = !!S.busy;
+
   const badges = loftBadges();
   for (const id of ["crew", "cov", "gad", "fav"] as const) {
     const btn = $("lb-" + id);

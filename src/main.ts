@@ -23,7 +23,7 @@ import * as A from "./game/actions";
 const ACT: Record<string, (arg: string) => void> = {
   amt: a => { S.buyAmt = a === "max" ? "max" : (+a as 1 | 10 | 100); },
   gen: A.buyGen, upg: A.buyUpg, hire: A.hireAlly, ability: A.useAbility,
-  cover: A.setCover, perk: A.buyPerk, contact: A.buyFavorFrom, craft: A.craft,
+  cover: A.setCover, perk: A.buyPerk, contact: a => A.buyFavorFrom(a), hangout: () => A.buyFavorFrom("seymour", "hangout"), craft: A.craft,
   start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
 };
 const onAct = (e: MouseEvent) => {
@@ -70,6 +70,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") showModal(nu
 
 // ---- always-on controls
 $("job").addEventListener("click", e => {
+  if (S.busy) return;
   const v = clickVal();
   earn(v); S.heat += 4 * heatMult(); S.stats.clicks++;
   if (Math.random() < 0.15) S.junk[pick(Object.keys(S.junk))]++;

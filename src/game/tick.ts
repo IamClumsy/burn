@@ -40,6 +40,16 @@ export function milestones(): void {
   }
 }
 
+/** Seymour finally lets Michael go. */
+export function tickBusy(dt: number): void {
+  if (!S.busy) return;
+  S.busy.left -= dt;
+  if (S.busy.left > 0) return;
+  const who = S.busy.who;
+  S.busy = null;
+  say(`${who} finally lets you go. You've lost an afternoon, but you've got a favor and, somehow, a new handshake.`);
+}
+
 /** Nate wanders off and wanders back on a random timer, because it's Nate. */
 export function tickNate(dt: number): void {
   if (!S.allies.nate) return;
@@ -72,6 +82,7 @@ export function tick(dt: number): void {
 
   tickBoss(dt);
   tickNate(dt);
+  tickBusy(dt);
   tickOrg(dt);
 
   if (S.upgs.h3 && S.heat >= 90) layLow();

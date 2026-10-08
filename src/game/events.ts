@@ -35,8 +35,8 @@ export function spawnClient(): void {
     pick(CLIENTS),
     [
       ["Take the case", () => {
-        payClient(reward); S.heat += 10 * heatMult();
-        return "The client's problem is yours now. You keep what you need for expenses and the rest goes back to the people who need it.";
+        const { keep } = payClient(reward); S.heat += 10 * heatMult();
+        return `The client pays ${money(reward)}. After expenses, the rest goes back to the people who need it, and ${money(keep)} lands in your account. Taking cases draws a little heat.`;
       }],
       ["Send them away", () => "You point them toward someone who can help. They thank you anyway."],
     ],

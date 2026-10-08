@@ -75,7 +75,6 @@
   #log{height:160px;overflow:auto;font-size:13px;color:var(--dim);font-style:italic}
   #log p{margin:0 0 7px;padding-left:8px;border-left:2px solid var(--line)}
   #log p:first-child{color:var(--text);border-color:var(--pink)}
-  #client{display:none;position:fixed;right:20px;bottom:20px;z-index:9;background:var(--sea);color:#04201d;font-weight:700;padding:14px 18px;border-radius:10px;box-shadow:0 8px 30px #000a;cursor:pointer;animation:pop .4s}
   @keyframes pop{from{transform:scale(.6);opacity:0}}
   #burned{display:none;position:fixed;inset:0;background:#b00020cc;z-index:20;align-items:center;justify-content:center;text-align:center;font-size:44px;font-weight:900;letter-spacing:6px;text-transform:uppercase}
   #burned small{display:block;font-size:15px;letter-spacing:1px;font-weight:400;margin-top:10px}
@@ -83,6 +82,13 @@
   #evt .dlg{background:var(--panel);border:2px solid var(--pink);border-radius:12px;padding:20px;max-width:440px;width:100%}
   #evt h3{margin:0 0 6px;color:var(--pink);letter-spacing:2px;text-transform:uppercase}
   #evt button{display:block;width:100%;margin-top:8px}
+  #evt .dlg{animation:pop .3s}
+  #evt .evtbig{display:none;font-size:40px;font-weight:800;color:var(--gold);margin:2px 0 6px;text-shadow:0 0 18px #ffd16655}
+  #evt .dlg.client{border-color:var(--sea);box-shadow:0 0 40px #2ee6d655,0 20px 60px #000c;max-width:480px}
+  #evt .dlg.client h3{color:var(--sea);font-size:20px}
+  #evt .dlg.client .evtbig{display:block}
+  #evt button.primary{background:linear-gradient(#2ee6d6,#1aa89c);color:#04201d;border:none;font-weight:700;padding:13px;font-size:16px}
+  #evt button.primary:hover:not(:disabled){background-color:transparent;filter:brightness(1.1)}
   #toasts{position:fixed;top:14px;right:14px;z-index:30;display:flex;flex-direction:column;gap:8px;max-width:300px}
   .toast{background:var(--panel);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:13px;animation:pop .3s;box-shadow:0 6px 20px #000a}
   .toast b{color:var(--gold);display:block}

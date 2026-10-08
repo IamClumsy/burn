@@ -3,8 +3,6 @@ import { clickVal, cps, heatMult } from "../calc";
 import { EVENTS } from "../data/events";
 import { chime } from "../audio";
 import { money, pick } from "../util";
-import { $ } from "../ui/dom";
-import { say } from "../ui/fx";
 import { choiceBusy, showChoice } from "../ui/choice";
 import { render } from "../ui/render";
 import { checkBurn } from "./heat";
@@ -17,20 +15,32 @@ export function spawnEvent(): void {
 
 export function scheduleEvent(): void { setTimeout(spawnEvent, 70000 + Math.random() * 60000); }
 
-// ---- "a client is at the door" popup
-let clientTimer: ReturnType<typeof setTimeout> | undefined;
+// ---- "a client is at the door": a prominent pop-up with the pay front and center
+const CLIENTS = [
+  "A woman in a hurry says the police won't help. She doesn't have long.",
+  "A man in a rumpled suit says he's run out of people to ask. Someone gave him your name.",
+  "A nervous couple stands in the doorway holding a folder. They've tried everyone else.",
+  "A teenager you've never met says her brother is in trouble, and she's saved up what she can.",
+  "An old neighbor knocks twice. He doesn't ask for much. He never does.",
+];
 
 export function scheduleClient(): void { setTimeout(spawnClient, 45000 + Math.random() * 60000); }
 
-function spawnClient(): void {
-  const reward = Math.max(500, (cps() * 45 + clickVal() * 10) / KEEP_RATE), el = $("client");
-  el.style.display = "block";
-  el.textContent = `📞 A client is at the door! Pays ${money(reward)}`;
-  const done = () => { el.style.display = "none"; clearTimeout(clientTimer); el.onclick = null; scheduleClient(); };
-  el.onclick = () => {
-    payClient(reward); S.heat += 10 * heatMult();
-    say("The client's problem is yours now. You keep what you need for expenses and the rest goes back to the people who need it.");
-    chime(); checkBurn(); done(); render();
-  };
-  clientTimer = setTimeout(done, 12000);
+export function spawnClient(): void {
+  if (choiceBusy()) { setTimeout(spawnClient, 20000); return; }
+  const reward = Math.max(500, (cps() * 45 + clickVal() * 10) / KEEP_RATE);
+  chime();
+  showChoice(
+    "📞 A client is at the door",
+    pick(CLIENTS),
+    [
+      ["Take the case", () => {
+        payClient(reward); S.heat += 10 * heatMult();
+        return "The client's problem is yours now. You keep what you need for expenses and the rest goes back to the people who need it.";
+      }],
+      ["Send them away", () => "You point them toward someone who can help. They thank you anyway."],
+    ],
+    () => { checkBurn(); render(); scheduleClient(); },
+    { primary: 0, big: money(reward), client: true },
+  );
 }

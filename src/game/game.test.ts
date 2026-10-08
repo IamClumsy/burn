@@ -16,6 +16,7 @@ import { FAQ } from "../data/faq";
 import { allyFree, allyHere, contactPrice, succChance } from "../calc";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss } from "./bosses";
+import { spawnClient } from "./events";
 import { actionDmg, conChance } from "../calc";
 import { checkBurn } from "./heat";
 import { BOSSES } from "../data/bosses";
@@ -230,6 +231,48 @@ describe("pronouns on the mission board", () => {
       const text = panelHTML("mis");
       expect(text, ally).toContain(`to send ${word} (+25%)`);
     }
+  });
+});
+
+describe("client at the door", () => {
+  const buttons = () => [...document.querySelectorAll<HTMLButtonElement>("#evtO button")];
+
+  it("is a prominent dialog with the pay up front and a clear main action", () => {
+    S.gens.inf = 10;
+    spawnClient();
+    expect(document.getElementById("evt")!.style.display).toBe("flex");
+    expect(document.getElementById("evtDlg")!.classList.contains("client")).toBe(true);
+    expect(document.getElementById("evtT")!.textContent).toMatch(/client is at the door/i);
+    expect(document.getElementById("evtBig")!.textContent).toMatch(/^\$/);
+    expect(buttons().map(b => b.textContent)).toEqual(["Take the case", "Send them away"]);
+    expect(buttons()[0].className).toBe("primary");
+    buttons()[1].click();
+  });
+
+  it("taking the case pays you and adds a little heat", () => {
+    S.gens.inf = 10;
+    spawnClient();
+    const cash = S.cash;
+    buttons()[0].click();
+    expect(S.cash).toBeGreaterThan(cash);
+    expect(S.heat).toBeGreaterThan(0);
+  });
+
+  it("sending them away costs nothing", () => {
+    S.gens.inf = 10;
+    spawnClient();
+    const cash = S.cash;
+    buttons()[1].click();
+    expect(S.cash).toBe(cash);
+    expect(S.heat).toBe(0);
+  });
+
+  it("waits its turn instead of stacking on top of another decision", () => {
+    spawnClient();
+    const first = document.getElementById("evtT")!.textContent;
+    spawnClient(); // would overwrite the open dialog if it didn't wait
+    expect(document.getElementById("evtT")!.textContent).toBe(first);
+    buttons()[1].click();
   });
 });
 

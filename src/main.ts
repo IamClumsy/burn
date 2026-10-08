@@ -125,7 +125,7 @@ setInterval(() => say(pick(QUOTES)), 35000);
 
 // Dev-only console hook for manual testing (stripped from production builds).
 if (import.meta.env.DEV) {
-  Promise.all([import("./game/bosses"), import("./game/org")]).then(([b, o]) => {
-    Object.assign(window, { __burn: { get S() { return S; }, spawnBoss: b.spawnBoss, spawnErrand: o.spawnErrand, tick, render } });
+  Promise.all([import("./game/bosses"), import("./game/org"), import("./game/events")]).then(([b, o, ev]) => {
+    Object.assign(window, { __burn: { get S() { return S; }, spawnBoss: b.spawnBoss, spawnErrand: o.spawnErrand, spawnClient: ev.spawnClient, tick, render } });
   });
 }

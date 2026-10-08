@@ -14,19 +14,29 @@ export const CONTACTS: Contact[] = [
 ];
 
 /**
- * Simon dies in Season 7 ("Tipping Point"). After that, his slot is taken by Dani Pearce, who passes
- * intel from her post in Mumbai: the same favors, a steadier hand. (The id stays "simon" so saves still line up.)
+ * The intel contact changes with the story, in the one slot (the id stays "simon" so old saves line up):
+ * Victor Stecker-Epps early on, until the Season 2 finale; Simon Escher from Season 3 (he turns up in
+ * "Devil You Know") until his death in Season 7 ("Tipping Point"); then Dani Pearce, writing from Mumbai.
  */
-export const PEARCE_CONTACT: Contact = {
+export const INTEL_STAGES = { victor: 0, simon: 1, pearce: 2 } as const;
+
+const VICTOR_CONTACT: Contact = {
+  id:"simon", name:"Victor Stecker-Epps", kind:"Intel favors",
+  bio:"A burned CIA officer who wound up working Miami for the Organization, and who says he's your wrangler. He plays chess with a gun under the table. He's cold, clever and dangerous, and he knows exactly who has been pulling your strings. A friend only in the sense that you want him where you can see him. A necessary evil.",
+  pitch:"Gets you intel: +1 favor and the Organization loses interest in you. He's unpredictable and sometimes goes off script. Never more than $100K, and only four favors a day.",
+};
+const PEARCE_CONTACT: Contact = {
   id:"simon", name:"Dani Pearce", kind:"Intel favors",
   bio:"The CIA officer who came to Miami to find a killer and stayed to keep Michael honest. Transferred to a quiet post in Mumbai, she still picks up when he calls, and she still knows who's looking for you. A friend, on her terms.",
-  pitch:"Gets you intel: +1 favor and the Organization loses interest in you. She's steadier than Simon was, and only occasionally pulls rank. Never more than $100K, and only four favors a day.",
+  pitch:"Gets you intel: +1 favor and the Organization loses interest in you. She's steadier than the others were, and only occasionally pulls rank. Never more than $100K, and only four favors a day.",
 };
 
-/** The contact as the game should show them right now (Pearce, once Simon is gone). */
-export const contactFor = (c: Contact, simonEnded: boolean): Contact => (c.id === "simon" && simonEnded ? PEARCE_CONTACT : c);
+/** The intel contact as the game should show them right now. */
+export const contactFor = (c: Contact, stage: number): Contact =>
+  c.id !== "simon" ? c : stage <= 0 ? VICTOR_CONTACT : stage === 1 ? c : PEARCE_CONTACT;
 /** Whose face goes with the contact. */
-export const contactFace = (id: string, simonEnded: boolean): string => (id === "simon" && simonEnded ? "pearce" : id);
+export const contactFace = (id: string, stage: number): string =>
+  id !== "simon" ? id : stage <= 0 ? "victor" : stage === 1 ? "simon" : "pearce";
 
 /**
  * What Seymour wants instead of full price: time with Michael. Each is a little odd, and he's thrilled.

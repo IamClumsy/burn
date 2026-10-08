@@ -653,7 +653,7 @@ describe("sketches around the game", () => {
   it("the Crew pop-up shows a portrait for every contact and ally", () => {
     S.life = 1e12; S.allies.sam = true;
     const html = panelHTML("crew");
-    for (const id of ["seymour", "simon", "sam", "fiona", "barry", "madeline", "nate", "jesse"]) {
+    for (const id of ["seymour", "victor", "sam", "fiona", "barry", "madeline", "nate", "jesse"]) {
       expect(html, id).toContain(`Sketch of ${id}`);
     }
   });
@@ -897,16 +897,30 @@ describe("Away card, tab title and number safety", () => {
   });
 });
 
-describe("Simon's replacement", () => {
-  it("Simon dies after Tipping Point and Pearce takes over his intel favors", () => {
-    const simon = CONTACTS.find(c => c.id === "simon")!;
-    expect(contactFor(simon, false).name).toBe("Simon Escher");
-    expect(contactFor(simon, true).name).toBe("Dani Pearce");
-    expect(contactFace("simon", true)).toBe("pearce");
-    expect(contactFace("seymour", true)).toBe("seymour");
+describe("The intel contact: Victor, then Simon, then Pearce", () => {
+  const simon = () => CONTACTS.find(c => c.id === "simon")!;
+
+  it("shows the right person for each stage", () => {
+    expect(contactFor(simon(), 0).name).toBe("Victor Stecker-Epps");
+    expect(contactFor(simon(), 1).name).toBe("Simon Escher");
+    expect(contactFor(simon(), 2).name).toBe("Dani Pearce");
+    expect(contactFace("simon", 0)).toBe("victor");
+    expect(contactFace("simon", 1)).toBe("simon");
+    expect(contactFace("simon", 2)).toBe("pearce");
+    expect(contactFace("seymour", 2)).toBe("seymour");
+  });
+
+  it("starts with Victor, hands over to Simon in Season 3, and to Pearce after Tipping Point", () => {
+    milestones();
+    expect(S.intel).toBe(0);
+    expect(panelHTML("fav")).toContain("Victor Stecker-Epps");
+    S.seasonOpen = 3;
+    milestones();
+    expect(S.intel).toBe(1);
+    expect(panelHTML("fav")).toContain("Simon Escher");
     S.episodesDone["711"] = true;
     milestones();
-    expect(S.simonEnded).toBe(true);
+    expect(S.intel).toBe(2);
     expect(panelHTML("fav")).toContain("Dani Pearce");
     expect(panelHTML("fav")).not.toContain("Simon Escher");
     S.cash = 1e9; S.favors = 0;
@@ -914,9 +928,12 @@ describe("Simon's replacement", () => {
     expect(S.favors).toBe(1);
   });
 
-  it("Simon stays Simon until then", () => {
-    milestones();
-    expect(S.simonEnded).toBe(false);
+  it("Reinstating keeps the story: Simon doesn't come back after he's gone", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    S.intel = 2; S.run = 2e8;
+    prestige();
+    expect(S.intel).toBe(2);
+    vi.restoreAllMocks();
   });
 });
 
@@ -973,7 +990,7 @@ describe("Crew pop-up order", () => {
     S.life = 1e12;
     const html = panelHTML("crew");
     const at = (name: string) => html.indexOf(name);
-    const order = ["Seymour Talbot", "Simon Escher", "Sam Axe", "Fiona Glenanne", "Barry Burkowski", "Madeline Westen", "Nate Westen", "Jesse Porter"].map(at);
+    const order = ["Seymour Talbot", "Victor Stecker-Epps", "Sam Axe", "Fiona Glenanne", "Barry Burkowski", "Madeline Westen", "Nate Westen", "Jesse Porter"].map(at);
     expect(order.every(i => i >= 0)).toBe(true);
     expect(order).toEqual([...order].sort((a, b) => a - b));
   });
@@ -1421,6 +1438,7 @@ describe("game loop (headless)", () => {
       expect(S.boss).toBeNull();
       expect(S.fionaAway).toBeGreaterThan(500);
       expect(allyHere("fiona")).toBe(false);
+      S.bossCd = 1e9; // no new boss while we wait
       tickBoss(700);
       expect(allyHere("fiona")).toBe(true);
     });

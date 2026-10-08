@@ -19,8 +19,13 @@ let sec = 0;
 export function milestones(): void {
   checkEnding();
   fillBoard(); // the board is never left short, whatever happened to it
-  if (!S.simonEnded && S.episodesDone["711"]) {
-    S.simonEnded = true;
+  if (S.intel < 1 && S.seasonOpen >= 3) {
+    S.intel = 1;
+    toast("Victor is gone", "Victor Stecker-Epps is dead, and Michael is the one who ended it. You get a new number for the same kind of favors: Simon Escher, a man you'd rather not need and who knows everything about the Organization.", "story");
+    say("Victor's line goes silent. A few days later, an unfamiliar number calls. \"We should talk,\" says Simon.");
+  }
+  if (S.intel < 2 && S.episodesDone["711"]) {
+    S.intel = 2;
     toast("Simon is gone", "Michael had to end it, and he didn't like it. Simon Escher is dead, and his number goes dead with him. Dani Pearce, now at a quiet post in Mumbai, quietly offers to take his place: same kind of favors, steadier hands.", "story");
     say("Simon's number is disconnected. A few days later, a message from Mumbai: \"If you need something, you know who to call.\"");
   }

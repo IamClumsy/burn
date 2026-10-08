@@ -49,6 +49,8 @@ export const LOOKS: Record<string, Look> = {
   diego: { skin: "#c99a70", hair: "short", hairColor: "#1c1612", facial: "stubble", facialColor: "#3a2a20", glasses: "aviator", jaw: "square", age: 1, outfit: "blazer", outfitColor: "#7d8570", accent: "#e8e2d4", bg: ["#ffd166", "#2a1a50"], mood: "sly" },
   // Pearce: dark brown hair worn down and parted, a gray blazer over a dark top, a level stare
   pearce: { skin: "#e6bd9c", hair: "long", hairColor: "#3a2a22", jaw: "narrow", outfit: "blazer", outfitColor: "#8d8f98", accent: "#1d1a24", bg: ["#4aa3ff", "#2a1a50"], mood: "stern" },
+  // Victor: thinning light-brown hair, light stubble, a patterned open-collar shirt, a cold hard stare
+  victor: { skin: "#e3bd9a", hair: "receding", hairColor: "#8a6a4a", facial: "stubble", facialColor: "#a58b68", jaw: "narrow", face: 0.98, outfit: "shirt", outfitColor: "#7d86b8", accent: "#d09ab8", stripes: "#d09ab8", bg: ["#8a8aa0", "#150c20"], mood: "stern" },
   // Gilroy: short tousled dark hair, a self-satisfied smirk, a cream blazer over a white shirt
   gilroy: { skin: "#ecc6a2", hair: "tousled", hairColor: "#3b2a22", jaw: "square", outfit: "blazer", outfitColor: "#dcc79c", accent: "#f4eef8", bg: ["#ff4d5e", "#150c20"], mood: "sly" },
   // Barrett: combed dark-gray hair, a ruddy weathered face, a dark suit with a red tie

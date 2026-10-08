@@ -174,16 +174,16 @@ function favorStatus(id: "seymour" | "simon"): string {
 }
 
 function contactItems(): string {
-  return CONTACTS.map(c0 => { const c = contactFor(c0, S.simonEnded); return item("contact", c.id, S.cash >= contactPrice(c.id) && favorsLeft(c.id) > 0, `${c.name}: ${c.kind}`,
+  return CONTACTS.map(c0 => { const c = contactFor(c0, S.intel); return item("contact", c.id, S.cash >= contactPrice(c.id) && favorsLeft(c.id) > 0, `${c.name}: ${c.kind}`,
     `${c.pitch} ${favorStatus(c.id)}.${S.allies.barry ? " Barry negotiates 25% off." : ""}`,
-    `<div class="cost">${money(contactPrice(c.id))}</div>`, "", portrait(contactFace(c.id, S.simonEnded), 44)); }).join("") +
+    `<div class="cost">${money(contactPrice(c.id))}</div>`, "", portrait(contactFace(c.id, S.intel), 44)); }).join("") +
     item("hangout", "seymour", !S.busy && S.cash >= hangOutPrice() && favorsLeft("seymour") > 0, "Seymour Talbot: Spend the afternoon",
       "He'd sooner be paid in company: he wants you to teach him a move, or come see something he's proud of. About half the cash, but Michael's tied up for 30 to 45 seconds and can't take jobs. Counts toward his daily limit.",
       `<div class="cost">${money(hangOutPrice())}</div>`, "", portrait("seymour", 44));
 }
 
 function crew(): string {
-  const contact = CONTACTS.map(c0 => { const c = contactFor(c0, S.simonEnded); return `<div class="box"><div class="who">${portrait(contactFace(c.id, S.simonEnded), 64)}<div><div class="row"><b>${c.name}</b><span class="small">Frienemy: ${c.kind.toLowerCase()}</span></div>
+  const contact = CONTACTS.map(c0 => { const c = contactFor(c0, S.intel); return `<div class="box"><div class="who">${portrait(contactFace(c.id, S.intel), 64)}<div><div class="row"><b>${c.name}</b><span class="small">Frienemy: ${c.kind.toLowerCase()}</span></div>
     <div class="small">${c.bio}</div>
     <div class="btns"><button data-act="contact" data-arg="${c.id}" ${S.cash >= contactPrice(c.id) && favorsLeft(c.id) > 0 ? "" : "disabled"}>Buy a favor — ${money(contactPrice(c.id))}</button>
     ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() && favorsLeft("seymour") > 0 ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div>

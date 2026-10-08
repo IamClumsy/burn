@@ -97,6 +97,11 @@ const SIMON_LINES = [
   "Simon smiles, and the favor is yours. Necessary, and worth keeping where you can see him.",
 ];
 
+const VICTOR_LINES = [
+  "Victor slides a name across the chessboard without looking up. The intel is good. The look he gives you is better.",
+  "Victor knows how the Organization works because he works for it. You pay him and keep one hand free.",
+  "Victor smiles, and the favor is yours. Necessary, and best kept where you can see his hands.",
+];
 const PEARCE_LINES = [
   "Pearce sends a name from Mumbai with a one-line warning. The intel is good. The warning is better.",
   "Pearce answers on the second ring, tells you what she can, and what she can't, and hangs up first.",
@@ -130,7 +135,10 @@ export function buyFavorFrom(id: string, mode: "cash" | "hangout" = "cash"): voi
     S.simonBought++; S.stats.simonFavors++;
     simonTip();
     S.att = Math.max(0, S.att - 10);
-    if (S.simonEnded) {
+    if (S.intel === 0) {
+      if (Math.random() < 0.2) { S.heat += 15; say("Victor goes off script and does something loud. The intel was good. The heat is real."); }
+      else say(pick(VICTOR_LINES));
+    } else if (S.intel >= 2) {
       if (Math.random() < 0.1) { S.heat += 10; say("Pearce pulls rank in a way that makes a lot of noise. The intel was good. The paperwork is not."); }
       else say(pick(PEARCE_LINES));
     } else if (Math.random() < 0.2) { S.heat += 15; say("Simon goes off script and does something loud. The intel was good. The heat is real."); }
@@ -162,7 +170,7 @@ export function prestige(): void {
     stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, sci: S.sci, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
     choices: S.choices, arcStep: S.arcStep, arcsDone: S.arcsDone,
     grip: S.grip, listKnown: S.listKnown, attPeak: S.attPeak, cleanRecord: S.cleanRecord,
-    episodesDone: S.episodesDone, seasonOpen: S.seasonOpen, favorLog: S.favorLog, backupNudged: S.backupNudged, simonEnded: S.simonEnded, nateAway: S.nateAway, nateTimer: S.nateTimer, nateStage: S.nateStage,
+    episodesDone: S.episodesDone, seasonOpen: S.seasonOpen, favorLog: S.favorLog, backupNudged: S.backupNudged, intel: S.intel, nateAway: S.nateAway, nateTimer: S.nateTimer, nateStage: S.nateStage,
   };
   setState(Object.assign(fresh(), keep));
   S.stats.reinstated++;

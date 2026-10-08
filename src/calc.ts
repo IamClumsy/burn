@@ -8,7 +8,7 @@ import { seasonsOpen } from "./data/missions";
 import { DAY_MS, FAVORS_PER_DAY } from "./data/pacing";
 import { GRIP_PERKS, TIERS } from "./data/org";
 import { REFERRAL } from "./data/upgrades";
-import type { Boss, ChoiceFx, Gen, Mission } from "./types";
+import type { Boss, ChoiceFx, ContactId, Gen, Mission } from "./types";
 
 /** Fx from every story choice the player has made. */
 function chosenFx(): ChoiceFx[] {
@@ -123,23 +123,23 @@ export const bribeDrop = (): number => S.fixer?.drop ?? 40;
  * so he starts dearer and climbs faster. Both get pricier with each purchase (reset on reinstatement),
  * and Barry negotiates a discount.
  */
-const CONTACT_PRICING = { seymour: { base: 0.8, grow: 1.12 }, simon: { base: 1.3, grow: 1.15 } } as const;
+const CONTACT_PRICING = { seymour: { base: 0.8, grow: 1.12 }, simon: { base: 1.3, grow: 1.15 }, barry: { base: 0.7, grow: 1.1 } } as const;
 /** Michael never has that kind of money: whatever your income, a frienemy never asks more than this. */
 export const CONTACT_CAP = 100_000;
-export const contactPrice = (id: "seymour" | "simon"): number => {
+export const contactPrice = (id: ContactId): number => {
   const { base, grow } = CONTACT_PRICING[id];
-  const bought = id === "seymour" ? S.seymourBought : S.simonBought;
+  const bought = id === "seymour" ? S.seymourBought : id === "simon" ? S.simonBought : S.barryBought;
   const raw = Math.max(500, cps() * 90) * base * Math.pow(grow, bought);
-  return Math.min(CONTACT_CAP, raw) * (S.allies.barry ? 0.75 : 1); // Barry's discount comes off the capped price
+  return Math.min(CONTACT_CAP, raw) * (S.allies.barry && id !== "barry" ? 0.75 : 1); // Barry's discount comes off the capped price (he doesn't discount himself)
 };
 /** Favors bought from a frienemy in the last 24 hours of real time. */
-export const recentFavors = (id: "seymour" | "simon", now = Date.now()): number[] =>
+export const recentFavors = (id: ContactId, now = Date.now()): number[] =>
   S.favorLog[id].filter(t => now - t < DAY_MS);
 /** How many more they'll sell you today. */
-export const favorsLeft = (id: "seymour" | "simon", now = Date.now()): number =>
+export const favorsLeft = (id: ContactId, now = Date.now()): number =>
   Math.max(0, FAVORS_PER_DAY - recentFavors(id, now).length);
 /** Milliseconds until they'll sell you another, or 0 if they will now. */
-export function nextFavorIn(id: "seymour" | "simon", now = Date.now()): number {
+export function nextFavorIn(id: ContactId, now = Date.now()): number {
   const r = recentFavors(id, now);
   return r.length < FAVORS_PER_DAY ? 0 : Math.min(...r) + DAY_MS - now;
 }
@@ -166,7 +166,7 @@ export function awayWhy(id: string): { short: string; long: string } | null {
 export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);
 export function succChance(m: Mission): number {
   if (m.kid) return 1; // Michael never fails when a kid is involved
-  const c = m.succ + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (S.allies.pearce ? 0.08 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
+  const c = m.succ + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
   return Math.min(0.97, c);
 }
 /** What the client pays in total. Michael keeps KEEP_RATE of it. */
@@ -190,6 +190,6 @@ export function actionDmg(pct: number): number {
 
 /** Odds that a con works on a boss. */
 export function conChance(): number {
-  const c = 0.7 + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (S.allies.pearce ? 0.08 : 0);
+  const c = 0.7 + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0);
   return Math.min(0.95, c);
 }

@@ -1,5 +1,5 @@
 import { S, earn } from "../state";
-import { allyHere, choiceMult, cps, gripAtt, heatMult, owned } from "../calc";
+import { choiceMult, cps, gripAtt, heatMult, owned } from "../calc";
 import { checkEnding, tickOrg } from "./org";
 import { GENS } from "../data/ops";
 import { STORY } from "../data/story";
@@ -100,7 +100,7 @@ export function tick(dt: number): void {
 
   const ops = GENS.reduce((a, g, i) => a + owned(g.id) * (1 + i * 0.3), 0);
   S.heat = Math.max(0, S.heat + (ops * 0.012 * heatMult() - 1.2) * dt);
-  S.att = Math.max(0, Math.min(100, S.att + ((0.05 + S.heat * 0.004) * choiceMult("att") * gripAtt() * (allyHere("diego") ? 0.85 : 1) - (S.heat < 20 ? 0.25 : 0)) * dt));
+  S.att = Math.max(0, Math.min(100, S.att + ((0.05 + S.heat * 0.004) * choiceMult("att") * gripAtt() - (S.heat < 20 ? 0.25 : 0)) * dt));
 
   if (S.layCd > 0) S.layCd = Math.max(0, S.layCd - dt);
   if (S.coverCd > 0) S.coverCd = Math.max(0, S.coverCd - dt);

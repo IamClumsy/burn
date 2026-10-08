@@ -13,6 +13,13 @@ export const CONTACTS: Contact[] = [
    pitch:"Gets you intel: +1 favor and the Organization loses interest in you. He's unpredictable and sometimes goes off script. Never more than $100K, and only four favors a day."},
 ];
 
+/** Barry sells favors too, once he's on the crew and for as long as he's around. He launders money, so his favors come with clean cash. */
+export const BARRY_CONTACT: Contact = {
+  id:"barry", name:"Barry Burkowski", kind:"Money favors",
+  bio:"Miami's money launderer and the Yellow Pages for criminals. He's on your side, which doesn't mean he works for free. A friend with a rate card.",
+  pitch:"Gets you a favor through his contacts: +1 favor and a little heat scrubbed off the books. Cheaper than the frienemies, and never more than $100K. Only four favors a day.",
+};
+
 /**
  * The intel contact changes with the story, in the one slot (the id stays "simon" so old saves line up):
  * Victor Stecker-Epps early on, until the Season 2 finale; Simon Escher from Season 3 (he turns up in

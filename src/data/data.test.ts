@@ -187,7 +187,7 @@ describe("data integrity", () => {
   it("the crew is listed in order of cost", () => {
     const costs = ALLIES.map(a => a.cost);
     expect(costs).toEqual([...costs].sort((a, b) => a - b));
-    expect(ALLIES.map(a => a.id)).toEqual(["sam", "fiona", "barry", "madeline", "nate", "diego", "jesse", "pearce"]);
+    expect(ALLIES.map(a => a.id)).toEqual(["sam", "fiona", "barry", "madeline", "nate", "jesse"]);
   });
 
   it("no ally appears in an episode before they joined the show", () => {
@@ -210,14 +210,6 @@ describe("data integrity", () => {
     expect(MISSIONS.filter(m => m.ally === "jesse").length).toBeGreaterThanOrEqual(10);
   });
 
-  it("Diego (Season 3) and Pearce (Season 5) join the show on time and have missions of their own", () => {
-    const d = ALLIES.find(a => a.id === "diego")!, p = ALLIES.find(a => a.id === "pearce")!;
-    expect([d.debut, d.debutEp]).toEqual([3, "305"]);
-    expect([p.debut, p.debutEp]).toEqual([5, "505"]);
-    expect(MISSIONS.filter(m => m.ally === "diego").length).toBeGreaterThanOrEqual(1);
-    expect(MISSIONS.filter(m => m.ally === "pearce").length).toBeGreaterThanOrEqual(4);
-  });
-
   it("Madeline costs more than Barry, who helps from the start", () => {
     const cost = (id: string) => ALLIES.find(a => a.id === id)!.cost;
     expect(cost("madeline")).toBeGreaterThan(cost("barry"));
@@ -233,7 +225,7 @@ describe("data integrity", () => {
 
   it("women on the crew are flagged so game text uses the right pronouns", () => {
     const she = ALLIES.filter(a => a.she).map(a => a.id).sort();
-    expect(she).toEqual(["fiona", "madeline", "pearce"]);
+    expect(she).toEqual(["fiona", "madeline"]);
   });
 
   it("every ally has an ability implementation", () => {

@@ -1,4 +1,5 @@
 import { S } from "../state";
+import type { ContactId } from "../types";
 import {
   REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
@@ -20,7 +21,7 @@ import { portrait } from "./portrait";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
-import { CONTACTS, contactFace, contactFor } from "../data/contacts";
+import { BARRY_CONTACT, CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 
 export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "med" | "rep";
@@ -168,7 +169,7 @@ function missions(): string {
 }
 
 /** "3 of 4 left today", or when they'll deal again. */
-function favorStatus(id: "seymour" | "simon"): string {
+function favorStatus(id: ContactId): string {
   const left = favorsLeft(id);
   return left > 0 ? `${left} of ${FAVORS_PER_DAY} left today` : `Tapped out for today. Back in ${formatWait(nextFavorIn(id))}`;
 }
@@ -177,6 +178,8 @@ function contactItems(): string {
   return CONTACTS.map(c0 => { const c = contactFor(c0, S.intel); return item("contact", c.id, S.cash >= contactPrice(c.id) && favorsLeft(c.id) > 0, `${c.name}: ${c.kind}`,
     `${c.pitch} ${favorStatus(c.id)}.${S.allies.barry ? " Barry negotiates 25% off." : ""}`,
     `<div class="cost">${money(contactPrice(c.id))}</div>`, "", portrait(contactFace(c.id, S.intel), 44)); }).join("") +
+    (S.allies.barry ? item("contact", "barry", S.cash >= contactPrice("barry") && favorsLeft("barry") > 0, `${BARRY_CONTACT.name}: ${BARRY_CONTACT.kind}`,
+      `${BARRY_CONTACT.pitch} ${favorStatus("barry")}.`, `<div class="cost">${money(contactPrice("barry"))}</div>`, "", portrait("barry", 44)) : "") +
     item("hangout", "seymour", !S.busy && S.cash >= hangOutPrice() && favorsLeft("seymour") > 0, "Seymour Talbot: Spend the afternoon",
       "He'd sooner be paid in company: he wants you to teach him a move, or come see something he's proud of. About half the cash, but Michael's tied up for 30 to 45 seconds and can't take jobs. Counts toward his daily limit.",
       `<div class="cost">${money(hangOutPrice())}</div>`, "", portrait("seymour", 44));
@@ -197,7 +200,9 @@ function crew(): string {
     const status = !here ? (awayWhy(a.id)?.long ?? "Away") : busy ? "On a mission" : "Available";
     return `<div class="box"${here ? "" : ' style="opacity:.6"'}><div class="who">${portrait(a.id, 64)}<div><div class="row"><b>${a.name}</b><span class="small">${status}</span></div>
       <div class="small">${a.bio}</div><div class="small">Perk: ${a.perk}</div>
-      <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd > 0 || !here ? "disabled" : ""}>${a.ab} — ${!here ? "Away" : cd > 0 ? lv("cd" + a.id, cd + "s") : "Ready"}</button></div>
+      <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd > 0 || !here ? "disabled" : ""}>${a.ab} — ${!here ? "Away" : cd > 0 ? lv("cd" + a.id, cd + "s") : "Ready"}</button>
+      ${a.id === "barry" ? `<button data-act="contact" data-arg="barry" ${S.cash >= contactPrice("barry") && favorsLeft("barry") > 0 ? "" : "disabled"}>Buy a favor — ${money(contactPrice("barry"))}</button>` : ""}</div>
+      ${a.id === "barry" ? `<div class="small" style="margin-top:4px">${BARRY_CONTACT.pitch} ${favorStatus("barry")}.</div>` : ""}
       <div class="small" style="margin-top:4px">${a.abDesc}</div></div></div></div>`;
   }).join("");
 }

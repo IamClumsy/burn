@@ -38,7 +38,7 @@ export const EP_NOTES: Record<string, EpisodeNote> = {
   '302': {client:'Howard', villain:'Santora', tip:'Stay fit between jobs. The work takes a toll.'},
   '303': {client:'Nate Westen', villain:'Tyler Brennen', friend:{name:'Nate', role:'Your brother, and the client this time'}, tip:'Keep your place free of anything that could hurt you if someone looks.'},
   '304': {client:'Detective Paxson', villain:'Matheson', tip:'Agree on the plan before you go in. Argue before, not during.'},
-  '305': {client:'Spencer', villain:'Shannon Park', friend:{name:'Diego', role:'Your new contact at the agency'}, tip:'A burned spy gets ignored. Find someone still in the field.'},
+  '305': {client:'Spencer', villain:'Shannon Park', tip:'A burned spy gets ignored. Find someone still in the field.'},
   '306': {client:'Beck', villain:'Tom Strickler', tip:'Training with someone close helps, and it gets personal too.'},
   '307': {client:'Joey', villain:'Erik Luna', friend:{name:'Diego Garza', role:'Your contact at the agency'}, tip:'Spies avoid noisy clubs. You can\'t hear, and you can\'t watch the crowd.'},
   '308': {client:'Barry', villain:'Natalie Rice', tip:'Small things save missions. Fresh batteries beat extra firepower.'},

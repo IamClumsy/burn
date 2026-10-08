@@ -39,7 +39,7 @@ Say what the reset would give you before you do it:
 - **Share preview image:** the page has Open Graph tags but no picture. A 1200×630 PNG (the header art with the title) would make links look right in chats.
 - **Browser notifications:** an opt-in "a boss is at the door" alert when the tab is in the background. The tab title already flags it.
 - **Cloud save or a short save code:** export works, but a long base64 string is awkward on a phone.
-- **More cast:** Ruth and Charlie (Nate's family) as flavor somewhere; Max (the CIA contact, Season 5); more one-episode villains as Rogues if they're disruptive enough, as Thomas O'Neill is.
+- **More cast:** Ruth and Charlie (Nate's family) as flavor somewhere; Diego Garza (Season 3 CIA contact, dies in 309) and Max (Season 5) as non-crew flavor; more one-episode villains as Rogues if they're disruptive enough, as Thomas O'Neill is.
 - **Sound pass:** a few more cues (boss arrives, mission paid, welcome back) and a volume slider rather than on/off.
 - **Reduced-motion setting:** skip the pop and shake animations for people who want it quieter.
 - **Tablet check:** phone width and desktop are checked; the in-between widths haven't had a proper look.
@@ -47,4 +47,4 @@ Say what the reset would give you before you do it:
 
 ## Done recently, for reference
 
-Full-rate offline progress (24 h cap), a "Welcome back" summary card, a live tab title, number safety (finite totals, a scientific-notation switch, sanitized saves), a backup reminder, Diego and Pearce on the crew, Thomas O'Neill as a Rogue, staged Nate story beats, Michael's File, the rotating-to-ready case tile, and the header skyline.
+Full-rate offline progress (24 h cap), a "Welcome back" summary card, a live tab title, number safety (finite totals, a scientific-notation switch, sanitized saves), a backup reminder, Barry selling favors, Victor then Simon then Pearce as the intel contact, Thomas O'Neill as a Rogue, staged Nate story beats, Michael's File, the rotating-to-ready case tile, and the header skyline.

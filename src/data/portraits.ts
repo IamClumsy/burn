@@ -45,8 +45,6 @@ export const LOOKS: Record<string, Look> = {
   strickler: { skin: "#d4a47c", hair: "tousled", hairColor: "#3a2a20", glasses: "aviator", jaw: "narrow", outfit: "shirt", outfitColor: "#e17fb8", accent: "#fbe7f2", stripes: "#fbe7f2", bg: ["#ffd166", "#3a0f4a"], mood: "sly" },
   // O'Neill: short dark hair, dark stubble, dark sunglasses, a black shirt and a chain, a hard stare
   oneill: { skin: "#d7ac86", hair: "short", hairColor: "#1f1814", facial: "stubble", facialColor: "#3a2c24", glasses: "shades", jaw: "square", age: 1, outfit: "shirt", outfitColor: "#17151a", accent: "#2a2630", extras: ["chain"], bg: ["#2fbf71", "#150c20"], mood: "stern" },
-  // Diego: slicked dark hair, aviators, close dark stubble, a gray-green jacket over a light shirt
-  diego: { skin: "#c99a70", hair: "short", hairColor: "#1c1612", facial: "stubble", facialColor: "#3a2a20", glasses: "aviator", jaw: "square", age: 1, outfit: "blazer", outfitColor: "#7d8570", accent: "#e8e2d4", bg: ["#ffd166", "#2a1a50"], mood: "sly" },
   // Pearce: dark brown hair worn down and parted, a gray blazer over a dark top, a level stare
   pearce: { skin: "#e6bd9c", hair: "long", hairColor: "#3a2a22", jaw: "narrow", outfit: "blazer", outfitColor: "#8d8f98", accent: "#1d1a24", bg: ["#4aa3ff", "#2a1a50"], mood: "stern" },
   // Victor: thinning light-brown hair, light stubble, a patterned open-collar shirt, a cold hard stare

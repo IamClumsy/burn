@@ -7,7 +7,7 @@ import { portrait, portraitSVG, shade, silhouetteSVG } from "./portrait";
 
 describe("character sketches", () => {
   it("every ally, contact and boss has a portrait, and so does Michael", () => {
-    const ids = [...ALLIES.map(a => a.id), ...CONTACTS.map(c => c.id), ...BOSSES.map(b => b.id), "michael", "victor"];
+    const ids = [...ALLIES.map(a => a.id), ...CONTACTS.map(c => c.id), ...BOSSES.map(b => b.id), "michael", "victor", "pearce"];
     for (const id of ids) expect(LOOKS[id], id).toBeTruthy();
     expect(Object.keys(LOOKS).sort()).toEqual([...new Set(ids)].sort());
   });

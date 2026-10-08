@@ -43,6 +43,7 @@ import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
 import { MISSIONS } from "../data/missions";
 import { earn, merge } from "../state";
+import type { GameState } from "../types";
 import { render } from "../ui/render";
 import { MODALS, SECTIONS, buildLayout, panelHTML } from "../ui/panels";
 
@@ -799,27 +800,35 @@ describe("upgrades never run out", () => {
   });
 });
 
-describe("Diego and Pearce", () => {
-  it("Diego's Pull a File reveals a name on the List and cools attention", () => {
-    S.allies.diego = true; S.att = 50; S.listKnown = {};
-    useAbility("diego");
-    expect(Object.keys(S.listKnown).length).toBe(1);
-    expect(S.att).toBe(35);
+describe("Barry sells favors", () => {
+  it("only once he's on the crew, at his own price, with a daily limit and no self-discount", () => {
+    S.cash = 1e9; S.favors = 0;
+    buyFavorFrom("barry");
+    expect(S.favors).toBe(0); // not hired yet
+    S.allies.barry = true; S.heat = 50;
+    const price = contactPrice("barry");
+    buyFavorFrom("barry");
+    expect(S.favors).toBe(1);
+    expect(S.heat).toBe(42);
+    expect(S.cash).toBeCloseTo(1e9 - price, 3);
+    expect(S.stats.barryFavors).toBe(1);
+    for (let i = 0; i < 6; i++) buyFavorFrom("barry");
+    expect(S.favors).toBe(4); // four a day
+    expect(favorsLeft("barry")).toBe(0);
   });
 
-  it("Pearce's Official Cover cuts heat and buys time on a case", () => {
-    S.allies.pearce = true; S.heat = 80;
-    S.boss = { id: "paxson", hp: 1e6, max: 1e6, left: 30 };
-    useAbility("pearce");
-    expect(S.heat).toBe(40);
-    expect(S.boss.left).toBe(50);
+  it("shows up in Crew and in Favors only while he's hired", () => {
+    S.life = 1e12;
+    expect(panelHTML("fav")).not.toContain("Money favors");
+    S.allies.barry = true;
+    expect(panelHTML("fav")).toContain("Money favors");
+    expect(panelHTML("crew")).toMatch(/data-act="contact" data-arg="barry"/);
   });
 
-  it("Pearce adds mission success", () => {
-    const m = { ...S.board[0], succ: 0.4, kid: false };
-    const base = succChance(m);
-    S.allies.pearce = true;
-    expect(succChance(m)).toBeGreaterThan(base);
+  it("an old save without Barry's favor log still loads", () => {
+    const m = merge({ favorLog: { seymour: [1], simon: [] } as unknown as GameState["favorLog"] });
+    expect(m.favorLog.barry).toEqual([]);
+    expect(m.favorLog.seymour).toEqual([1]);
   });
 });
 

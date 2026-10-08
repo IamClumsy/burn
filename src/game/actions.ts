@@ -97,6 +97,11 @@ const SIMON_LINES = [
   "Simon smiles, and the favor is yours. Necessary, and worth keeping where you can see him.",
 ];
 
+const BARRY_LINES = [
+  "Barry makes two calls and a third person owes you a favor. The invoice arrives before you hang up.",
+  "Barry slides an envelope across a diner table. \"Clean,\" he says. \"Mostly.\"",
+  "Barry knows a guy who knows a guy. The guy's price is reasonable, and Barry's cut is not.",
+];
 const VICTOR_LINES = [
   "Victor slides a name across the chessboard without looking up. The intel is good. The look he gives you is better.",
   "Victor knows how the Organization works because he works for it. You pay him and keep one hand free.",
@@ -113,7 +118,8 @@ const PEARCE_LINES = [
  * "hangout" to pay about half in cash and spend the afternoon with him. Simon sells intel, with a volatile streak.
  */
 export function buyFavorFrom(id: string, mode: "cash" | "hangout" = "cash"): void {
-  if (id !== "seymour" && id !== "simon") return;
+  if (id !== "seymour" && id !== "simon" && id !== "barry") return;
+  if (id === "barry" && !S.allies.barry) return; // he only sells once he's on the crew
   if (favorsLeft(id) <= 0) return; // tapped out for today
   const hang = id === "seymour" && mode === "hangout";
   if (hang && S.busy) return; // already tied up with someone
@@ -131,6 +137,10 @@ export function buyFavorFrom(id: string, mode: "cash" | "hangout" = "cash"): voi
       S.busy = { who: "Seymour", left: 30 + Math.random() * 15 };
       say(h.story);
     } else say(pick(SEYMOUR_LINES));
+  } else if (id === "barry") {
+    S.barryBought++; S.stats.barryFavors++;
+    S.heat = Math.max(0, S.heat - 8);
+    say(pick(BARRY_LINES));
   } else {
     S.simonBought++; S.stats.simonFavors++;
     simonTip();

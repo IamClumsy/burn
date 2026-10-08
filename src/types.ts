@@ -60,7 +60,8 @@ export interface ActiveBoss {
 export type CaseAction = "investigate" | "con" | "gadget" | "favor" | "stakeout" | "cover" | "crew" | "trap";
 
 /** A frienemy: not crew, sells a specific kind of necessary favor for cash. */
-export interface Contact { id: "seymour" | "simon"; name: string; kind: string; bio: string; pitch: string }
+export type ContactId = "seymour" | "simon" | "barry";
+export interface Contact { id: ContactId; name: string; kind: string; bio: string; pitch: string }
 
 /** The fixer currently on offer: a different price and result each time one turns up. */
 export interface FixerQuote {
@@ -95,7 +96,7 @@ export interface Stats {
   clicks: number; burns: number; mDone: number; mFail: number; crafted: number;
   ambush: number; reinstated: number; time: number; kidMissions: number;
   /** Favors bought from Seymour, across all runs. */
-  seymourFavors: number; simonFavors: number; errands: number;
+  seymourFavors: number; simonFavors: number; barryFavors: number; errands: number;
   /** Total client money Michael handed back instead of keeping. */
   returned: number;
 }
@@ -109,7 +110,7 @@ export interface GameState {
   story: number; ach: string[]; stats: Stats;
   buyAmt: 1 | 10 | 100 | "max"; mute: boolean; sci: boolean;
   /** Show important news as centered pop-ups that wait to be accepted. Off means corner toasts. */
-  popups: boolean; seymourBought: number; simonBought: number;
+  popups: boolean; seymourBought: number; simonBought: number; barryBought: number;
   /** Nate wanders off and returns on a random timer. */
   nateAway: boolean; nateTimer: number; nateStage: number; fionaAway: number; backupNudged: boolean; intel: number;
   /** The Organization's grip on you: starts at 100 and is worn down by wins. */
@@ -125,7 +126,7 @@ export interface GameState {
   /** Levels of the endless 'Satisfied Clients Refer Friends' upgrade. */
   referrals: number;
   /** When each frienemy last sold you a favor (real timestamps), for their daily limit. */
-  favorLog: { seymour: number[]; simon: number[] };
+  favorLog: { seymour: number[]; simon: number[]; barry: number[] };
   /** Episodes whose mission you've completed, by code. */
   episodesDone: Dict<boolean>;
   /** Highest season of cases announced as open. */

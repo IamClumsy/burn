@@ -11,7 +11,7 @@ export const ALLIES: Ally[] = [
    perk:"Jobs pay ×1.5", ab:"Blow Something Up", abDesc:"Gain 120s of income, +15 heat", cd:120},
   {id:"barry", name:"Barry Burkowski", cost:1e6,
    bio:"Miami's money launderer, the Yellow Pages for criminals. He always takes Michael's call.",
-   perk:"Fixer payoffs cost 50% less; favor prices from your frienemies −25%. He also sells favors of his own.",
+   perk:"Fixer payoffs cost 50% less; favor prices from your frienemies −25%. He also sells favors, whether or not he's hired.",
    ab:"Follow the Money", abDesc:"Barry traces a payoff to a crook: gain 90s of income and −25 heat", cd:110},
   {id:"madeline", name:"Madeline Westen", cost:1.25e6, she: true,
    bio:"Michael's mother. Sharp, chain-smoking, and not part of the spy business, but she'll always come through for a child or an older neighbor in need.",

@@ -801,28 +801,30 @@ describe("upgrades never run out", () => {
 });
 
 describe("Barry sells favors", () => {
-  it("only once he's on the crew, at his own price, with a daily limit and no self-discount", () => {
-    S.cash = 1e9; S.favors = 0;
-    buyFavorFrom("barry");
-    expect(S.favors).toBe(0); // not hired yet
-    S.allies.barry = true; S.heat = 50;
+  it("from the very start, hired or not, at his own price, with a daily limit and no self-discount", () => {
+    S.cash = 1e9; S.favors = 0; S.heat = 50;
+    expect(S.allies.barry).toBeFalsy();
     const price = contactPrice("barry");
     buyFavorFrom("barry");
     expect(S.favors).toBe(1);
     expect(S.heat).toBe(42);
     expect(S.cash).toBeCloseTo(1e9 - price, 3);
     expect(S.stats.barryFavors).toBe(1);
+    S.allies.barry = true;
+    expect(contactPrice("barry")).toBeGreaterThan(0);
     for (let i = 0; i < 6; i++) buyFavorFrom("barry");
-    expect(S.favors).toBe(4); // four a day
+    expect(S.favors).toBe(4); // four a day, hired or not
     expect(favorsLeft("barry")).toBe(0);
   });
 
-  it("shows up in Crew and in Favors only while he's hired", () => {
+  it("is listed in Favors and Crew whether or not he's hired, and can still be hired", () => {
     S.life = 1e12;
-    expect(panelHTML("fav")).not.toContain("Money favors");
-    S.allies.barry = true;
     expect(panelHTML("fav")).toContain("Money favors");
     expect(panelHTML("crew")).toMatch(/data-act="contact" data-arg="barry"/);
+    expect(panelHTML("crew")).toContain("Hire Barry Burkowski");
+    S.allies.barry = true;
+    expect(panelHTML("fav")).toContain("Money favors");
+    expect(panelHTML("crew")).not.toContain("Hire Barry Burkowski");
   });
 
   it("an old save without Barry's favor log still loads", () => {
@@ -999,7 +1001,7 @@ describe("Crew pop-up order", () => {
     S.life = 1e12;
     const html = panelHTML("crew");
     const at = (name: string) => html.indexOf(name);
-    const order = ["Seymour Talbot", "Victor Stecker-Epps", "Sam Axe", "Fiona Glenanne", "Barry Burkowski", "Madeline Westen", "Nate Westen", "Jesse Porter"].map(at);
+    const order = ["Seymour Talbot", "Victor Stecker-Epps", "Barry Burkowski</b>", "Hire Sam Axe", "Hire Fiona Glenanne", "Hire Barry Burkowski", "Hire Madeline Westen", "Hire Nate Westen", "Hire Jesse Porter"].map(at);
     expect(order.every(i => i >= 0)).toBe(true);
     expect(order).toEqual([...order].sort((a, b) => a - b));
   });

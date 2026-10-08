@@ -328,16 +328,28 @@ export function silhouetteSVG(label = "Unknown"): string {
 }
 
 // ---- ready-made portraits for the game's characters ----
-const cache = new Map<string, string>();
+const cache = new Map<string, { svg: string; base: string }>();
+
+/**
+ * Gradient and clip ids have to be unique on the whole page: if two copies of the same face share ids and
+ * the first one is hidden (a closed card, say), the browser can't resolve them and the face turns dark.
+ * So every portrait gets ids that depend on where it is: a name for the panel it's in, plus its position
+ * within it. The same panel always produces the same ids, so re-rendering doesn't churn the page.
+ */
+let scope = "x", slot = 0;
+export function portraitScope(name: string): void { scope = name; slot = 0; }
 
 /** An inline portrait for a character id, or a silhouette if we don't have one. `known: false` hides the face. */
 export function portrait(id: string, px = 56, known = true, label?: string): string {
   const key = `${id}:${known}`;
-  let svg = cache.get(key);
-  if (!svg) {
+  let entry = cache.get(key);
+  if (!entry) {
     const look = LOOKS[id];
-    svg = known && look ? portraitSVG(look, label || `Sketch of ${id}`) : silhouetteSVG(known ? "Unknown" : "Someone you haven't met");
-    cache.set(key, svg);
+    const svg = known && look ? portraitSVG(look, label || `Sketch of ${id}`) : silhouetteSVG(known ? "Unknown" : "Someone you haven't met");
+    entry = { svg, base: known && look ? uid(look) : "" };
+    cache.set(key, entry);
   }
+  const suffix = `${scope}${slot++}`;
+  const svg = entry.base ? entry.svg.replace(new RegExp(`-${entry.base}(?=["')])`, "g"), `-${entry.base}${suffix}`) : entry.svg;
   return `<span class="portrait" style="width:${px}px;height:${px}px">${svg}</span>`;
 }

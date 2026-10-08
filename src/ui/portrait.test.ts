@@ -3,7 +3,7 @@ import { LOOKS } from "../data/portraits";
 import { ALLIES } from "../data/allies";
 import { BOSSES } from "../data/bosses";
 import { CONTACTS } from "../data/contacts";
-import { portrait, portraitSVG, shade, silhouetteSVG } from "./portrait";
+import { portrait, portraitScope, portraitSVG, shade, silhouetteSVG } from "./portrait";
 
 describe("character sketches", () => {
   it("every ally, contact and boss has a portrait, and so does Michael", () => {
@@ -86,11 +86,27 @@ describe("character sketches", () => {
     expect(s).not.toContain("#ecc4a0"); // no skin tone
   });
 
+  it("the same face shown twice on one page never shares ids, but re-rendering a panel is stable", () => {
+    portraitScope("rogue");
+    const html = portrait("brennen", 56) + portrait("brennen", 56);
+    portraitScope("list");
+    const other = portrait("brennen", 56);
+    const ids = [...(html + other).matchAll(/ id="([^"]+)"/g)].map(m => m[1]);
+    expect(ids.length).toBeGreaterThan(10);
+    expect(new Set(ids).size).toBe(ids.length);
+    // every reference points at an id that exists
+    for (const m of (html + other).matchAll(/url\(#([^)]+)\)/g)) expect(ids, m[1]).toContain(m[1]);
+    portraitScope("rogue");
+    expect(portrait("brennen", 56) + portrait("brennen", 56)).toBe(html);
+  });
+
   it("portrait() sizes the sketch, caches it, and falls back to a silhouette", () => {
+    portraitScope("t");
     const a = portrait("sam", 64);
     expect(a).toContain("width:64px");
     expect(a).toContain("Sketch of sam");
-    expect(portrait("sam", 64)).toBe(a);
+    portraitScope("t");
+    expect(portrait("sam", 64)).toBe(a); // the same place on the page gives the same markup
     expect(portrait("sam", 30, false)).toContain("Someone you haven't met");
     expect(portrait("sam", 30, false)).not.toContain("Sketch of sam");
     expect(portrait("nobody-here")).toContain("Unknown");

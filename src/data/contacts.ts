@@ -11,14 +11,10 @@ export const CONTACTS: Contact[] = [
   {id:"simon", name:"Simon Escher", kind:"Intel favors",
    bio:"A former Organization assassin who turned on his own bosses and kept the receipts. Brilliant, volatile, and fixated on the people who burned you. Dangerous to know, and he knows everything. A friend, when it suits you both. A necessary evil.",
    pitch:"Gets you intel: +1 favor and the Organization loses interest in you. He's unpredictable and sometimes goes off script. Never more than $100K, and only four favors a day."},
+  {id:"barry", name:"Barry Burkowski", kind:"Money favors",
+   bio:"Miami's money launderer and the Yellow Pages for criminals. He's always happy to take Michael's call, and he's on your side, which doesn't mean he works for free. Hire him and he works for you, but the favors never stop. A friend with a rate card.",
+   pitch:"Gets you a favor through his contacts: +1 favor and a little heat scrubbed off the books. Cheaper than the frienemies, and never more than $100K. Only four favors a day."},
 ];
-
-/** Barry sells favors too, once he's on the crew and for as long as he's around. He launders money, so his favors come with clean cash. */
-export const BARRY_CONTACT: Contact = {
-  id:"barry", name:"Barry Burkowski", kind:"Money favors",
-  bio:"Miami's money launderer and the Yellow Pages for criminals. He's on your side, which doesn't mean he works for free. A friend with a rate card.",
-  pitch:"Gets you a favor through his contacts: +1 favor and a little heat scrubbed off the books. Cheaper than the frienemies, and never more than $100K. Only four favors a day.",
-};
 
 /**
  * The intel contact changes with the story, in the one slot (the id stays "simon" so old saves line up):

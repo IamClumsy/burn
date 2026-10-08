@@ -119,7 +119,6 @@ const PEARCE_LINES = [
  */
 export function buyFavorFrom(id: string, mode: "cash" | "hangout" = "cash"): void {
   if (id !== "seymour" && id !== "simon" && id !== "barry") return;
-  if (id === "barry" && !S.allies.barry) return; // he only sells once he's on the crew
   if (favorsLeft(id) <= 0) return; // tapped out for today
   const hang = id === "seymour" && mode === "hangout";
   if (hang && S.busy) return; // already tied up with someone

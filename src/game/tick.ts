@@ -65,7 +65,7 @@ export function tickNate(dt: number): void {
   S.nateTimer -= dt;
   if (S.nateTimer > 0) return;
   S.nateAway = !S.nateAway;
-  S.nateTimer = S.nateAway ? 240 + Math.random() * 300 : 120 + Math.random() * 180;
+  S.nateTimer = S.nateAway ? 3600 + Math.random() * 7200 : 600 + Math.random() * 900;
   const line = pick(S.nateAway ? LINES.nateAway : LINES.nateBack);
   toast(S.nateAway ? "Nate wandered off" : "Nate's back", line);
   say(line);

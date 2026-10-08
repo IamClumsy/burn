@@ -160,7 +160,7 @@ export function payOffFixer(): void {
   if (S.cash < c) return;
   const who = S.fixer?.name ?? "A fixer", drop = bribeDrop();
   S.cash -= c; S.att = Math.max(0, S.att - drop);
-  say(`${who} takes the envelope and makes some calls. The Organization loses interest, by about ${drop} points, for now.`);
+  say(`${S.fixer?.line ?? `${who} takes the envelope and makes some calls.`} The Organization loses interest, by about ${drop} points, for now.`);
   newFixer(); // that fixer's done; someone else will be along with a different price
 }
 

@@ -83,7 +83,7 @@ export function render(): void {
   $("attbar").style.width = Math.min(100, S.att) + "%";
   setText($("lay"), S.layCd > 0 ? `Lay Low (${Math.ceil(S.layCd)}s)` : `Lay Low (−${layAmt()} heat)`);
   $<HTMLButtonElement>("lay").disabled = S.layCd > 0 || layBlocked();
-  setText($("bribe"), `${S.fixer ? "Pay off " + S.fixer.name : "Pay Off a Fixer"} (${money(bribeCost())}, −${bribeDrop()})`);
+  setText($("bribe"), `${S.fixer ? (S.fixer.act ?? "Pay off") + " " + S.fixer.name : "Pay Off a Fixer"} (${money(bribeCost())}, −${bribeDrop()})`);
   $<HTMLButtonElement>("bribe").disabled = S.cash < bribeCost();
 
   const jobBtn = $<HTMLButtonElement>("job");

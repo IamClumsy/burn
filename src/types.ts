@@ -78,6 +78,8 @@ export interface Contact { id: ContactId; name: string; kind: string; bio: strin
 /** The fixer currently on offer: a different price and result each time one turns up. */
 export interface FixerQuote {
   name: string;
+  /** What you do for them ("Pay off", "Buy a drink for") and what happens after. Older saves may not have these. */
+  act?: string; line?: string;
   /** Price multiplier (cheaper or pricier than the going rate). */
   mult: number;
   /** How much Organization attention they can take off. */

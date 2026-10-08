@@ -69,9 +69,42 @@ export const ERRANDS: Errand[] = [
 
 // ---- fixers ----
 
-const FIXER_NAMES = [
-  "Eddie from the docks", "Walt from customs", "Marisol at the courthouse", "Lou the bookie",
-  "Ray, the retired agent with a grudge", "Dee, the night manager", "Nico, a fixer's cousin", "Priya, a lawyer who owes Sam",
+/**
+ * Everyone who might smooth things over. `act` is what you do for them (it reads "Pay off Walt from customs"),
+ * `line` is what happens after, so each one feels like a little scene instead of the same envelope.
+ */
+export interface FixerKind { name: string; act: string; line: string }
+export const FIXERS: FixerKind[] = [
+  {name: "Eddie from the docks", act: "Pay off", line: "Eddie makes a manifest go missing and a crate disappear."},
+  {name: "Walt from customs", act: "Pay off", line: "Walt stamps the right forms and loses the wrong ones."},
+  {name: "Marisol at the courthouse", act: "Pay off", line: "Marisol misfiles a warrant in a way that looks like an accident."},
+  {name: "Lou the bookie", act: "Settle a debt with", line: "Lou rewrites a few debts so somebody important forgets they were watching you."},
+  {name: "Ray, the retired agent with a grudge", act: "Buy a drink for", line: "Ray hears you out and calls three old friends who still owe him."},
+  {name: "Dee, the night manager", act: "Tip", line: "Dee wipes a week of hotel security footage."},
+  {name: "Nico, a fixer's cousin", act: "Pay off", line: "Nico isn't as good as his cousin, but he knows who is."},
+  {name: "Priya, a lawyer who owes Sam", act: "Hire", line: "Priya files three motions before lunch and an injunction before dinner."},
+  {name: "Hector the tow-truck driver", act: "Tip", line: "Hector hauls a certain car to a lot where no camera looks."},
+  {name: "Candace in records", act: "Slip an envelope to", line: "Candace deletes a name from a list and a list from a drawer."},
+  {name: "Father Mike, who hears a lot", act: "Make a donation to", line: "Father Mike says a prayer and then makes exactly one phone call."},
+  {name: "Big Tony at the car wash", act: "Pay off", line: "Tony says the car wash has always been closed on Tuesdays. Nobody argues."},
+  {name: "Dr. Fenn, a surgeon who doesn't ask", act: "Send a gift to", line: "Dr. Fenn has a sudden memory lapse about a certain patient."},
+  {name: "a bartender on South Beach", act: "Overtip", line: "The bartender remembers that nobody ever sat at that table, and never will."},
+  {name: "Jorge the locksmith", act: "Pay off", line: "Jorge swears that lock was always broken."},
+  {name: "Rita, a former Organization accountant", act: "Hire", line: "Rita moves a few numbers around, and a few heads turn the other way."},
+  {name: "Sal at the airport", act: "Pay off", line: "Sal checks a passenger list and, on reflection, doesn't see your name."},
+  {name: "a bail bondsman with a long memory", act: "Hire", line: "The bondsman knows who needs a favor and who is about to."},
+  {name: "Gus the taxi dispatcher", act: "Tip", line: "Gus sends every cab on the east side the wrong way for an hour."},
+  {name: "a cousin of Barry's at the bank", act: "Pay off", line: "Barry's cousin finds a clerical error that happens to bury three transactions."},
+  {name: "Mrs. Dunleavy, a judge's secretary", act: "Send flowers to", line: "Mrs. Dunleavy mentions to the judge that it would be a bother, and it goes away."},
+  {name: "Frankie from the phone company", act: "Pay off", line: "Frankie finds that a number never existed, and a tap never got approved."},
+  {name: "a TSA supervisor who hates his boss", act: "Buy a round for", line: "The supervisor happily loses some paperwork to spite his boss."},
+  {name: "Yolanda at the DMV", act: "Pay off", line: "Yolanda gives a plate a brand-new history and no questions."},
+  {name: "Sergeant Cruz, who's retiring soon", act: "Buy dinner for", line: "Sergeant Cruz decides some reports aren't worth his last six weeks."},
+  {name: "an ex-NSA clerk named Pat", act: "Hire", line: "Pat is very good at making a lot of data suddenly unavailable."},
+  {name: "the harbormaster", act: "Pay off", line: "The harbormaster has no record of a certain boat leaving or arriving."},
+  {name: "a hotel concierge who sees everything", act: "Overtip", line: "The concierge keeps a guest book that very politely forgets you."},
+  {name: "Mr. Okafor, a notary with no scruples", act: "Pay off", line: "Mr. Okafor notarizes a story that's much better than the real one."},
+  {name: "Bea at the wire-transfer desk", act: "Slip an envelope to", line: "Bea sends a payment on a very long route that no one will follow."},
 ];
 export const FIXER_MIN_MULT = 0.6;
 export const FIXER_MAX_MULT = 1.8;
@@ -80,12 +113,18 @@ export const FIXER_MAX_MULT = 1.8;
  * A fixer turns up with their own price and their own reach. Dearer fixers tend to do more good,
  * but there's luck in it: a cheap one is sometimes great, and a pricey one sometimes isn't.
  */
+const recentFixers: string[] = [];
 export function rollFixer(rand: () => number = Math.random): FixerQuote {
   const mult = FIXER_MIN_MULT + rand() * (FIXER_MAX_MULT - FIXER_MIN_MULT);
   const quality = (mult - FIXER_MIN_MULT) / (FIXER_MAX_MULT - FIXER_MIN_MULT);
   const drop = Math.round(25 + quality * 25 + rand() * 6);
+  // never the same few people twice running
+  let kind = FIXERS[Math.floor(rand() * FIXERS.length)];
+  for (let i = 0; i < 20 && recentFixers.includes(kind.name); i++) kind = FIXERS[Math.floor(rand() * FIXERS.length)];
+  recentFixers.push(kind.name);
+  if (recentFixers.length > 8) recentFixers.shift();
   return {
-    name: FIXER_NAMES[Math.floor(rand() * FIXER_NAMES.length)],
+    name: kind.name, act: kind.act, line: kind.line,
     mult: Math.round(mult * 100) / 100,
     drop,
     left: 45 + rand() * 45,

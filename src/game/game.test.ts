@@ -16,7 +16,7 @@ import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
 import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missionReward } from "../calc";
 import { allBeaten, checkEnding, newFixer, reduceGrip, simonTip, spawnErrand, tickOrg } from "./org";
-import { FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
+import { FIXERS, FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
 import { bribeCost, bribeDrop } from "../calc";
 import { payOffFixer } from "./actions";
 import { GRIP_PERKS, TIERS, handlerFor } from "../data/org";
@@ -953,6 +953,36 @@ describe("Nate's two looks", () => {
     S.nateStage = 1;
     const b = panelHTML("crew");
     expect(b).not.toBe(a);
+  });
+});
+
+describe("Fixer variety", () => {
+  it("there are plenty of fixers, each with their own action and scene", () => {
+    expect(FIXERS.length).toBeGreaterThanOrEqual(25);
+    expect(new Set(FIXERS.map(f => f.name)).size).toBe(FIXERS.length);
+    expect(new Set(FIXERS.map(f => f.act)).size).toBeGreaterThan(8);
+    for (const f of FIXERS) { expect(f.line.length, f.name).toBeGreaterThan(20); expect(f.act.length).toBeGreaterThan(2); }
+  });
+
+  it("the same person never turns up twice in a row, or again within a few rolls", () => {
+    let prev: string[] = [];
+    for (let i = 0; i < 60; i++) {
+      const f = rollFixer();
+      expect(prev.slice(-5), `roll ${i}`).not.toContain(f.name);
+      prev = [...prev, f.name];
+    }
+  });
+
+  it("the button names the action, and paying off tells that fixer's story", () => {
+    S.cash = 1e12; S.att = 60;
+    S.fixer = { name: "Walt from customs", act: "Pay off", line: "Walt stamps the right forms and loses the wrong ones.", mult: 1, drop: 40, left: 60 };
+    render();
+    expect(document.getElementById("bribe")!.textContent).toMatch(/^Pay off Walt from customs/);
+    S.fixer = { name: "Ray, the retired agent with a grudge", act: "Buy a drink for", line: "Ray hears you out.", mult: 1, drop: 40, left: 60 };
+    render();
+    expect(document.getElementById("bribe")!.textContent).toMatch(/^Buy a drink for Ray/);
+    payOffFixer();
+    expect(document.getElementById("log")!.textContent).toMatch(/Ray hears you out\. The Organization loses interest/);
   });
 });
 

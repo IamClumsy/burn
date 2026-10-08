@@ -6,6 +6,7 @@ import { QUOTES } from "./data/text";
 import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
 import { render, showModal } from "./ui/render";
+import { catchUp, welcomeBack } from "./game/offline";
 import { initNotices } from "./ui/notice";
 import { portrait } from "./ui/portrait";
 import { buildLayout, type TabId } from "./ui/panels";
@@ -119,9 +120,10 @@ render();
 
 let last = Date.now();
 setInterval(() => {
-  const now = Date.now(), dt = Math.min(1, (now - last) / 1000);
+  const now = Date.now(), gap = (now - last) / 1000;
   last = now;
-  tick(dt);
+  // A throttled background tab or a sleeping laptop leaves a long gap: catch up on all of it, not just a second.
+  if (gap > 2) welcomeBack(gap, catchUp(gap)); else tick(gap);
   render();
 }, 100);
 

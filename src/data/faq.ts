@@ -83,7 +83,7 @@ export const FAQ: FaqSection[] = [
     {q: "What are medals?",
      a: () => "Achievements. Each one gives +2% income, forever. The Medals pop-up shows which you have and what's left."},
     {q: "Does the game earn while I'm away?",
-     a: () => "Yes, at half rate for up to eight hours. Running missions finish, and heat and attention cool off."},
+     a: () => "Yes, at the full rate for up to 24 hours at a time, whether the tab is closed or just in the background. Missions finish, cooldowns run down, and heat and attention cool off. Bosses never show up while you're gone, and Nate can still wander off and come back."},
     {q: "Where is my save, and how do I move it?",
      a: () => "In your browser, saved every couple of seconds. It's tied to the site's address, so a different browser or device starts fresh. Use export save in the footer to copy a code, and import save on the other side. Private windows and cleared site data can lose it."},
     {q: "Can I start over?",

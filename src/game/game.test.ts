@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 
 import { S, fresh, setState } from "../state";
 import { milestones, tick, tickNate } from "./tick";
+import { AWAY_CAP, catchUp } from "./offline";
 import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
 import { arcAvailable, startArc } from "./arcs";
 import { ARCS } from "../data/arcs";
@@ -792,6 +793,32 @@ describe("upgrades never run out", () => {
     prestige();
     expect(S.referrals).toBe(0);
     vi.restoreAllMocks();
+  });
+});
+
+describe("Idle while away", () => {
+  it("earns at the full rate while you're gone, capped at a day", () => {
+    S.gens.inf = 5;
+    const base = cps(), before = S.cash;
+    const e = catchUp(3600);
+    expect(e).toBeCloseTo(base * 3600, 5);
+    expect(S.cash - before).toBeCloseTo(base * 3600, 5);
+    const c = cps(), b2 = S.cash;
+    catchUp(AWAY_CAP * 10);
+    expect(S.cash - b2).toBeCloseTo(c * AWAY_CAP, 3);
+  });
+
+  it("finishes missions that would have ended, cools cooldowns, and never starts a boss", () => {
+    S.allyCd.sam = 500; S.layCd = 90; S.bossCd = 100; S.boss = null;
+    S.board = []; fillBoard();
+    startMission(S.board[0].uid);
+    expect(S.active.length).toBe(1);
+    catchUp(7200);
+    expect(S.active.length).toBe(0);
+    expect(S.allyCd.sam).toBe(0);
+    expect(S.layCd).toBe(0);
+    expect(S.boss).toBeNull();
+    expect(S.bossCd).toBeGreaterThanOrEqual(30);
   });
 });
 

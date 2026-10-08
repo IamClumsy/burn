@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { S, fresh, setState } from "../state";
-import { tick, tickNate } from "./tick";
+import { milestones, tick, tickNate } from "./tick";
 import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
 import { arcAvailable, startArc } from "./arcs";
 import { ARCS } from "../data/arcs";
@@ -791,6 +791,18 @@ describe("upgrades never run out", () => {
     S.run = 2e8; S.referrals = 5;
     prestige();
     expect(S.referrals).toBe(0);
+    vi.restoreAllMocks();
+  });
+});
+
+describe("Backup nudge", () => {
+  it("reminds you once after a couple of hours, and not again after Reinstating", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    S.stats.time = 7300; milestones();
+    expect(S.backupNudged).toBe(true);
+    dismissAllNotices();
+    S.run = 2e8; prestige();
+    expect(S.backupNudged).toBe(true);
     vi.restoreAllMocks();
   });
 });

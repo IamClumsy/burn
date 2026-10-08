@@ -19,6 +19,10 @@ let sec = 0;
 export function milestones(): void {
   checkEnding();
   fillBoard(); // the board is never left short, whatever happened to it
+  if (!S.backupNudged && S.stats.time >= 7200) {
+    S.backupNudged = true;
+    toast("Back up your save", "Your game lives in this browser only. Use export at the bottom of the page to keep a copy, just in case.");
+  }
   const open = seasonsOpen(S.life);
   if (open > S.seasonOpen) {
     S.seasonOpen = open;

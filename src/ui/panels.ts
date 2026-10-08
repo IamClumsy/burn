@@ -24,17 +24,16 @@ export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "c
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
   ["mis", "Missions"], ["upg", "Upgrades"], ["ops", "Operations"],
-  ["gad", "Gadgets"], ["fav", "Favors"],
 ];
 
 /** Reference and rare screens: opened as pop-ups from the toolbar. */
 export const MODALS: [TabId, string][] = [
-  ["crew", "Crew"], ["cov", "Covers"],
+  ["crew", "Crew"], ["cov", "Covers"], ["gad", "Gadgets"], ["fav", "Favors"],
   ["list", "The List"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
 ];
 
-/** Crew and Covers open from buttons in The Loft card, so they're left off the toolbar. */
-const LOFT_ONLY: TabId[] = ["crew", "cov"];
+/** These open from buttons in The Loft card, so they're left off the toolbar. */
+const LOFT_ONLY: TabId[] = ["crew", "cov", "gad", "fav"];
 
 export const titleOf = (id: TabId): string => [...SECTIONS, ...MODALS].find(([i]) => i === id)![1];
 

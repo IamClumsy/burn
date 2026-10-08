@@ -16,6 +16,7 @@ import { bribeCost, bribeDrop } from "../calc";
 import { payOffFixer } from "./actions";
 import { GRIP_PERKS, TIERS } from "../data/org";
 import { FAQ } from "../data/faq";
+import { loftBadges } from "../ui/badges";
 import { allyFree, allyHere, contactPrice, succChance } from "../calc";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss } from "./bosses";
@@ -333,6 +334,44 @@ describe("fixers", () => {
     tickOrg(1);
     expect(S.fixer).not.toBe(first);
     expect(S.fixer!.left).toBeGreaterThan(40);
+  });
+});
+
+describe("Loft badges", () => {
+  it("start quiet", () => {
+    const b = loftBadges();
+    expect(b.gad).toEqual({ text: "", ready: false });
+    expect(b.fav).toEqual({ text: "", ready: false });
+    expect(b.crew.ready).toBe(false);
+  });
+
+  it("gadgets show your parts and glow when you can craft something", () => {
+    S.junk = { tape: 1, wire: 0, bleach: 1, micro: 0 }; // smoke bomb: 1 bleach + 1 tape
+    expect(loftBadges().gad).toEqual({ text: "2 parts", ready: true });
+    S.junk = { tape: 1, wire: 0, bleach: 0, micro: 0 };
+    expect(loftBadges().gad).toEqual({ text: "1 part", ready: false });
+  });
+
+  it("favors show your count and glow when a perk is affordable", () => {
+    S.favors = 1;
+    expect(loftBadges().fav).toEqual({ text: "1", ready: false }); // cheapest perk costs 2
+    S.favors = 5;
+    expect(loftBadges().fav).toEqual({ text: "5", ready: true });
+  });
+
+  it("crew glows when an ally ability is ready, and not while Nate is away", () => {
+    S.allies.sam = true;
+    expect(loftBadges().crew).toEqual({ text: "1 ready", ready: true });
+    S.allyCd.sam = 30;
+    expect(loftBadges().crew.ready).toBe(false);
+    S.allies.nate = true; S.nateAway = true;
+    expect(loftBadges().crew.ready).toBe(false);
+  });
+
+  it("the buttons exist in the Loft and the old cards are gone from the grid", () => {
+    for (const id of ["crew", "cov", "gad", "fav"]) expect(document.getElementById("lb-" + id), id).not.toBeNull();
+    const cards = [...document.querySelectorAll("#sections .sec > h2")].map(h => h.textContent);
+    expect(cards).toEqual(["Missions", "Upgrades", "Operations"]);
   });
 });
 

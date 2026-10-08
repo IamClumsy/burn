@@ -28,8 +28,11 @@
   .faqitem summary::before{content:"+";display:inline-block;width:1.2em;color:var(--pink);font-weight:700}
   .faqitem[open] summary::before{content:"\2212"}
   .faqa{padding:0 12px 11px 2.4em;color:var(--dim);font-size:13px;line-height:1.5}
-  .loftbtns{display:flex;gap:8px;margin-top:10px}
-  .loftbtns button{flex:1;letter-spacing:1px;text-transform:uppercase;font-size:13px}
+  .loftbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .loftbtns button{display:flex;justify-content:space-between;align-items:center;gap:6px;letter-spacing:1px;text-transform:uppercase;font-size:13px}
+  .loftbtns .badge{font-size:11px;letter-spacing:0;text-transform:none;color:var(--gold);font-weight:700}
+  .loftbtns button.ready{border-color:var(--pink);box-shadow:0 0 0 1px var(--pink) inset,0 0 12px #ff4fa355}
+  .loftbtns button.ready::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 8px var(--pink);order:3}
   .toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:10px 20px 0;max-width:1600px;margin:auto}
   .toolbar button{background:var(--panel);border-color:var(--line);font-size:13px;letter-spacing:1px;text-transform:uppercase}
   .modal{display:none;position:fixed;inset:0;background:#000b;z-index:25;align-items:center;justify-content:center;padding:20px}

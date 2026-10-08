@@ -51,7 +51,7 @@ export const FAQ: FaqSection[] = [
     {q: "Who are Seymour and Simon?",
      a: () => "Frienemies, not crew. Michael avoids them and keeps their numbers anyway. Seymour Talbot sells hardware favors: +1 favor and some gadget parts. Simon Escher sells intel favors: +1 favor and less Organization attention, with a risk he goes off script. Prices rise with every favor and reset when you Reinstate."},
     {q: "What are favors for?",
-     a: () => "Spend them on permanent perks in the Favors card, or call one in during a boss encounter. You earn favors from missions, cases, story beats and boss wins, and you can buy them from Seymour and Simon. Barry gets you a discount on those."},
+     a: () => "Spend them on permanent perks in the Favors pop-up (a button in The Loft), or call one in during a boss encounter. You earn favors from missions, cases, story beats and boss wins, and you can buy them from Seymour and Simon. Barry gets you a discount on those."},
     {q: "What are Gadgets and junk?",
      a: () => "Taking jobs and owning Duct-Tape Gadgets drops junk: tape, wire, bleach and microwaves. Spend it to craft one-off boosts such as a smoke bomb or a jammer, or on a gadget during a boss encounter."},
     {q: "What do Covers do?",

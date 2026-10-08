@@ -5,6 +5,7 @@ import { money } from "../util";
 import type { CaseAction } from "../types";
 import { CASE_ACTIONS, MAX_LEADS } from "../data/caseActions";
 import { actionBlock } from "../game/bosses";
+import { loftBadges } from "./badges";
 import { $ } from "./dom";
 import { setText } from "./fx";
 import { SECTIONS, panelHTML, patchLive, resetLive, titleOf, type TabId } from "./panels";
@@ -40,6 +41,13 @@ export function render(): void {
   $<HTMLButtonElement>("lay").disabled = S.layCd > 0 || layBlocked();
   setText($("bribe"), `${S.fixer ? "Pay off " + S.fixer.name : "Pay Off a Fixer"} (${money(bribeCost())}, −${bribeDrop()})`);
   $<HTMLButtonElement>("bribe").disabled = S.cash < bribeCost();
+
+  const badges = loftBadges();
+  for (const id of ["crew", "cov", "gad", "fav"] as const) {
+    const btn = $("lb-" + id);
+    setText(btn.querySelector(".badge") as HTMLElement, badges[id].text);
+    btn.classList.toggle("ready", badges[id].ready);
+  }
 
   const bd = bossDef();
   $("bosscard").style.display = bd ? "block" : "none";

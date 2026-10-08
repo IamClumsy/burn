@@ -50,8 +50,11 @@ export function incomeMult(): number {
 export const genMult = (id: string): number =>
   UPGS.filter(u => S.upgs[u.id] && u.kind === "gen" && u.g === id).reduce((a, u) => a * u.m!, 1);
 
+/** Odd jobs that bring in a little money with no operations at all. Credibility makes restarts faster. */
+export const baseIncome = (): number => 0.3 * (1 + S.cred);
+
 export function cps(): number {
-  let t = 0;
+  let t = baseIncome();
   for (const g of GENS) t += owned(g.id) * g.cps * genMult(g.id);
   return t * incomeMult();
 }

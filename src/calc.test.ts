@@ -13,14 +13,21 @@ beforeEach(() => setState(fresh()));
 
 describe("economy", () => {
   it("starts with no income and a $1 click", () => {
-    expect(cps()).toBe(0);
+    expect(cps()).toBeCloseTo(0.3); // odd jobs keep a trickle coming in
     expect(incomeMult()).toBeCloseTo(1);
-    expect(clickVal()).toBeCloseTo(1.3); // contractor cover
+    expect(clickVal()).toBeCloseTo((1 + 0.3 * 0.05) * 1.3); // contractor cover
   });
 
   it("income scales with owned operations", () => {
     S.gens.inf = 10;
-    expect(cps()).toBeCloseTo(10 * 0.5);
+    expect(cps()).toBeCloseTo(0.3 + 10 * 0.5);
+  });
+
+  it("odd jobs grow with Credibility, so a reinstated run never starts at zero", () => {
+    S.cred = 3;
+    // baseline 0.3 x (1 + 3) = 1.2, then Credibility's +30% on income
+    expect(cps()).toBeCloseTo(1.2 * 1.3);
+    expect(cps()).toBeGreaterThan(0);
   });
 
   it("bulk cost is the sum of the individual prices", () => {

@@ -27,7 +27,7 @@ export const ARCS: Arc[] = [
      {n:"Set the Trap",                      dur:65, succ:.7,  heat:18, rm:3.4},
      {n:"Walk Away From the Houseboat",      dur:70, succ:.65, heat:22, rm:4.4},
    ]},
-  {id:"devilyouknow", title:"Devil You Know", at:2e8, ally:"jesse", favors:5,
+  {id:"devilyouknow", title:"Devil You Know", at:2e8, ally:"sam", favors:5,
    blurb:"A dangerous prisoner escapes, and he has Michael's name on a very long list. Finding him is the easy part.",
    epilogue:"The man who wrote the list is back in play, and he's more useful than anyone is comfortable admitting.",
    steps:[

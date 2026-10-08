@@ -117,6 +117,26 @@ describe("data integrity", () => {
     expect(ALLIES.map(a => a.id)).toEqual(["sam", "fiona", "barry", "madeline", "nate", "jesse"]);
   });
 
+  it("no ally appears in an episode before they joined the show", () => {
+    const withDebut = ALLIES.filter(a => a.debutEp);
+    expect(withDebut.map(a => a.id)).toContain("jesse");
+    for (const a of withDebut) {
+      for (const m of MISSIONS.filter(x => x.ally === a.id)) {
+        expect(+m.ep!, `${a.name} in ${m.n}`).toBeGreaterThanOrEqual(+a.debutEp!);
+      }
+      for (const arc of ARCS.filter(x => x.ally === a.id)) {
+        expect(arc.at, `${a.name} in ${arc.title}`).toBeGreaterThanOrEqual(SEASON_UNLOCK[a.debut! - 1]);
+      }
+    }
+  });
+
+  it("Jesse debuts in Season 4, Episode 2", () => {
+    const jesse = ALLIES.find(a => a.id === "jesse")!;
+    expect(jesse.debut).toBe(4);
+    expect(jesse.debutEp).toBe("402");
+    expect(MISSIONS.filter(m => m.ally === "jesse").length).toBeGreaterThanOrEqual(10);
+  });
+
   it("Madeline costs more than Barry, who helps from the start", () => {
     const cost = (id: string) => ALLIES.find(a => a.id === id)!.cost;
     expect(cost("madeline")).toBeGreaterThan(cost("barry"));

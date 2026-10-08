@@ -12,6 +12,10 @@ export interface Ally {
   flaky?: boolean;
   /** Uses she/her pronouns in game text. */
   she?: boolean;
+  /** The show season they first appear in. They can't be hired before it opens. */
+  debut?: number;
+  /** The episode code (season x 100 + episode) they first appear in. Their missions never come earlier. */
+  debutEp?: string;
 }
 
 export interface MissionTpl {

@@ -21,7 +21,7 @@ export const ALLIES: Ally[] = [
    bio:"Michael's younger brother. Charming, well-meaning, and about as reliable as Miami weather.",
    perk:"+15% income while he's around. He comes and goes, so don't count on him.",
    ab:"Nate's Big Idea", abDesc:"A gamble: usually a windfall, sometimes a mess. Only when he's around.", cd:130},
-  {id:"jesse", name:"Jesse Porter", cost:3e6,
+  {id:"jesse", name:"Jesse Porter", cost:3e6, debut: 4, debutEp: "402",
    bio:"A former counterintelligence agent who got burned himself and now works with Michael.",
    perk:"+10% mission success", ab:"Fast Talk", abDesc:"Missions run 2× faster for 60s", cd:150},
 ];

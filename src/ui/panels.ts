@@ -1,6 +1,6 @@
 import { S } from "../state";
 import {
-  REINSTATE_MIN, baseIncome, tierDef, allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
+  REINSTATE_MIN, allyAvailable, baseIncome, tierDef, allyFree, allyHere, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, hangOutPrice, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
@@ -160,6 +160,9 @@ function crew(): string {
     <div class="btns"><button data-act="contact" data-arg="${c.id}" ${S.cash >= contactPrice(c.id) ? "" : "disabled"}>Buy a favor — ${money(contactPrice(c.id))}</button>
     ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div></div>`).join("");
   return contact + ALLIES.map(a => {
+    if (!S.allies[a.id] && !allyAvailable(a.debut)) {
+      return item("hire", a.id, false, a.name, `${a.bio} Doesn't join the story until Season ${a.debut}.`, `<div class="small">Season ${a.debut}</div>`);
+    }
     if (!S.allies[a.id]) return item("hire", a.id, S.cash >= a.cost, "Hire " + a.name, `${a.bio} Perk: ${a.perk}`, `<div class="cost">${money(a.cost)}</div>`);
     const cd = Math.ceil(S.allyCd[a.id] || 0), busy = S.active.some(m => m.sent === a.id), here = allyHere(a.id);
     const status = !here ? "Wandered off. No idea when he'll be back" : busy ? "On a mission" : "Available";

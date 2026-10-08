@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 import { S, fresh, setState } from "../state";
 import { tick, tickNate } from "./tick";
-import { buyFavorFrom, useAbility } from "./actions";
+import { buyFavorFrom, hireAlly, useAbility } from "./actions";
 import { arcAvailable, startArc } from "./arcs";
 import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
@@ -458,6 +458,38 @@ describe("allies on kid missions", () => {
     S.life = 1e12; let sawElder = false;
     for (let i = 0; i < 400 && !sawElder; i++) { S.board = []; fillBoard(); sawElder = S.board.some(m => m.elder); }
     expect(sawElder).toBe(true);
+  });
+});
+
+describe("Jesse joins in Season 4", () => {
+  it("can't be hired before his season opens, however rich you are", () => {
+    S.cash = 1e12; S.life = 1e6; // only seasons 1 and 2 are open
+    hireAlly("jesse");
+    expect(S.allies.jesse).toBeUndefined();
+    expect(S.cash).toBe(1e12);
+  });
+
+  it("can be hired once Season 4 opens", () => {
+    S.cash = 1e12; S.life = 3e7; // Season 4's threshold
+    hireAlly("jesse");
+    expect(S.allies.jesse).toBe(true);
+  });
+
+  it("the crew list says when he joins, and doesn't offer to hire him early", () => {
+    S.cash = 1e12; S.life = 1e6;
+    const html = panelHTML("crew");
+    expect(html).toContain("until Season 4");
+    expect(html).not.toContain("Hire Jesse Porter");
+    S.life = 3e7;
+    expect(panelHTML("crew")).toContain("Hire Jesse Porter");
+  });
+
+  it("the board never offers Jesse before his first episode", () => {
+    S.life = 1e12;
+    for (let i = 0; i < 300; i++) {
+      S.board = []; fillBoard();
+      for (const m of S.board) if (m.ally === "jesse") expect(+m.ep!).toBeGreaterThanOrEqual(402);
+    }
   });
 });
 

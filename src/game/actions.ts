@@ -16,6 +16,7 @@ import { ABILITIES } from "./abilities";
 import { checkBurn } from "./heat";
 import { newFixer, simonTip } from "./org";
 import { SEYMOUR_HANGOUTS } from "../data/contacts";
+import { allyAvailable } from "../calc";
 import { fillBoard, startMission } from "./missions";
 
 export function buyGen(id: string): void {
@@ -37,7 +38,7 @@ export function buyUpg(id: string): void {
 
 export function hireAlly(id: string): void {
   const a = ALLIES.find(x => x.id === id)!;
-  if (S.allies[id] || S.cash < a.cost) return;
+  if (S.allies[id] || S.cash < a.cost || !allyAvailable(a.debut)) return;
   S.cash -= a.cost; S.allies[id] = true;
   chime(); toast(a.name + " joins you", a.perk);
   say(a.name + " is on the team. Try not to get them killed.");

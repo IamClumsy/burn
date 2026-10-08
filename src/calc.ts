@@ -4,6 +4,7 @@ import { UPGS } from "./data/upgrades";
 import { COVERS } from "./data/covers";
 import { BOSSES } from "./data/bosses";
 import { STORY } from "./data/story";
+import { seasonsOpen } from "./data/missions";
 import { GRIP_PERKS, TIERS } from "./data/org";
 import type { Boss, ChoiceFx, Gen, Mission } from "./types";
 
@@ -33,6 +34,9 @@ export const gripPerks = () => GRIP_PERKS.filter(p => S.grip <= p.at);
 export const gripInc = (): number => gripPerks().reduce((m, p) => m * (1 + (p.inc || 0)), 1);
 export const gripAtt = (): number => gripPerks().reduce((m, p) => m * (1 + (p.att || 0)), 1);
 export const gripFixer = (): number => gripPerks().reduce((m, p) => m * (p.fixer ?? 1), 1);
+
+/** Has this ally's season opened yet? Someone who debuts in Season 4 can't be hired in Season 2. */
+export const allyAvailable = (debut?: number): boolean => !debut || seasonsOpen(S.life) >= debut;
 
 export const owned = (id: string): number => S.gens[id] || 0;
 export const totalOps = (): number => GENS.reduce((a, g) => a + owned(g.id), 0);

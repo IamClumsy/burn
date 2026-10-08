@@ -76,7 +76,7 @@ export function cps(): number {
 export function clickVal(): number {
   const m = UPGS.filter(u => S.upgs[u.id] && u.kind === "click").reduce((a, u) => a * u.m!, 1);
   let v = (1 + cps() * 0.05) * m * cover().job * (1 + 0.25 * perk("cars"));
-  if (S.allies.fiona) v *= 1.5;
+  if (allyHere("fiona")) v *= 1.5;
   if (S.fx.jobs > 0) v *= 4;
   return v * (1 + S.cred * 0.1) * (1 + 0.02 * S.ach.length);
 }
@@ -154,7 +154,15 @@ export const credGain = (): number => (S.run < REINSTATE_MIN ? 0 : Math.floor(Ma
 
 // ---- missions
 /** Hired and actually around: Nate is only here when he hasn't wandered off. */
-export const allyHere = (id: string): boolean => !!S.allies[id] && !(id === "nate" && S.nateAway);
+export const allyHere = (id: string): boolean => !!S.allies[id] && !awayWhy(id);
+
+/** Why an ally isn't around right now, or null if they are. */
+export function awayWhy(id: string): { short: string; long: string } | null {
+  if (id === "nate" && S.nateAway) return { short: "has wandered off", long: "Wandered off. No idea when he'll be back" };
+  if (id === "fiona" && S.boss && bossDef()?.m.includes("snatch")) return { short: "has been taken", long: "Taken by Thomas O'Neill. Win the case to get her back" };
+  if (id === "fiona" && S.fionaAway > 0) return { short: "is still recovering from being taken", long: "Recovering from being taken, and not happy about it" };
+  return null;
+}
 export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);
 export function succChance(m: Mission): number {
   if (m.kid) return 1; // Michael never fails when a kid is involved

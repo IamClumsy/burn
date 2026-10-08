@@ -43,6 +43,8 @@ export const LOOKS: Record<string, Look> = {
   brennen: { skin: "#efd2b6", hair: "short", hairColor: "#b9b3a4", jaw: "narrow", face: 0.98, age: 1, outfit: "suit", outfitColor: "#7d7b86", accent: "#9aa38a", bg: ["#2ee6d6", "#1b1034"], mood: "worried" },
   // Strickler: thick dark hair, aviators, a pink striped shirt open at the collar
   strickler: { skin: "#d4a47c", hair: "tousled", hairColor: "#3a2a20", glasses: "aviator", jaw: "narrow", outfit: "shirt", outfitColor: "#e17fb8", accent: "#fbe7f2", stripes: "#fbe7f2", bg: ["#ffd166", "#3a0f4a"], mood: "sly" },
+  // O'Neill: short dark hair, dark stubble, dark sunglasses, a black shirt and a chain, a hard stare
+  oneill: { skin: "#d7ac86", hair: "short", hairColor: "#1f1814", facial: "stubble", facialColor: "#3a2c24", glasses: "shades", jaw: "square", age: 1, outfit: "shirt", outfitColor: "#17151a", accent: "#2a2630", extras: ["chain"], bg: ["#2fbf71", "#150c20"], mood: "stern" },
   // Gilroy: short tousled dark hair, a self-satisfied smirk, a cream blazer over a white shirt
   gilroy: { skin: "#ecc6a2", hair: "tousled", hairColor: "#3b2a22", jaw: "square", outfit: "blazer", outfitColor: "#dcc79c", accent: "#f4eef8", bg: ["#ff4d5e", "#150c20"], mood: "sly" },
   // Barrett: combed dark-gray hair, a ruddy weathered face, a dark suit with a red tie

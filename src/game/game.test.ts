@@ -28,7 +28,8 @@ import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
-import { actionBlock, bossAction, spawnBoss } from "./bosses";
+import { actionBlock, bossAction, spawnBoss, tickBoss } from "./bosses";
+import { awayWhy, clickVal } from "../calc";
 import { spawnClient } from "./events";
 import { seasonOf } from "../data/missions";
 import { EP_NOTES } from "../data/episodeNotes";
@@ -1259,6 +1260,43 @@ describe("game loop (headless)", () => {
       expect(actionDmg(0.2) / 1000, b.id).toBeGreaterThan(actionDmg(0.03) / 1000);
     }
     S.boss = null;
+  });
+
+  describe("Thomas O'Neill takes Fiona", () => {
+    it("only shows up if Fiona is on the crew", () => {
+      S.life = 1e13;
+      const only = BOSSES.filter(b => b.needs);
+      expect(only.map(b => b.id)).toEqual(["oneill"]);
+      S.allies = {};
+      for (let i = 0; i < 200; i++) { S.boss = null; spawnBoss(); expect(S.boss!.id).not.toBe("oneill"); }
+    });
+
+    it("while he has her, her perks and abilities are gone; losing keeps her away a while", () => {
+      S.life = 1e13; S.allies.fiona = true;
+      const withFiona = clickVal();
+      expect(allyHere("fiona")).toBe(true);
+      S.boss = { id: "oneill", hp: 1e6, max: 1e6, left: 75 };
+      expect(allyHere("fiona")).toBe(false);
+      expect(clickVal()).toBeLessThan(withFiona);
+      expect(awayWhy("fiona")!.short).toMatch(/taken/);
+      S.boss.left = 0; S.heat = 0;
+      tickBoss(0.1);
+      expect(S.boss).toBeNull();
+      expect(S.fionaAway).toBeGreaterThan(500);
+      expect(allyHere("fiona")).toBe(false);
+      tickBoss(700);
+      expect(allyHere("fiona")).toBe(true);
+    });
+
+    it("beating him frees her right away and pays two bonus favors", () => {
+      S.life = 1e13; S.allies.fiona = true; S.favors = 0;
+      S.boss = { id: "oneill", hp: 0, max: 1e6, left: 75 };
+      tickBoss(1);
+      expect(S.boss).toBeNull();
+      expect(S.fionaAway).toBe(0);
+      expect(allyHere("fiona")).toBe(true);
+      expect(S.favors).toBeGreaterThanOrEqual(2);
+    });
   });
 
   describe("case actions", () => {

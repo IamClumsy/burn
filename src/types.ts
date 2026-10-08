@@ -41,9 +41,11 @@ export interface ActiveMission extends Mission { sent: string | null; left: numb
 
 export interface Cover { id: string; name: string; desc: string; job: number; inc: number; heat: number; mis: number; unlock: number }
 
-export type BossTag = "heat" | "att" | "steal" | "heal" | "fx" | "freeze" | "weak" | "rush" | "nolay";
+export type BossTag = "heat" | "att" | "steal" | "heal" | "fx" | "freeze" | "weak" | "rush" | "nolay" | "snatch";
 export interface Boss {
   id: string; n: string; title: string; at: number; hpm: number; m: BossTag[]; mech: string; intro: string;
+  /** An ally who has to be hired for this boss to show up (they're the one at stake). */
+  needs?: string;
   /** Character file, unlocked by beating them once. */
   file: string;
 }
@@ -109,7 +111,7 @@ export interface GameState {
   /** Show important news as centered pop-ups that wait to be accepted. Off means corner toasts. */
   popups: boolean; seymourBought: number; simonBought: number;
   /** Nate wanders off and returns on a random timer. */
-  nateAway: boolean; nateTimer: number; nateStage: number;
+  nateAway: boolean; nateTimer: number; nateStage: number; fionaAway: number;
   /** The Organization's grip on you: starts at 100 and is worn down by wins. */
   grip: number;
   /** Names of people on the List that you know about (from wins or Simon's tips). */

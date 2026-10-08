@@ -11,7 +11,7 @@ import { learnName, reduceGrip } from "./org";
 import { nextBossGap } from "../data/pacing";
 
 export function spawnBoss(): void {
-  const pool = BOSSES.filter(b => S.life >= b.at);
+  const pool = BOSSES.filter(b => S.life >= b.at && (!b.needs || S.allies[b.needs]));
   if (!pool.length) { S.bossCd = 60; return; }
   const b = pick(pool), max = bossHP(b);
   S.boss = { id: b.id, hp: max, max, left: 75 };
@@ -29,16 +29,21 @@ export function winBoss(): void {
   S.boss = null; S.bossCd = nextBossGap();
   chime();
   toast(b.n + " outmaneuvered", `+${money(reward)}, +${fav} favors${first ? " · first win: +3% income forever" : ""}`, "good");
-  say(b.n + " walks away with nothing, which is the best outcome you can ask for.");
+  if (b.m.includes("snatch")) {
+    S.favors += 2;
+    toast("Fiona's free", "She's furious, grateful, and has a few things to say to him first. +2 favors.", "good");
+    say("Fiona walks out on her own two feet and takes a moment with Thomas O'Neill. Then she asks what took so long.");
+  } else say(b.n + " walks away with nothing, which is the best outcome you can ask for.");
 }
 
 export function loseBoss(): void {
   const b = bossDef()!;
   S.cash *= 0.92; S.heat += 15; S.att = Math.min(99, S.att + 20);
+  if (b.m.includes("snatch")) S.fionaAway = 600;
   S.boss = null; S.bossCd = nextBossGap();
   beep(130, 0.4, "sawtooth", 0.06, -50);
-  toast(b.n + " got away", "−8% cash, extra heat and attention.", "bad");
-  say(b.n + " slips out with what they came for. You'll see them again.");
+  toast(b.n + " got away", b.m.includes("snatch") ? "−8% cash, extra heat and attention. Fiona is gone for 10 minutes." : "−8% cash, extra heat and attention.", "bad");
+  say(b.m.includes("snatch") ? b.n + " vanishes with Fiona. She'll find her own way out, and it will not be gentle." : b.n + " slips out with what they came for. You'll see them again.");
 }
 
 const def = (k: CaseAction) => CASE_ACTIONS.find(x => x.id === k)!;
@@ -117,6 +122,7 @@ export function bossAction(kind: CaseAction, x?: number, y?: number): void {
 
 /** Per-tick boss behavior: passive damage plus the boss's mechanic tags. */
 export function tickBoss(dt: number): void {
+  if (S.fionaAway > 0) S.fionaAway = Math.max(0, S.fionaAway - dt);
   if (!S.boss) {
     S.bossCd -= dt;
     if (S.bossCd <= 0) spawnBoss();

@@ -43,6 +43,7 @@ const span = (mins: number): string => mins >= 120 ? `${Math.round(mins / 60)} h
  */
 export function returnFromAway(seconds: number): void {
   if (seconds < 60) { catchUp(seconds); return; }
+  S.stats.longestAway = Math.max(S.stats.longestAway, Math.min(seconds, AWAY_CAP));
   const before = { done: S.stats.mDone, fail: S.stats.mFail, fav: S.favors, nate: S.nateAway };
   holdNotices();
   const earned = catchUp(seconds);

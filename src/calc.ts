@@ -160,7 +160,9 @@ export const allyHere = (id: string): boolean => !!S.allies[id] && !awayWhy(id);
 export function awayWhy(id: string): { short: string; long: string } | null {
   if (id === "nate" && S.nateAway) return { short: "has wandered off", long: "Wandered off. No idea when he'll be back" };
   if (id === "fiona" && S.boss && bossDef()?.m.includes("snatch")) return { short: "has been taken", long: "Taken by Thomas O'Neill. Win the case to get her back" };
-  if (id === "fiona" && S.fionaAway > 0) return { short: "is still recovering from being taken", long: "Recovering from being taken, and not happy about it" };
+  if (id === "fiona" && S.fionaAway > 0) return S.fionaWhy === "reinstate"
+    ? { short: "has gone off on her own for a bit", long: "Off on her own for a bit. She'll be back when she's done" }
+    : { short: "is still recovering from being taken", long: "Recovering from being taken, and not happy about it" };
   return null;
 }
 export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);

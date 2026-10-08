@@ -1,7 +1,7 @@
 import { S } from "../state";
 import type { ContactId } from "../types";
 import {
-  REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
+  REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, cps, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
 } from "../calc";
 import { GENS } from "../data/ops";
@@ -24,7 +24,7 @@ import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 
-export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "med" | "rep";
+export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "med" | "rep";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
@@ -34,7 +34,7 @@ export const SECTIONS: [TabId, string][] = [
 /** Reference and rare screens: opened as pop-ups from the toolbar. */
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"], ["gad", "Gadgets"], ["fav", "Favors"],
-  ["list", "The List"], ["file", "Michael's File"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
+  ["list", "The List"], ["file", "Michael's File"], ["stats", "Stats"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
 ];
 
 /** These open from buttons in The Loft card, so they're left off the toolbar. */
@@ -277,10 +277,56 @@ function medals(): string {
 }
 
 function reinstate(): string {
-  const g = credGain();
-  return `<p class="small">Call in the favor that gets you reinstated. You reset cash, ops, upgrades and missions. You keep perks, medals, story and covers, and your allies too, except anyone who joined late in the story (like Jesse), who you hire again.</p>
+  const g = credGain(), c = cps();
+  const keep = `You reset cash, ops, upgrades and missions. You keep perks, medals, story and covers, and your allies too, except anyone who joined late in the story (like Jesse), who you hire again.`;
+  const after = S.cred + g;
+  // the next Credibility point arrives when this run's earnings reach (g + 1)^2 x 10M
+  const nextAt = Math.max(REINSTATE_MIN, (g + 1) ** 2 * 1e7), left = Math.max(0, nextAt - S.run);
+  const eta = c > 0 ? ` At ${money(c)}/s that's about ${formatWait(left / c * 1000)}.` : "";
+  const fi = S.allies.fiona ? `<li>Fiona needs a little time to herself after each reinstatement, a few minutes.</li>` : "";
+  const preview = `<div class="box" style="margin:8px 0"><b>The preview</b>
+    <ul class="small" style="margin:6px 0 0 16px;padding:0;color:var(--text)">
+      <li>Credibility: ${S.cred} now (+${S.cred * 10}% income) → <b>${after}</b> after (+${after * 10}% income).</li>
+      <li>Favors: +${g}.</li>
+      <li>This run so far: ${money(S.run)}${S.stats.bestRun ? `. Your best run: ${money(S.stats.bestRun)}` : ""}.</li>
+      <li>${g >= 1 ? `Next Credibility point at ${money(nextAt)} this run: ${money(left)} to go.${eta}` : `Qualifies at ${money(REINSTATE_MIN)} this run: ${money(Math.max(0, REINSTATE_MIN - S.run))} to go.${eta}`}</li>
+      ${fi}
+    </ul>
+    ${g >= 1 && left < nextAt * 0.1 ? `<div class="small" style="margin-top:6px;color:var(--gold)">Another point is close. You'll earn more by waiting a little.</div>` : ""}</div>`;
+  return `<p class="small">Call in the favor that gets you reinstated. ${keep}</p>
     <p>${g >= 1 ? `Reset for <b style="color:var(--gold)">+${g} Credibility</b> (each point +10% income, forever) and +${g} favors.` : `Earn ${money(REINSTATE_MIN)} in a single run to qualify (${money(S.run)} so far).`}</p>
+    ${preview}
     <div class="btns"><button data-act="prestige" ${g < 1 ? "disabled" : ""}>Get Reinstated</button></div>`;
+}
+
+/** The numbers worth comparing between runs. */
+function statsView(): string {
+  const st = S.stats;
+  const row = (label: string, value: string) => `<div class="drow"><span class="dlabel">${label}</span><span class="dtext">${value}</span></div>`;
+  const wins = Object.values(S.bossKills).reduce((a, n) => a + n, 0);
+  const boss = BOSSES.filter(b => S.bossKills[b.id]).length;
+  const favorsBought = st.seymourFavors + st.simonFavors + st.barryFavors;
+  return `<div class="small" style="margin-bottom:8px">Everything you've done, across every run.</div>
+    <div class="dfile">
+      ${row("Time played", formatWait(st.time * 1000))}
+      ${row("Earned, all runs", money(S.life))}
+      ${row("This run", money(S.run))}
+      ${row("Best single run", money(st.bestRun))}
+      ${row("Income right now", money(cps()) + "/s")}
+      ${row("Credibility", `${S.cred} (+${S.cred * 10}% income)`)}
+      ${row("Reinstated", String(st.reinstated))}
+      ${row("Missions won / lost", `${st.mDone} / ${st.mFail}`)}
+      ${row("Case files seen", `${Object.keys(S.episodesDone).length} of ${MISSIONS.length}`)}
+      ${row("Kid cases (never fail)", String(st.kidMissions))}
+      ${row("Handed back to people who needed it", money(st.returned))}
+      ${row("Rogues beaten", `${boss} of ${BOSSES.length} (${wins} wins in all)`)}
+      ${row("Burns / ambushes", `${st.burns} / ${st.ambush}`)}
+      ${row("Handler errands", String(st.errands))}
+      ${row("Favors bought", String(favorsBought))}
+      ${row("Gadgets crafted", String(st.crafted))}
+      ${row("Medals", `${S.ach.length} of ${MEDALS.length}`)}
+      ${row("Longest away", st.longestAway ? formatWait(st.longestAway * 1000) : "none yet")}
+    </div>`;
 }
 
 function theList(): string {
@@ -331,7 +377,7 @@ function faq(): string {
 const VIEWS: Record<TabId, () => string> = {
   faq,
   list: theList,
-  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, story, med: medals, rep: reinstate,
+  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, story, med: medals, rep: reinstate,
 };
 
 export const panelHTML = (tab: TabId): string => { portraitScope(tab); return VIEWS[tab](); };

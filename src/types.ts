@@ -115,6 +115,8 @@ export interface Stats {
   seymourFavors: number; simonFavors: number; barryFavors: number; errands: number;
   /** Total client money Michael handed back instead of keeping. */
   returned: number;
+  /** The most you've earned in a single run, and the longest you were away in one go (seconds). */
+  bestRun: number; longestAway: number;
 }
 
 export interface GameState {
@@ -128,7 +130,7 @@ export interface GameState {
   /** Show important news as centered pop-ups that wait to be accepted. Off means corner toasts. */
   popups: boolean; seymourBought: number; simonBought: number; barryBought: number;
   /** Nate wanders off and returns on a random timer. */
-  nateAway: boolean; nateTimer: number; nateStage: number; fionaAway: number; backupNudged: boolean; intel: number;
+  nateAway: boolean; nateTimer: number; nateStage: number; fionaAway: number; fionaWhy: string; backupNudged: boolean; intel: number;
   /** The Organization's grip on you: starts at 100 and is worn down by wins. */
   grip: number;
   /** Names of people on the List that you know about (from wins or Simon's tips). */

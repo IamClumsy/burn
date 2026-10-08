@@ -39,7 +39,7 @@ export function winBoss(): void {
 export function loseBoss(): void {
   const b = bossDef()!;
   S.cash *= 0.92; S.heat += 15; S.att = Math.min(99, S.att + 20);
-  if (b.m.includes("snatch")) S.fionaAway = 600;
+  if (b.m.includes("snatch")) { S.fionaAway = 600; S.fionaWhy = "taken"; }
   S.boss = null; S.bossCd = nextBossGap();
   beep(130, 0.4, "sawtooth", 0.06, -50);
   toast(b.n + " got away", b.m.includes("snatch") ? "−8% cash, extra heat and attention. Fiona is gone for 10 minutes." : "−8% cash, extra heat and attention.", "bad");

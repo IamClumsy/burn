@@ -174,6 +174,8 @@ export function prestige(): void {
   const gain = credGain();
   if (gain < 1) return;
   if (!confirm(`Get reinstated? You reset cash, ops, upgrades and missions, but gain ${gain} Credibility (+${gain * 10}% income) and ${gain} favors. Allies who joined late in the story, like Jesse, have to be hired again. Perks, medals and story are kept.`)) return;
+  S.stats.bestRun = Math.max(S.stats.bestRun, S.run);
+  const hadFiona = !!S.allies.fiona;
   const keep = {
     cred: S.cred + gain, life: S.life, favors: S.favors + gain, perks: S.perks, allies: keptAllies(), ach: S.ach,
     stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, sci: S.sci, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
@@ -184,6 +186,10 @@ export function prestige(): void {
   setState(Object.assign(fresh(), keep));
   S.stats.reinstated++;
   fillBoard();
+  if (hadFiona) { // every fresh start, Fiona takes a little time to herself
+    S.fionaAway = 240 + Math.random() * 240; S.fionaWhy = "reinstate";
+    say(pick(LINES.fionaGone));
+  }
   say(pick(LINES.prest)); toast("Reinstated", "+" + gain + " Credibility");
 }
 

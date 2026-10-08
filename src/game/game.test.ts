@@ -956,6 +956,53 @@ describe("Nate's two looks", () => {
   });
 });
 
+describe("Reinstating: preview, stats and Fiona's time off", () => {
+  it("the Reinstate card previews the gain and the next point", () => {
+    S.run = 3e8; S.cred = 2; S.stats.bestRun = 1e8;
+    const html = panelHTML("rep");
+    expect(html).toMatch(/Credibility: 2 now \(\+20% income\)/);
+    expect(html).toContain("after");
+    expect(html).toMatch(/Next Credibility point at/);
+    expect(html).toContain("Your best run");
+  });
+
+  it("before you qualify it says how far there is to go", () => {
+    S.run = 1e7;
+    expect(panelHTML("rep")).toMatch(/Qualifies at \$100M this run/);
+  });
+
+  it("reinstating sends Fiona off for a few minutes, and she can't be sent on missions meanwhile", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    S.allies.fiona = true; S.run = 2e8; S.stats.bestRun = 0;
+    prestige();
+    expect(S.stats.bestRun).toBe(2e8);
+    expect(S.fionaAway).toBeGreaterThanOrEqual(240);
+    expect(S.fionaAway).toBeLessThanOrEqual(480);
+    expect(awayWhy("fiona")!.short).toMatch(/on her own/);
+    expect(allyHere("fiona")).toBe(false);
+    S.fionaAway = 0;
+    expect(allyHere("fiona")).toBe(true);
+    vi.restoreAllMocks();
+  });
+
+  it("no Fiona, no disappearance", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    S.allies = {}; S.run = 2e8;
+    prestige();
+    expect(S.fionaAway).toBe(0);
+    vi.restoreAllMocks();
+  });
+
+  it("the Stats card shows your totals", () => {
+    S.stats.mDone = 12; S.stats.mFail = 3; S.stats.bestRun = 5e9; S.stats.longestAway = 7200;
+    const html = panelHTML("stats");
+    expect(html).toContain("12 / 3");
+    expect(html).toContain("$5.00B");
+    expect(html).toContain("Longest away");
+    expect(html).toContain("2h");
+  });
+});
+
 describe("Fixer variety", () => {
   it("there are plenty of fixers, each with their own action and scene", () => {
     expect(FIXERS.length).toBeGreaterThanOrEqual(25);

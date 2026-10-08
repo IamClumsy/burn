@@ -52,7 +52,9 @@ describe("data integrity", () => {
   it("Harlan, who bailed Michael out of jail, is in the Season 3 premiere", () => {
     const n = EP_NOTES["301"];
     expect(n.client).toBe("Marta");
-    expect(n.friend).toEqual({ name: "Harlan", role: "Bailed you out of jail" });
+    expect(n.friend?.name).toBe("Harlan");
+    expect(n.friend?.role).toBe("Bailed you out of jail");
+    expect(n.friend?.win).toContain("Harlan");
   });
 
   it("the stolen-ledger case is credited to the thief who took it", () => {
@@ -70,10 +72,15 @@ describe("data integrity", () => {
     expect(outcomeLine({ villain: "Simon", tip: "x" }, false, first)).toContain("Simon");
     expect(outcomeLine({ tip: "x" }, true, first)).toBeNull();
     expect(outcomeLine(undefined, true, first)).toBeNull();
-    const withFriend = { client: "Marta", villain: "Rufino Cortez", friend: { name: "Harlan", role: "Bailed you out of jail" }, tip: "x" };
-    const lines = new Set<string>();
-    for (let i = 0; i < 3; i++) lines.add(outcomeLine(withFriend, true, a => a[i]) || "");
-    expect([...lines].some(l => l.includes("Harlan"))).toBe(true);
+    const harlan = { client: "Marta", villain: "Rufino Cortez", friend: { name: "Harlan", role: "Bailed you out of jail", win: "Harlan gets his favor, and you're square." }, tip: "x" };
+    const lines = [0, 1, 2, 3].map(i => outcomeLine(harlan, true, a => a[i]));
+    expect(lines).toContain("Harlan gets his favor, and you're square.");
+    // a friend with no line of their own gets a plain thank-you
+    const plain = { client: "Jimmy", friend: { name: "Max", role: "Your handler" }, tip: "x" };
+    expect([0, 1, 2].map(i => outcomeLine(plain, true, a => a[i]))).toContain("Max is glad you came through.");
+    // a friend alone still gets a line, and nothing on a loss
+    expect(outcomeLine({ friend: { name: "Max", role: "Your handler" }, tip: "x" }, true, a => a[0])).toBe("Max is glad you came through.");
+    expect(outcomeLine({ friend: { name: "Max", role: "Your handler" }, tip: "x" }, false, a => a[0])).toBeNull();
   });
 
   it("episode credits read naturally", () => {

@@ -80,7 +80,7 @@ export function patchLive(root: ParentNode): void {
 function castLine(ep: string | undefined): string {
   const n = ep ? EP_NOTES[ep] : undefined;
   if (!n) return "";
-  const bits = [n.client && `Client: ${n.client}`, n.villain && `Up against: ${n.villain}`].filter(Boolean);
+  const bits = [n.client && `Client: ${n.client}`, n.villain && `Up against: ${n.villain}`, n.friend && `${n.friend.role}: ${n.friend.name}`].filter(Boolean);
   return bits.length ? `<div class="small" style="color:var(--text)">${bits.join(" · ")}</div>` : "";
 }
 

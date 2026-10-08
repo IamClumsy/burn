@@ -2,7 +2,8 @@
  * Who is in each episode, and a spy tip to go with it. Names come from the wiki; the tips are written
  * in my own words. Keyed by episode code (season x 100 + episode), matching `ep` on each mission.
  */
-export interface EpisodeNote { client?: string; villain?: string; tip: string }
+/** `friend` is someone who helps Michael in that episode, with how (for example, who bailed him out). */
+export interface EpisodeNote { client?: string; villain?: string; friend?: { name: string; role: string }; tip: string }
 
 export const EP_NOTES: Record<string, EpisodeNote> = {
   '101': {client:'Javier', villain:'Graham Pyne', tip:'Spying is mostly waiting. Bring something to read.'},
@@ -33,7 +34,7 @@ export const EP_NOTES: Record<string, EpisodeNote> = {
   '214': {client:'Claude Laurent', villain:'Gustavo', tip:'Bribery is tricky. You can\'t shop around and you can\'t get a refund.'},
   '215': {client:'Samantha', villain:'Tyler Brennen', tip:'Need-to-know keeps you safe at work and can hurt at home.'},
   '216': {client:'Victor', villain:'Carla Baxter', tip:'The riskiest moment is when it all starts coming together.'},
-  '301': {client:'Marta', villain:'Rufino Cortez', tip:'Spies get used to uncomfortable situations. Stay calm.'},
+  '301': {client:'Marta', villain:'Rufino Cortez', friend:{name:'Harlan', role:'Bailed you out of jail'}, tip:'Spies get used to uncomfortable situations. Stay calm.'},
   '302': {client:'Howard', villain:'Santora', tip:'Stay fit between jobs. The work takes a toll.'},
   '303': {client:'Nate Westen', villain:'Tyler Brennen', tip:'Keep your place free of anything that could hurt you if someone looks.'},
   '304': {client:'Detective Paxson', villain:'Matheson', tip:'Agree on the plan before you go in. Argue before, not during.'},
@@ -121,8 +122,9 @@ export const EP_NOTES: Record<string, EpisodeNote> = {
 /** One line of narration for how an episode's mission ended, using the people in it. */
 export function outcomeLine(note: EpisodeNote | undefined, won: boolean, pick: <T>(a: readonly T[]) => T): string | null {
   if (!note) return null;
-  const { client, villain } = note;
+  const { client, villain, friend } = note;
   if (won) {
+    if (friend && client && villain) return pick([`${client} is safe, and ${villain} has run out of road.`, `${friend.name} gets his favor and you're square. ${client} gets her life back.`, `${villain} never saw it coming. ${friend.name} owes you nothing now.`]);
     if (client && villain) return pick([`${client} is safe, and ${villain} has run out of road.`, `${villain} never saw it coming. ${client} finally exhales.`, `${client} thanks you twice. ${villain} is not thanking anyone.`]);
     if (client) return pick([`${client} can finally sleep.`, `${client} thanks you, and means it.`]);
     if (villain) return pick([`${villain} is out of moves.`, `${villain} learns what it feels like to be outplayed.`]);

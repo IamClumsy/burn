@@ -827,6 +827,15 @@ describe("episode missions", () => {
     expect(html).toContain("Up against: Graham Pyne");
   });
 
+  it("the card for Friends and Family names the friend who bailed you out", () => {
+    S.life = 5e6;
+    S.board = [{ uid: 1, n: "Pay Back an Old Friend's Favor Without Getting Hurt", dur: 54, succ: .8, heat: 5, rm: 1, fav: 1, ally: "sam", kid: false, send: false, ep: "301", epTitle: "Friends and Family" }];
+    const html = panelHTML("mis");
+    expect(html).toContain("Client: Marta");
+    expect(html).toContain("Up against: Rufino Cortez");
+    expect(html).toContain("Bailed you out of jail: Harlan");
+  });
+
   it("winning narrates the people, tells you the tip, and files it in the notebook", () => {
     S.life = 0; S.board = [{ uid: 1, n: "Clear a Caretaker Accused of Theft", dur: 1, succ: 1, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false, ep: "101", epTitle: "Pilot" }];
     startMission(1);

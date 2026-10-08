@@ -49,6 +49,12 @@ describe("data integrity", () => {
     expect(unique(Object.values(EP_NOTES).map(n => n.tip))).toBe(true);
   });
 
+  it("Harlan, who bailed Michael out of jail, is in the Season 3 premiere", () => {
+    const n = EP_NOTES["301"];
+    expect(n.client).toBe("Marta");
+    expect(n.friend).toEqual({ name: "Harlan", role: "Bailed you out of jail" });
+  });
+
   it("the stolen-ledger case is credited to the thief who took it", () => {
     expect(EP_NOTES["308"].client).toBe("Barry");
     expect(EP_NOTES["308"].villain).toBe("Natalie Rice");
@@ -64,6 +70,10 @@ describe("data integrity", () => {
     expect(outcomeLine({ villain: "Simon", tip: "x" }, false, first)).toContain("Simon");
     expect(outcomeLine({ tip: "x" }, true, first)).toBeNull();
     expect(outcomeLine(undefined, true, first)).toBeNull();
+    const withFriend = { client: "Marta", villain: "Rufino Cortez", friend: { name: "Harlan", role: "Bailed you out of jail" }, tip: "x" };
+    const lines = new Set<string>();
+    for (let i = 0; i < 3; i++) lines.add(outcomeLine(withFriend, true, a => a[i]) || "");
+    expect([...lines].some(l => l.includes("Harlan"))).toBe(true);
   });
 
   it("episode credits read naturally", () => {

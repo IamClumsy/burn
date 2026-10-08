@@ -10,6 +10,7 @@ import { MEDALS } from "./medals";
 import { RECIPES, JUNK, PERKS } from "./perks";
 import { EVENTS } from "./events";
 import { ARCS } from "./arcs";
+import { FAQ } from "./faq";
 import { ABILITIES } from "../game/abilities";
 
 const unique = (a: string[]) => new Set(a).size === a.length;
@@ -60,6 +61,17 @@ describe("data integrity", () => {
   it("story and bosses unlock in ascending order", () => {
     for (let i = 1; i < STORY.length; i++) expect(STORY[i].at).toBeGreaterThan(STORY[i - 1].at);
     for (let i = 1; i < GENS.length; i++) expect(GENS[i].base).toBeGreaterThan(GENS[i - 1].base);
+  });
+
+  it("the FAQ is complete and mentions the live numbers", () => {
+    const items = FAQ.flatMap(s => s.items);
+    expect(items.length).toBeGreaterThanOrEqual(20);
+    expect(unique(items.map(i => i.q))).toBe(true);
+    for (const it of items) expect(it.a().length, it.q).toBeGreaterThan(40);
+    const all = items.map(i => i.a()).join(" ");
+    expect(all).toContain("$100M");       // Reinstate threshold, pulled from the code
+    expect(all).toContain("Wanted");      // attention stages
+    expect(all).toContain("at 75%");     // grip perks
   });
 
   it("every boss has a character file", () => {

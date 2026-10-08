@@ -12,6 +12,7 @@ import { STORY } from "../data/story";
 import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missionReward } from "../calc";
 import { allBeaten, checkEnding, reduceGrip, simonTip, spawnErrand } from "./org";
 import { GRIP_PERKS, TIERS } from "../data/org";
+import { FAQ } from "../data/faq";
 import { allyFree, allyHere, contactPrice, succChance } from "../calc";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss } from "./bosses";
@@ -229,6 +230,14 @@ describe("pronouns on the mission board", () => {
       const text = panelHTML("mis");
       expect(text, ally).toContain(`to send ${word} (+25%)`);
     }
+  });
+});
+
+describe("FAQ pop-up", () => {
+  it("renders every question and a search box", () => {
+    const html = panelHTML("faq");
+    expect(html).toContain('id="faqSearch"');
+    for (const sec of FAQ) for (const it of sec.items) expect(html).toContain(it.q);
   });
 });
 

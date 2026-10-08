@@ -44,6 +44,27 @@ document.addEventListener("click", e => {
   if (b) showModal(b.dataset.modal as TabId);
 });
 $("modalClose").addEventListener("click", () => showModal(null));
+
+// FAQ search: hide questions that don't match, and sections left empty.
+$("modalBody").addEventListener("input", e => {
+  const t = e.target as HTMLInputElement;
+  if (t.id !== "faqSearch") return;
+  const term = t.value.trim().toLowerCase();
+  const items = [...$("modalBody").querySelectorAll<HTMLElement>(".faqitem")];
+  let shown = 0;
+  for (const it of items) {
+    const hit = !term || (it.textContent || "").toLowerCase().includes(term);
+    it.style.display = hit ? "" : "none";
+    if (term && hit) (it as HTMLDetailsElement).open = true;
+    if (hit) shown++;
+  }
+  $("modalBody").querySelectorAll<HTMLElement>(".faqsec").forEach(h => {
+    let n = h.nextElementSibling, any = false;
+    while (n && n.classList.contains("faqitem")) { if ((n as HTMLElement).style.display !== "none") any = true; n = n.nextElementSibling; }
+    h.style.display = any ? "" : "none";
+  });
+  $("faqNone").style.display = shown ? "none" : "block";
+});
 $("modal").addEventListener("mousedown", e => { if (e.target === $("modal")) showModal(null); });
 document.addEventListener("keydown", e => { if (e.key === "Escape") showModal(null); });
 

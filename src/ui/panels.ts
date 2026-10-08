@@ -13,12 +13,13 @@ import { STORY } from "../data/story";
 import { MEDALS } from "../data/medals";
 import { ARCS } from "../data/arcs";
 import { CASE_ACTIONS } from "../data/caseActions";
+import { FAQ } from "../data/faq";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS } from "../data/contacts";
 import { fmt, money } from "../util";
 
-export type TabId = "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "med" | "rep";
+export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "med" | "rep";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
@@ -29,7 +30,7 @@ export const SECTIONS: [TabId, string][] = [
 /** Reference and rare screens: opened as pop-ups from the toolbar. */
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"],
-  ["list", "The List"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"],
+  ["list", "The List"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
 ];
 
 /** Crew and Covers open from buttons in The Loft card, so they're left off the toolbar. */
@@ -243,7 +244,16 @@ function theList(): string {
   return h;
 }
 
+function faq(): string {
+  return `<input id="faqSearch" type="search" placeholder="Search the FAQ" aria-label="Search the FAQ"
+      style="width:100%;margin-bottom:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit">` +
+    FAQ.map(sec => `<h2 class="faqsec" style="margin-top:12px">${sec.title}</h2>` +
+      sec.items.map(it => `<details class="faqitem"><summary>${it.q}</summary><div class="faqa">${it.a()}</div></details>`).join("")).join("") +
+    `<div class="small" id="faqNone" style="display:none;margin-top:8px">No matches. Try a different word.</div>`;
+}
+
 const VIEWS: Record<TabId, () => string> = {
+  faq,
   list: theList,
   ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, story, med: medals, rep: reinstate,
 };

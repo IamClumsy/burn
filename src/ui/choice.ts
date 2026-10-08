@@ -41,7 +41,7 @@ export function showChoice(
     b.onclick = () => {
       const result = run();
       say(result);
-      toast(title, result, "minor"); // the narrator already says it; no need to pop it up again
+      toast(title, result);
       $("evt").style.display = "none";
       open = false;
       onDone?.(result);

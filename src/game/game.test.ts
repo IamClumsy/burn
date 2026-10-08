@@ -553,10 +553,22 @@ describe("notifications", () => {
     expect(document.getElementById("ndlg")!.className).toBe("ndlg gold");
   });
 
-  it("minor news stays in the corner and never blocks you", () => {
-    toast("Nate's back", "He's around again.", "minor");
-    expect(shown()).toBe(false);
-    expect(document.querySelectorAll("#toasts .toast").length).toBe(1);
+  it("everything pops up in the middle, including small news like Nate coming back", () => {
+    toast("Nate's back", "He's around again.");
+    expect(shown()).toBe(true);
+    expect(title()).toBe("Nate's back");
+    expect(document.querySelectorAll("#toasts .toast").length).toBe(0); // nothing is tucked away in the corner
+  });
+
+  it("Nate wandering off and coming back both pop up", () => {
+    S.allies.nate = true; S.nateAway = false; S.nateTimer = 0;
+    tickNate(0.1);
+    expect(shown()).toBe(true);
+    expect(title()).toBe("Nate wandered off");
+    dismissNotice();
+    S.nateTimer = 0;
+    tickNate(0.1);
+    expect(title()).toBe("Nate's back");
   });
 
   it("go back to corner toasts if you turn pop-ups off", () => {
@@ -597,11 +609,13 @@ describe("notifications", () => {
     expect(choiceBusy()).toBe(false);
   });
 
-  it("a decision's own result goes to the corner, not a second pop-up", () => {
+  it("a decision's result pops up after you choose, so you see what happened", () => {
     showChoice("Pulled Over", "A cop taps your window.", [["Bluff", () => "He buys it."]]);
     (document.querySelector("#evtO button") as HTMLButtonElement).click();
-    expect(shown()).toBe(false);
-    expect(document.querySelectorAll("#toasts .toast").length).toBe(1);
+    expect(shown()).toBe(true);
+    expect(title()).toBe("Pulled Over");
+    expect(document.getElementById("nM")!.textContent).toBe("He buys it.");
+    expect(document.querySelectorAll("#toasts .toast").length).toBe(0);
   });
 
   it("the pop-ups setting survives Reinstate", () => {

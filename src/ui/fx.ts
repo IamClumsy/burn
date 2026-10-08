@@ -19,14 +19,13 @@ export function say(t: string): void {
   freshTimer = setTimeout(() => summary.classList.remove("fresh"), 1400);
 }
 
-export type ToastKind = NoticeKind | "minor";
 
 /**
- * Tell the player something. Important news pops up in the middle of the screen until they accept it;
- * "minor" news (or everything, if pop-ups are off) slides into the corner for a few seconds instead.
+ * Tell the player something. Everything pops up in the middle of the screen until they accept it.
+ * (If they've turned pop-ups off, it slides into the corner for a few seconds instead.)
  */
-export function toast(title: string, msg = "", kind: ToastKind = "gold"): void {
-  if (kind === "minor" || !S.popups) { cornerToast(title, msg); return; }
+export function toast(title: string, msg = "", kind: NoticeKind = "gold"): void {
+  if (!S.popups) { cornerToast(title, msg); return; }
   notify(title, msg, kind);
 }
 

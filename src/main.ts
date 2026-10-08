@@ -99,7 +99,7 @@ $("export").addEventListener("click", exportSave);
 $("import").addEventListener("click", () => {
   const c = prompt("Paste your save code:");
   if (!c) return;
-  if (importSave(c)) { fillBoard(); toast("Save imported", "", "minor"); syncMute(); syncPopups(); render(); }
+  if (importSave(c)) { fillBoard(); toast("Save imported", "Your game is loaded.", "good"); syncMute(); syncPopups(); render(); }
   else alert("That code didn't work.");
 });
 

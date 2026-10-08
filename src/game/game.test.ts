@@ -1011,14 +1011,29 @@ describe("Backup nudge", () => {
 });
 
 describe("Upgrades card order", () => {
-  it("shows the cheapest available upgrades first", () => {
-    S.life = 1e9;
+  const mult: Record<string, number> = { "": 1, K: 1e3, M: 1e6, B: 1e9, T: 1e12, Qa: 1e15, Qi: 1e18 };
+  const costsOf = (html: string) => [...html.matchAll(/class="cost">\$([\d.]+)(K|M|B|T|Qa|Qi)?</g)].map(m => +m[1] * mult[m[2] ?? ""]);
+
+  it("shows the cheapest available upgrades first, with the endless one in its place by price", () => {
+    for (const life of [1e7, 1e9, 1e10, 1e11, 1e12, 1e14]) {
+      setState(fresh()); S.life = life; S.referrals = 0;
+      const html = panelHTML("upg");
+      const costs = costsOf(html);
+      expect(costs.length, `life ${life}`).toBeGreaterThan(1);
+      expect(costs, `life ${life}`).toEqual([...costs].sort((a, b) => a - b));
+    }
+  });
+
+  it("the endless upgrade really is mixed in, not tacked on the end", () => {
+    setState(fresh()); S.life = 1e11;
     const html = panelHTML("upg");
-    const costs = [...html.matchAll(/class="cost">\$([\d.]+)([KMB]?)</g)].map(m => +m[1] * ({ "": 1, K: 1e3, M: 1e6, B: 1e9 } as Record<string, number>)[m[2]]);
-    expect(costs.length).toBeGreaterThan(3);
-    expect(costs).toEqual([...costs].sort((a, b) => a - b));
+    const at = html.indexOf("Satisfied Clients");
+    expect(at).toBeGreaterThan(-1);
+    expect(html.indexOf("Satisfied Clients", at) ).toBe(at);
+    expect(at).toBeLessThan(html.lastIndexOf('class="cost"'));
   });
 });
+
 
 describe("asking allies for help, not sending them", () => {
   const card = { uid: 1, n: "t", dur: 10, succ: .7, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false };

@@ -33,7 +33,7 @@ import { formatWait } from "../util";
 import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss, tickBoss } from "./bosses";
-import { awayWhy, clickVal } from "../calc";
+import { awayWhy, clickVal, tierDef } from "../calc";
 import { spawnClient } from "./events";
 import { seasonOf } from "../data/missions";
 import { EP_NOTES } from "../data/episodeNotes";
@@ -864,6 +864,23 @@ describe("Case encounters pause everything else", () => {
     toast("It's over", "You won", "good");
     expect(noticeOpen()).toBe(true);
     expect(document.getElementById("nT")!.textContent).toBe("A new season");
+  });
+});
+
+describe("Management", () => {
+  it("is the top level of Organization attention, from 90%", () => {
+    expect(TIERS.map(t => t.name)).toEqual(["Unnoticed", "Watched", "Hunted", "Wanted", "Management"]);
+    S.att = 89; expect(tierDef().name).toBe("Wanted");
+    S.att = 91; expect(tierDef().name).toBe("Management");
+    expect(tierDef().heat).toBeGreaterThan(TIERS[3].heat);
+    expect(tierDef().succ).toBeLessThan(TIERS[3].succ);
+  });
+
+  it("the helicopter offer is a story choice that comes after Carla's fall and before Season 3", () => {
+    const i = STORY.findIndex(b => b.t === "There's the Door");
+    expect(i).toBeGreaterThan(STORY.findIndex(b => b.t === "Lesser Evil"));
+    expect(STORY[i].choice!.options.length).toBe(2);
+    expect(STORY[i].at).toBeLessThan(2e6); // Season 3 opens at 2M
   });
 });
 

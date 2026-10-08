@@ -16,6 +16,14 @@ export const STORY: StoryBeat[] = [
      ]}},
   {at:1.5e6, fav:3,  t:"Lesser Evil",
    x:"You find out what Carla did to the man who went rogue. You set her up to be undone by her own bosses. She sees it coming. Fiona gets there first."},
+  {at:1.8e6, fav:3,  t:"There's the Door",
+   x:"After Carla and Victor go down, a helicopter lands at the docks. A humorless old man the Organization calls Management flies you out over the ocean and offers you Carla's old job. When you hesitate, he opens the hatch.",
+   choice:{
+     prompt:"Management offers you Carla's job, thirty feet above the water, with the hatch open. What do you do?",
+     options:[
+       {label:"Take the offer", result:"He's pleased. You get money and protection, and a leash. Income rises, and so does the Organization's interest.", fx:{inc:0.1, att:0.15}},
+       {label:"Take the door", result:"You jump. The water is cold and the swim is long, but you owe them nothing. Heat gain drops, and word of the jump earns you some respect.", fx:{heat:-0.05, favors:3}},
+     ]}},
   {at:1e7,   fav:3,  t:"Detective on Your Tail",
    x:"A Miami detective notices the pattern around you, Fiona and Sam. She's not a spy. She's a cop with a case, and she's patient. You give her one of Miami's worst men to get her off your back.",
    choice:{

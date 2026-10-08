@@ -10,6 +10,7 @@ export const TIERS: Tier[] = [
   {name:"Watched",   min:20, heat:1.1, succ:0,     note:"Someone is keeping tabs. Heat builds 10% faster."},
   {name:"Hunted",    min:45, heat:1.2, succ:-0.05, note:"Agents are asking about you. Heat builds 20% faster and missions are 5% less likely to succeed."},
   {name:"Wanted",    min:70, heat:1.3, succ:-0.10, note:"They're moving on you. Heat builds 30% faster and missions are 10% less likely to succeed."},
+  {name:"Management", min:90, heat:1.4, succ:-0.15, note:"The man at the top has taken a personal interest. Heat builds 40% faster and missions are 15% less likely to succeed."},
 ];
 
 /** Narration when attention crosses into a new stage (index matches TIERS). */
@@ -20,11 +21,14 @@ export const TIER_UP: Record<number, string[]> = {
       "Your name comes up in a room you've never been in. That's how it starts."],
   3: ["They've stopped hiding. The car outside has a radio and no plates.",
       "It's no longer about whether they know you. It's about when they move."],
+  4: ["A helicopter circles the loft twice and heads out over the water. It's a polite hello.",
+      "An envelope arrives with your old sunglasses in it. 'We never stopped watching,' says the note. There's no return address."],
 };
 export const TIER_DOWN: Record<number, string[]> = {
   0: ["The cars are gone. Whatever they were looking for, they've found it somewhere else."],
   1: ["The men in suits stop coming around. You can breathe, mostly."],
   2: ["They pull back from the door. Still watching, but they've lost the urgency."],
+  3: ["The helicopter doesn't come back. For now, the old man has other business."],
 };
 
 /** The Organization's grip on you starts at 100 and is worn down by wins. Milestones grant permanent perks. */

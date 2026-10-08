@@ -1,5 +1,6 @@
 import { REINSTATE_MIN } from "../calc";
 import { GRIP_PERKS, TIERS } from "./org";
+import { BOSSES } from "./bosses";
 import { COVERS } from "./covers";
 import { money } from "../util";
 import { bossGapText } from "./pacing";
@@ -30,7 +31,7 @@ export const FAQ: FaqSection[] = [
     {q: "What is heat?",
      a: () => "Heat is how much attention your activity draws. Jobs, operations and missions raise it. At 100% you're burned again: you lose half your cash and heat drops back to 30. Lay Low cuts it, and Madeline or the Hands-Off Handler upgrade can do it for you."},
     {q: "What is the Organization's attention?",
-     a: () => `It's how closely the people who burned you are watching. It has four stages: ${TIERS.map(t => `${t.name} (${t.min}%+)`).join(", ")}. Higher stages make heat build faster and missions riskier. At 100% you're ambushed: you lose a quarter of your cash and your missions fall apart. Paying off a fixer, Madeline's Family Dinner and Simon's intel favors bring it down.`},
+     a: () => `It's how closely the people who burned you are watching. It has ${TIERS.length} stages: ${TIERS.map(t => `${t.name} (${t.min}%+)`).join(", ")}. Higher stages make heat build faster and missions riskier. At 100% you're ambushed: you lose a quarter of your cash and your missions fall apart. Paying off a fixer, Madeline's Family Dinner and your intel contact's favors bring it down.`},
     {q: "Why does the fixer's price keep changing?",
      a: () => "Fixers come and go. Each one who turns up has their own price and their own reach: some are cheap and do a little, some are pricey and do a lot, and now and then you'll get lucky. They move on after a minute or so, and once you pay one, a different one takes their place. Prices also climb the closer the Organization is to you, so it's cheaper to deal with them early. Barry and a loosened grip bring prices down."},
     {q: "What's \"Their grip on you\"?",
@@ -38,7 +39,7 @@ export const FAQ: FaqSection[] = [
     {q: "What are handler errands?",
      a: () => "Once the Organization is watching, a handler sends you a job. You can do it as asked (big pay, more attention), do it your own way (a gamble that can loosen their grip or backfire), or refuse (some heat, but you stay your own man)."},
     {q: "What's The List?",
-     a: () => "The people who helped burn you. Outmaneuvering a boss crosses their name off, and Simon sometimes passes you one early. Cross off all thirteen to lift the burn for good: favors and +25% income."},
+     a: () => `The people who helped burn you. Outmaneuvering a boss crosses their name off, and your intel contact sometimes passes you one early. Cross off all ${BOSSES.length} to lift the burn for good: favors and +25% income.`},
   ]},
   {title: "Missions and your crew", items: [
     {q: "What do the numbers on a mission mean?",

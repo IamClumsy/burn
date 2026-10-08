@@ -90,7 +90,9 @@ export interface Arc {
   steps: { n: string; dur: number; succ: number; heat: number; rm: number }[];
 }
 export interface Medal { id: string; n: string; d: string; t: (s: GameState) => boolean }
-export interface GameEvent { t: string; d: string; o: [label: string, run: () => string][] }
+/** An event option; `needs` is an ally who has to be on the crew for it to be offered. */
+export type EventOption = [label: string, run: () => string, needs?: string];
+export interface GameEvent { t: string; d: string; o: EventOption[] }
 
 export interface Stats {
   clicks: number; burns: number; mDone: number; mFail: number; crafted: number;

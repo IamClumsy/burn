@@ -34,7 +34,7 @@ import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss, tickBoss } from "./bosses";
 import { awayWhy, clickVal, tierDef } from "../calc";
-import { spawnClient } from "./events";
+import { spawnClient, spawnEvent } from "./events";
 import { seasonOf } from "../data/missions";
 import { EP_NOTES } from "../data/episodeNotes";
 import { actionDmg, conChance, cps, genMult, referralCost, referralMult, upgradeUnlocked } from "../calc";
@@ -864,6 +864,29 @@ describe("Case encounters pause everything else", () => {
     toast("It's over", "You won", "good");
     expect(noticeOpen()).toBe(true);
     expect(document.getElementById("nT")!.textContent).toBe("A new season");
+  });
+});
+
+describe("Event options that need an ally", () => {
+  const showFootballEvent = () => {
+    const i = EVENTS.findIndex(e => e.t === "A Friend's Friend");
+    vi.spyOn(Math, "random").mockReturnValue((i + 0.5) / EVENTS.length);
+    spawnEvent();
+    vi.restoreAllMocks();
+    const labels = [...document.querySelectorAll<HTMLButtonElement>("#evtO button")].map(b => b.textContent);
+    document.querySelector<HTMLButtonElement>("#evtO button")?.click(); // answer it so nothing is left open
+    dismissAllNotices();
+    return labels;
+  };
+
+  it("\"Bring Jesse in\" only shows once Jesse is on the crew", () => {
+    expect(showFootballEvent()).not.toContain("Bring Jesse in");
+    expect(showFootballEvent().length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("and shows when he is", () => {
+    S.allies.jesse = true;
+    expect(showFootballEvent()).toContain("Bring Jesse in");
   });
 });
 

@@ -57,7 +57,8 @@ export const EVENTS: GameEvent[] = [
     ["Find the scammer who sold him the club", () => help(75, 2, 11, "Following the scam's money leads you to the real crook. The salesman gets his savings back. +2 favors.")]]},
   {t:"A Friend's Friend", d:"Sam says an old teammate has been framed as a dirty cop and needs help clearing his name. 'Free football tickets,' Sam adds.", o:[
     ["Dig into the case", () => help(70, 2, 8, "The cop was framed. The real culprit gets exposed. Sam gets his tickets. +2 favors.")],
-    ["Bring Jesse in", () => help(80, 2, 10, "Jesse finds the paper trail. The cop gets his badge, and his name, back.")]]},
+    ["Lean on Sam's old teammates", () => help(60, 1, 6, "Half the team vouches for him, and the other half remembers who owes whom. The cop gets his badge, and his name, back.")],
+    ["Bring Jesse in", () => help(80, 2, 10, "Jesse finds the paper trail. The cop gets his badge, and his name, back."), "jesse"]]},
   {t:"A Father in Despair", d:"A man lost his savings on a 'miracle drug' for his sick son. He's out of options. You aren't.", o:[
     ["Get his money back", () => help(70, 2, 8, "The fake-drug ring folds fast. The boy gets his real treatment. Kids are the one job that never goes wrong. +2 favors.", true)],
     ["Expose the ring", () => help(90, 3, 14, "You take down the entire operation. The father gets everything back, and so do a dozen other families. +3 favors.", true)]]},

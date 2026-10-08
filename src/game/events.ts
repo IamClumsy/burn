@@ -9,7 +9,7 @@ import { checkBurn } from "./heat";
 
 export function spawnEvent(): void {
   if (choiceBusy() || S.boss) { setTimeout(spawnEvent, 15000); return; }
-  const ev = pick(EVENTS);
+  const ev = pick(EVENTS.filter(e => !e.needs || S.allies[e.needs]));
   const options = ev.o.filter(([, , needs]) => !needs || S.allies[needs]).map(([label, run]) => [label, run] as [string, () => string]);
   showChoice(ev.t, ev.d, options, () => { checkBurn(); render(); scheduleEvent(); });
 }

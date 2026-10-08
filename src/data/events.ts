@@ -35,10 +35,15 @@ export const EVENTS: GameEvent[] = [
       const c = cps() * 20 + 20;
       if (S.cash < c) return "You can't afford him. He leaves.";
       S.cash -= c;
-      const owns = GENS.filter(x => owned(x.id) > 0);
-      const g = owns.length ? pick(owns) : GENS[0];
-      S.gens[g.id] = owned(g.id) + 1;
-      return "He's on the books. You gain a free " + g.name + ".";
+      const inf = GENS[0], n = Math.max(1, Math.ceil(owned(inf.id) * 0.05));
+      S.gens[inf.id] = owned(inf.id) + n;
+      return `He's on the books. You gain ${n} free ${inf.name}${n > 1 ? "s" : ""}, and a kid who finally has an employer.`;
+    }],
+    ["Buy one tip", () => {
+      const c = cps() * 5 + 5;
+      if (S.cash < c) return "You're short. He shrugs and finds another buyer.";
+      S.cash -= c; S.favors++; att(2);
+      return "One tip, one handshake. It checks out. +1 favor.";
     }],
     ["Send him away", () => "He shrugs and finds another buyer."]]},
 
@@ -65,4 +70,36 @@ export const EVENTS: GameEvent[] = [
   {t:"Barry's Tip", d:"Barry calls. He heard something about a money trail running toward a boat in the harbor, and he thinks you'd like to know.", o:[
     ["Follow the trail", () => { att(4); return help(60, 1, 5, "The trail ends at a scam artist's yacht. You tell the right people and he goes away. +1 favor."); }],
     ["Tell him you owe him one", () => { S.favors++; return "Barry never forgets a favor, and you'll be glad of it later. +1 favor."; }]]},
+
+  // ---- the crew, being the crew ----
+  {t:"Nate's Alibi", needs:"nate", d:"Nate calls from a payphone. He's late, he's sorry, and the story involves a goat, a limousine and a bachelorette party. Again.", o:[
+    ["Believe him", () => { S.favors++; return "An hour later Nate turns up with real intel he picked up at the party. +1 favor, and a goat's worth of explanation."; }],
+    ["Check his story", () => { if (Math.random() < .5) { S.favors += 2; return "The story checks out, which is the most alarming part. +2 favors."; } S.heat += 8; return "You find the limo. You also find a ticket and a goat. Heat climbs."; }],
+    ["Tell him to call Mom", () => { S.heat = Math.max(0, S.heat - 10); return "Madeline gets involved. Nate is on time for a whole week, and the heat drops with the noise."; }]]},
+  {t:"Nate's Big Plan", needs:"nate", d:"Nate has a business idea. It involves limousines, a vending machine, and a guy he knows.", o:[
+    ["Back it", () => { const c = cps() * 40 + 40; if (S.cash < c) return "You can't afford his guy."; S.cash -= c; if (Math.random() < .55) { earn(cps() * 200 + 200); return "It works. Nobody is more surprised than Nate. You come out well ahead."; } S.heat += 10; return "The guy turns out to be a different guy. You lose the stake and some goodwill."; }],
+    ["Fund it a little", () => { const c = cps() * 8 + 8; if (S.cash < c) return "Not even a little."; S.cash -= c; earn(cps() * 20 + 20); return "Nate pays you back in snacks and, somehow, a small profit."; }],
+    ["Say no", () => "Nate says the idea was never that good anyway. He starts a new one on the way out."]]},
+  {t:"Sam's Story", needs:"sam", d:"Sam starts a story that begins, \"When I was a SEAL in Manila.\" You have time for the story, or for work. Not both.", o:[
+    ["Listen", () => { S.heat = Math.max(0, S.heat - 6); S.favors++; return "It's a good one. Sam trades a favor to finish it, and the afternoon cools your heat. +1 favor."; }],
+    ["Ask him for intel instead", () => { earn(cps() * 60 + 60); return "Sam sighs, then names three bars and two bartenders. The tip pays out."; }],
+    ["Buy the next round", () => { const c = cps() * 6 + 6; if (S.cash < c) return "You're short, and Sam is not subtle about it."; S.cash -= c; att(-4); return "Round bought. Sam's story gets longer, and somebody in the Organization falls asleep listening to it."; }]]},
+  {t:"Barry's Rate Card", needs:"barry", d:"Barry slides a laminated rate card across the table. Your name is in the header, and the font is friendly.", o:[
+    ["Pay the standard rate", () => { const c = cps() * 45 + 45; if (S.cash < c) return "You can't cover the standard rate. Barry frowns, kindly."; S.cash -= c; S.heat = Math.max(0, S.heat - 18); att(-6); return "Barry makes your problems tidy. The invoice is tidy, too."; }],
+    ["Haggle", () => { if (Math.random() < .5) { const c = cps() * 20 + 20; if (S.cash < c) return "Your haggling is better than your balance."; S.cash -= c; S.heat = Math.max(0, S.heat - 12); return "Barry respects the haggle. A smaller bill, a smaller favor."; } S.heat += 6; return "Barry does not respect the haggle. The rate goes up, and so does the temperature."; }],
+    ["Ask for a friend discount", () => { S.favors = Math.max(0, S.favors - 1); S.heat = Math.max(0, S.heat - 15); return "Barry has a friend discount. It's called a favor, and he's keeping it. -1 favor."; }]]},
+  {t:"Madeline's Phone Tree", needs:"madeline", d:"Your mother has activated the phone tree. By dinner, forty-one people will know your business.", o:[
+    ["Let her", () => { S.favors += 2; att(5); return "Forty-one people turn out to know forty-one useful things. +2 favors, and a little more attention than you wanted."; }],
+    ["Ask her to stop", () => { S.heat = Math.max(0, S.heat - 5); return "Madeline gives you a look and the tree goes quiet. Mostly. Somebody's cousin still calls."; }],
+    ["Join the call", () => help(60, 2, 4, "A neighbor's grandson is in trouble, and the phone tree already knows where he is. You fix it before dessert. +2 favors.", true)]]},
+  {t:"Seymour's Storage Unit", d:"Seymour offers a tour of his new storage unit. He's very proud. Some of it is legal.", o:[
+    ["Take the tour", () => { for (let i = 0; i < 2; i++) S.junk[pick(Object.keys(S.junk))]++; att(3); return "You nod at every shelf. Two useful things fall into your pockets, and Seymour tells you about the other shelf."; }],
+    ["Send a polite no", () => "Seymour takes it well, which is to say, loudly. He'll ask again."]]},
+  {t:"Fiona's New Hobby", needs:"fiona", d:"Fiona has taken up a new hobby. It's called precision demolition. She'd like you to hold the stopwatch.", o:[
+    ["Hold the stopwatch", () => { earn(cps() * 100 + 100); S.heat += 20; shake(); return "Three seconds, exactly. A building you didn't need is gone and a client you did need is thrilled."; }],
+    ["Watch from a distance", () => { earn(cps() * 40 + 40); S.heat += 8; return "A safe distance, as promised. Mostly. The pay is lower, and so is the noise."; }],
+    ["Suggest gardening", () => { S.heat = Math.max(0, S.heat - 10); return "Fiona stares at you for a long time and then buys a planter. It doesn't survive the week, and neither does the neighbor's fence."; }]]},
+  {t:"Jesse's Old Handler", needs:"jesse", d:"Jesse's old handler calls and says he has something that might help. Jesse says he is also lying, and probably both.", o:[
+    ["Hear him out", () => { if (Math.random() < .65) { S.favors += 2; return "Mostly useful, mostly true. Jesse reads between the lines out loud. +2 favors."; } S.heat += 12; att(8); return "It was a trap, and an obvious one. Jesse says he called it, and he did."; }],
+    ["Hang up", () => "Jesse looks relieved. The handler calls back twice, then stops."]]},
 ];

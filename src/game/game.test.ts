@@ -870,8 +870,9 @@ describe("Case encounters pause everything else", () => {
 
 describe("Event options that need an ally", () => {
   const showFootballEvent = () => {
-    const i = EVENTS.findIndex(e => e.t === "A Friend's Friend");
-    vi.spyOn(Math, "random").mockReturnValue((i + 0.5) / EVENTS.length);
+    const pool = EVENTS.filter(e => !e.needs || S.allies[e.needs]);
+    const i = pool.findIndex(e => e.t === "A Friend's Friend");
+    vi.spyOn(Math, "random").mockReturnValue((i + 0.5) / pool.length);
     spawnEvent();
     vi.restoreAllMocks();
     const labels = [...document.querySelectorAll<HTMLButtonElement>("#evtO button")].map(b => b.textContent);
@@ -1000,6 +1001,42 @@ describe("Reinstating: preview, stats and Fiona's time off", () => {
     expect(html).toContain("$5.00B");
     expect(html).toContain("Longest away");
     expect(html).toContain("2h");
+  });
+});
+
+describe("Crew events", () => {
+  it("events about a crew member only come up once they're on the crew", () => {
+    const gated = EVENTS.filter(e => e.needs);
+    expect(gated.map(e => e.needs).sort()).toEqual(expect.arrayContaining(["nate", "sam", "barry", "madeline", "fiona", "jesse"]));
+    S.allies = {};
+    for (let i = 0; i < 400; i++) {
+      const ev = EVENTS.filter(e => !e.needs || S.allies[e.needs]);
+      expect(ev.every(e => !e.needs)).toBe(true);
+    }
+  });
+
+  it("every option does something and says what happened", () => {
+    S.cash = 1e12; S.allies = { nate: true, sam: true, barry: true, madeline: true, fiona: true, jesse: true };
+    S.gens.inf = 20;
+    for (const ev of EVENTS) {
+      expect(ev.o.length, ev.t).toBeGreaterThanOrEqual(2);
+      for (const [label, run] of ev.o) {
+        const out = run();
+        expect(typeof out, `${ev.t} / ${label}`).toBe("string");
+        expect(out.length, `${ev.t} / ${label}`).toBeGreaterThan(15);
+        expect(out, `${ev.t} / ${label}`).not.toMatch(/undefined|NaN/);
+      }
+    }
+    expect(Number.isFinite(S.cash)).toBe(true);
+  });
+
+  it("hiring the stray informant gives you a Street Informant, not a random operation", () => {
+    S.cash = 1e9; S.gens = { inf: 40 };
+    const ev = EVENTS.find(e => e.t === "Stray Informant")!;
+    const out = ev.o[0][1]();
+    expect(out).toMatch(/Street Informant/);
+    expect(S.gens.inf).toBe(42);
+    expect(Object.keys(S.gens)).toEqual(["inf"]);
   });
 });
 

@@ -18,6 +18,7 @@ import { GRIP_PERKS, TIERS } from "../data/org";
 import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
 import { loftBadges } from "../ui/badges";
+import { say } from "../ui/fx";
 import { allyFree, allyHere, contactPrice, hangOutPrice, succChance } from "../calc";
 import { tickBusy } from "./tick";
 import { fillBoard, resolveMission, startMission } from "./missions";
@@ -490,6 +491,35 @@ describe("Jesse joins in Season 4", () => {
       S.board = []; fillBoard();
       for (const m of S.board) if (m.ally === "jesse") expect(+m.ep!).toBeGreaterThanOrEqual(402);
     }
+  });
+});
+
+describe("narration strip", () => {
+  it("sits right under the toolbar, above the game, where it can't be scrolled past", () => {
+    const toolbar = document.getElementById("toolbar")!, strip = document.getElementById("voiceover")!, main = document.querySelector("main")!;
+    const follows = (a: Node, b: Node) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(follows(toolbar, strip)).toBe(true);
+    expect(follows(strip, main)).toBe(true);
+    expect([...document.querySelectorAll(".card h2")].map(h => h.textContent)).not.toContain("Narration");
+  });
+
+  it("always shows the latest line, and keeps the history newest first", () => {
+    say("First thing happened.");
+    say("Second thing happened.");
+    expect(document.getElementById("vo-latest")!.textContent).toBe("Second thing happened.");
+    const lines = [...document.querySelectorAll("#log p")].map(p => p.textContent);
+    expect(lines.slice(0, 2)).toEqual(["Second thing happened.", "First thing happened."]);
+  });
+
+  it("flashes when something new is said, so you notice", () => {
+    say("Something new.");
+    expect(document.querySelector("#voiceover summary")!.classList.contains("fresh")).toBe(true);
+  });
+
+  it("keeps only the last 40 lines of history", () => {
+    for (let i = 0; i < 60; i++) say("line " + i);
+    expect(document.querySelectorAll("#log p").length).toBe(40);
+    expect(document.getElementById("vo-latest")!.textContent).toBe("line 59");
   });
 });
 

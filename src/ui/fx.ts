@@ -1,11 +1,20 @@
 import { $ } from "./dom";
 
+let freshTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Narrate a line: it goes to the top of the history and into the strip under the toolbar. */
 export function say(t: string): void {
   const log = $("log");
   const p = document.createElement("p");
   p.textContent = t;
   log.prepend(p);
   while (log.children.length > 40) log.lastChild!.remove();
+
+  $("vo-latest").textContent = t;
+  const summary = $("voiceover").querySelector("summary")!;
+  summary.classList.add("fresh");
+  clearTimeout(freshTimer);
+  freshTimer = setTimeout(() => summary.classList.remove("fresh"), 1400);
 }
 
 export function toast(title: string, msg = ""): void {

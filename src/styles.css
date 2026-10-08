@@ -75,7 +75,17 @@
   .medal.got{opacity:1;border-color:var(--gold)}
   .medal b{display:block;font-size:13px}
   .chip{display:inline-block;background:var(--sea);color:#04201d;border-radius:12px;padding:1px 9px;font-size:12px;font-weight:700;margin:2px 4px 2px 0}
-  #log{height:160px;overflow:auto;font-size:13px;color:var(--dim);font-style:italic}
+  .voiceover{max-width:1600px;margin:10px auto 0;padding:0 20px}
+  .voiceover summary{display:flex;align-items:center;gap:12px;cursor:pointer;list-style:none;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:8px;padding:9px 14px;transition:border-color .2s,box-shadow .2s}
+  .voiceover summary::-webkit-details-marker{display:none}
+  .voiceover summary.fresh{border-color:var(--pink);box-shadow:0 0 14px #ff4fa355}
+  .vo-tag{flex:none;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--pink);font-weight:700}
+  #vo-latest{flex:1;font-style:italic;color:var(--text);font-size:14px;line-height:1.35}
+  .vo-more{flex:none;font-size:11px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
+  .vo-more::after{content:" \25BE"}
+  .voiceover[open] .vo-more::after{content:" \25B4"}
+  .voiceover #log{margin-top:6px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+  #log{max-height:220px;overflow:auto;font-size:13px;color:var(--dim);font-style:italic}
   #log p{margin:0 0 7px;padding-left:8px;border-left:2px solid var(--line)}
   #log p:first-child{color:var(--text);border-color:var(--pink)}
   @keyframes pop{from{transform:scale(.6);opacity:0}}

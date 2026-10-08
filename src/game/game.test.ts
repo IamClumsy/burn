@@ -260,7 +260,7 @@ describe("pronouns on the mission board", () => {
       S.board = [{ uid: 1, n: "t", dur: 10, succ: .5, heat: 1, rm: 1, fav: 1, ally, kid: false, send: false }];
       S.life = 1e6;
       const text = panelHTML("mis");
-      expect(text, ally).toContain(`to send ${word} (+25%)`);
+      expect(text, ally).toContain(`to ask ${word} for help (+25%)`);
     }
   });
 });
@@ -442,12 +442,12 @@ describe("boss pacing", () => {
 describe("allies on kid missions", () => {
   const kidMission = { uid: 1, n: "t", dur: 1, succ: 1, heat: 1, rm: 1, fav: 1, ally: "madeline", kid: true, send: true };
 
-  it("sending an ally earns a favor, since better odds would do nothing", () => {
+  it("asking an ally for help earns a favor, since better odds would do nothing", () => {
     S.allies.madeline = true; S.life = 1e6; S.board = [{ ...kidMission }];
     startMission(1);
     expect(S.active[0].sent).toBe("madeline");
     resolveMission(S.active[0]);
-    expect(S.favors).toBe(2); // 1 from the mission, 1 for sending her
+    expect(S.favors).toBe(2); // 1 from the mission, 1 for asking her
   });
 
   it("without an ally there's no bonus favor", () => {
@@ -459,9 +459,9 @@ describe("allies on kid missions", () => {
 
   it("the card says +1 favor instead of +25% on a case that can't fail", () => {
     S.allies.madeline = true; S.life = 1e6; S.board = [{ ...kidMission }];
-    expect(panelHTML("mis")).toContain("Send Madeline (+1 favor)");
+    expect(panelHTML("mis")).toContain("Ask Madeline for help (+1 favor)");
     S.board = [{ ...kidMission, kid: false, succ: .7 }];
-    expect(panelHTML("mis")).toContain("Send Madeline (+25%)");
+    expect(panelHTML("mis")).toContain("Ask Madeline for help (+25%)");
   });
 
   it("older-folk missions carry through to the board", () => {
@@ -762,6 +762,32 @@ describe("Upgrades card order", () => {
     const costs = [...html.matchAll(/class="cost">\$([\d.]+)([KMB]?)</g)].map(m => +m[1] * ({ "": 1, K: 1e3, M: 1e6, B: 1e9 } as Record<string, number>)[m[2]]);
     expect(costs.length).toBeGreaterThan(3);
     expect(costs).toEqual([...costs].sort((a, b) => a - b));
+  });
+});
+
+describe("asking allies for help, not sending them", () => {
+  const card = { uid: 1, n: "t", dur: 10, succ: .7, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, send: false };
+
+  it("the button asks for help", () => {
+    S.allies.sam = true; S.life = 1e6; S.board = [{ ...card }];
+    const html = panelHTML("mis");
+    expect(html).toContain("Ask Sam for help (+25%)");
+    expect(html).not.toMatch(/>[^<]*Send Sam/);
+  });
+
+  it("a busy ally is described as helping, not as being out", () => {
+    S.allies.sam = true; S.life = 1e6;
+    S.board = [{ ...card, uid: 1, send: true }, { ...card, uid: 2, n: "other" }];
+    startMission(1);
+    const html = panelHTML("mis");
+    expect(html).toContain("Sam Axe is helping");
+    expect(html).toMatch(/Sam is helping with ".*", free in/);
+    expect(html).not.toContain("is out");
+  });
+
+  it("an ally who isn't hired yet is something you can recruit", () => {
+    S.allies = {}; S.life = 1e6; S.board = [{ ...card }];
+    expect(panelHTML("mis")).toContain("Hire Sam in Crew to ask him for help (+25%)");
   });
 });
 

@@ -45,7 +45,7 @@ export const EVENTS: GameEvent[] = [
   // ---- Episode-style cases: Michael helps people the system won't ----
   {t:"The Landlord's Favor", d:"Your landlord asks you to look into why one of his waitresses stopped showing up. She witnessed something she shouldn't have.", o:[
     ["Take the case yourself", () => help(60, 1, 8, "You find her, and then you find the dealer who scared her. Both problems get solved. +1 favor.")],
-    ["Send Sam to talk to the dealer", () => help(40, 1, 3, "Sam buys a round, makes a few friendly threats, and the dealer finds a new bar.")]]},
+    ["Ask Sam to talk to the dealer", () => help(40, 1, 3, "Sam buys a round, makes a few friendly threats, and the dealer finds a new bar.")]]},
   {t:"A Mother's Plea", d:"A woman begs you to find her son. The police say they're doing what they can. You have more than that.", o:[
     ["Take the case", () => help(80, 2, 10, "You find the boy before sundown. Kids are the one job that never goes wrong. +2 favors.", true)],
     ["Bring Fiona in", () => help(100, 2, 14, "Fiona's idea of subtlety is a locked door and a good fuse. The boy is home by dinner. +2 favors.", true)]]},

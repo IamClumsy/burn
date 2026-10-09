@@ -82,3 +82,11 @@ export const FLASHBACK_BOSSES: Boss[] = [
    lose: "Veracruz gets through the road. Sam pulls everyone back, takes a breath, and plans another way to hold it.",
    file: "Colonel Veracruz led a local militia in Colombia and told the world a story: a clinic burned by terrorists who had kidnapped a Navy observer. The 'terrorists' were goat farmers, and the observer was Sam Axe. He answered to a governor who was on a cartel's payroll, and he was losing his patience with them both."},
 ];
+
+/** Sam remembers the bowling alley (Michael's cameo in the movie), a small nod before Act One. */
+export const BOWLING = {
+  title: "The Bowling Alley",
+  text: "Before any of it, Sam remembers a bowling alley and a younger, scruffier Michael, years before the burn notice, hearing him out about a romantic mess and giving him straight advice. Sam did not follow all of it. Still, a good friend's advice makes the first step a little easier (+8% on Step 1).",
+  say: "Sam stares at a bowling ball and remembers Michael's advice. He'd have been better off taking all of it.",
+  succ: 0.08,
+};

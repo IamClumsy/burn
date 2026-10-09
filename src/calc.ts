@@ -3,7 +3,7 @@ import { GENS, OP_CAP } from "./data/ops";
 import { UPGS } from "./data/upgrades";
 import { COVERS } from "./data/covers";
 import { BOSSES } from "./data/bosses";
-import { FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC_ID } from "./data/samAxe";
+import { BOWLING, FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC_ID } from "./data/samAxe";
 import { STORY } from "./data/story";
 import { seasonsOpen } from "./data/missions";
 import { DAY_MS, FAVORS_PER_DAY } from "./data/pacing";
@@ -204,7 +204,7 @@ export function awayWhy(id: string): { short: string; long: string } | null {
 export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);
 export function succChance(m: Mission): number {
   if (m.kid) return 1; // Michael never fails when a kid is involved
-  const c = m.succ + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
+  const c = m.succ + tierDef().succ + choiceSucc() + (m.arc?.id === SAM_ARC_ID && m.arc.step === 0 && S.samChoices.bowling ? BOWLING.succ : 0) + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
   return Math.min(0.97, c);
 }
 /** What the client pays in total. Michael keeps KEEP_RATE of it. */

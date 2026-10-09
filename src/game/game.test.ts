@@ -11,7 +11,7 @@ import { portrait, portraitScope } from "../ui/portrait";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { tabTitle } from "../ui/render";
 import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
-import { arcAvailable, askSamForStory, startArc } from "./arcs";
+import { arcAvailable, askSamForStory, rememberBowling, startArc } from "./arcs";
 import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
 import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missionReward } from "../calc";
@@ -51,7 +51,7 @@ import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
 import { MISSIONS, seasonsOpen } from "../data/missions";
 import { clientCut, crewCut } from "../data/automation";
-import { SAM_ACTS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
+import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
 import { earn, merge } from "../state";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
@@ -1680,6 +1680,17 @@ describe("The Fall of Sam Axe", () => {
     expect(arcAvailable(SAM_ARC)).toBe(true);
     expect(panelHTML("settings")).not.toContain('data-arg="samfall"');
     expect(panelHTML("settings")).toMatch(/Open Cases/);
+  });
+
+  it("remembering the bowling alley boosts Step 1 once, and the button then goes away", () => {
+    S.life = 5e8; S.samOffered = true; dismissAllNotices();
+    expect(panelHTML("mis")).toContain('data-act="bowling"');
+    const before = succChance({ ...MISSIONS[0], uid: 1, arc: { id: SAM_ARC_ID, step: 0 } } as any);
+    rememberBowling(); rememberBowling();
+    const after = succChance({ ...MISSIONS[0], uid: 1, arc: { id: SAM_ARC_ID, step: 0 } } as any);
+    expect(after - before).toBeCloseTo(BOWLING.succ);
+    expect(panelHTML("mis")).not.toContain('data-act="bowling"');
+    dismissAllNotices();
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

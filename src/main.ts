@@ -15,7 +15,7 @@ import { loadGame, save, wipeSave, exportSave, importSave } from "./persist";
 import { tick } from "./game/tick";
 import { checkBurn, layLow } from "./game/heat";
 import { fillBoard, startMission } from "./game/missions";
-import { askSamForStory, startArc } from "./game/arcs";
+import { askSamForStory, rememberBowling, startArc } from "./game/arcs";
 import { bossAction } from "./game/bosses";
 import type { CaseAction } from "./types";
 import { scheduleClient, scheduleEvent } from "./game/events";
@@ -28,7 +28,7 @@ const ACT: Record<string, (arg: string) => void> = {
   gen: A.buyGen, upg: A.buyUpg, referral: () => A.buyReferral(), hire: A.hireAlly, ability: A.useAbility,
   cover: A.setCover, auto: A.toggleAuto, callnate: () => A.callNate(), perk: A.buyPerk, contact: a => A.buyFavorFrom(a), hangout: () => A.buyFavorFrom("seymour", "hangout"), craft: A.craft,
   start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
-  setting: a => setting(a),
+  setting: a => setting(a), bowling: () => rememberBowling(),
 };
 
 /** The switches in Settings: sound, pop-ups, number style, and saves. */

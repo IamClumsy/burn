@@ -6,7 +6,7 @@ import { beep, chime } from "../audio";
 import { say as sayTag, toast } from "../ui/fx";
 import { reduceGrip } from "./org";
 import type { Arc, Mission } from "../types";
-import { SAM_ACTS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
+import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
 import { choiceBusy, showChoice } from "../ui/choice";
 import { startFlashbackBoss } from "./bosses";
 const say = (t: string): void => sayTag(t, "mission");
@@ -23,6 +23,14 @@ export function askSamForStory(): void {
   S.samOffered = true;
   toast("Sam has a story", "\"Colombia, 2005,\" says Sam, and orders a drink. \"Pull up a chair.\" The Fall of Sam Axe is now an Open Case.", "story");
   say("You asked, so Sam clears his throat. This is going to take a while.");
+}
+
+/** Before Act One: remember the bowling alley (Michael's cameo) for a small boost to the first step. Once per case. */
+export function rememberBowling(): void {
+  if (!arcAvailable(SAM_ARC) || arcStep(SAM_ARC) !== 0 || S.samChoices.bowling) return;
+  S.samChoices.bowling = 1;
+  toast(BOWLING.title, BOWLING.text, "story");
+  say(BOWLING.say);
 }
 
 /** Start the next step of a case. Your ally for that case joins automatically if they're free. */

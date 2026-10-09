@@ -8,6 +8,7 @@ import type { Look } from "../ui/portrait";
  */
 export const LOOKS: Record<string, Look> = {
   // ---- the star: lean, angular, short dark hair, a khaki polo
+  michaelpre: { skin: "#e2b48c", hair: "short", hairColor: "#2a1d16", jaw: "square", face: 0.97, outfit: "shirt", outfitColor: "#8a8f7c", accent: "#5c6652", facial: "stubble", bg: ["#ff7a59", "#7b2a6b"], mood: "calm" },
   michael: { skin: "#e2b48c", hair: "short", hairColor: "#2a1d16", jaw: "square", face: 0.97, outfit: "polo", outfitColor: "#cdbb9a", accent: "#8a7a5c", bg: ["#ff7a59", "#7b2a6b"], mood: "calm" },
 
   // ---- crew

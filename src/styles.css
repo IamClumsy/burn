@@ -110,6 +110,9 @@
   /* No transform on hover: lifting a button can move it out from under the cursor and make it flicker. */
   button:hover:not(:disabled){border-color:var(--pink);background-color:#321d46}
   button:disabled{opacity:.4;cursor:not-allowed}
+  /* Choices you can act on get a pink outline, so they read as buttons on a phone (where there is no hover) */
+  .btns button:not(:disabled),.bossacts button:not(:disabled),#evtO button:not(:disabled){border:1.5px solid color-mix(in srgb,var(--pink) 75%,var(--line))}
+  .btns button:active:not(:disabled),.bossacts button:active:not(:disabled){background-color:#4a2060;border-color:var(--pink)}
   #job{width:100%;padding:18px;font-size:18px;font-weight:700;background:linear-gradient(#ff7a59,#ff2d8a);color:#fff;border:none;letter-spacing:2px;box-shadow:0 0 18px #ff2d8a66}
   #job:active{transform:scale(.98)}
   .bar{height:14px;background:#0b0610;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:6px 0}

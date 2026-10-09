@@ -18,15 +18,17 @@ export const stepDur = (a: Arc, dur: number): number => a.id === SAM_ARC_ID ? Ma
 export const arcStep = (a: Arc): number => S.arcStep[a.id] || 0;
 
 export const arcAvailable = (a: Arc): boolean =>
-  S.life >= a.at && !S.arcsDone[a.id] && !S.active.some(m => m.arc?.id === a.id) &&
-  (!a.needsEp || !!S.episodesDone[a.needsEp] || seasonsOpen(S.life) >= (a.orSeason ?? 99) || (a.id === SAM_ARC_ID && S.samOffered));
+  S.life >= a.at && (!S.arcsDone[a.id] || (a.id === SAM_ARC_ID && S.samReplay)) && !S.active.some(m => m.arc?.id === a.id) &&
+  (!a.needsEp || !!S.episodesDone[a.needsEp] || seasonsOpen(S.life) >= (a.orSeason ?? 99));
 
-/** Settings button for players who are already past Season 5: Sam tells the story whenever you ask. */
-export function askSamForStory(): void {
-  if (S.arcsDone[SAM_ARC_ID] || S.samOffered || arcAvailable(SAM_ARC)) return;
-  S.samOffered = true;
-  toast("Sam has a story", "\"Colombia, 2005,\" says Sam, and orders a drink. \"Pull up a chair.\" The Fall of Sam Axe is now an Open Case.", "story");
-  say("You asked, so Sam clears his throat. This is going to take a while.");
+/** Hear it again from the menu once it's been told: the case starts over, with new answers and no second helping of rewards. */
+export function replaySamStory(): void {
+  if (!S.arcsDone[SAM_ARC_ID] || S.samReplay || S.boss || S.active.length) return;
+  S.samReplay = true;
+  S.arcStep[SAM_ARC_ID] = 0;
+  S.samChoices = {};
+  toast("Sam tells it again", "\"Colombia, 2005,\" says Sam, and orders a drink. Everything else waits until he's done. The Fall of Sam Axe is an Open Case again, and this time you can answer the Admiral differently. The favors and prizes were yours the first time.", "story");
+  say("Sam clears his throat. He's been waiting for someone to ask.");
 }
 
 /** Before Act One: remember the bowling alley (Michael's cameo) for a small boost to the first step. Once per case. */
@@ -48,7 +50,7 @@ export function startArc(id: string): void {
     const act = SAM_ACTS[st.act];
     showChoice(`The Fall of Sam Axe · ${act.title}`, `${act.inquiry} ${act.prompt}`, act.options.map((o, k): [string, () => string] => [o.label, () => {
       S.samChoices[st.act!] = k;
-      if (o.fx.favors) S.favors += o.fx.favors;
+      if (o.fx.favors && !S.samReplay) S.favors += o.fx.favors;
       return o.result;
     }]), res => launchStep(a, step, res, `The Fall of Sam Axe · ${act.title}`), { inquiry: true });
     return;
@@ -78,7 +80,7 @@ function launchStep(a: Arc, step: number, prior?: string, priorTitle?: string): 
     return;
   }
   const base: Mission = {
-    uid: S.uid++, n: `${a.title}: ${st.n}`, dur: stepDur(a, st.dur), succ: st.succ, heat: st.heat, rm: st.rm, fav: 1,
+    uid: S.uid++, n: `${a.title}: ${st.n}`, dur: stepDur(a, st.dur), succ: st.succ, heat: st.heat, rm: st.rm, fav: a.id === SAM_ARC_ID && S.samReplay ? 0 : 1,
     ally: a.ally, kid: false, send: allyFree(a.ally), arc: { id: a.id, step },
   };
   const sent = base.send ? a.ally : null;
@@ -92,11 +94,11 @@ export function advanceArc(id: string, step: number): void {
   if (!a) return;
   S.arcStep[id] = step + 1;
   if (step + 1 >= a.steps.length) {
-    S.arcsDone[id] = true;
-    S.favors += a.favors;
-    reduceGrip(8);
+    const again = id === SAM_ARC_ID && S.samReplay; // told a second time: no more favors or grip
+    S.arcsDone[id] = true; S.samReplay = again ? false : S.samReplay;
+    if (!again) { S.favors += a.favors; reduceGrip(8); }
     chime();
-    toast("Case closed: " + a.title, `+${a.favors} favors. ${a.epilogue}`, "good");
+    toast("Case closed: " + a.title, `${again ? "Told again." : `+${a.favors} favors.`} ${a.epilogue}`, "good");
     sayTag(a.epilogue, "mission", { label: `Case closed · ${a.title}`, name: a.title });
   } else {
     sayTag(`${a.title}: step ${step + 1} done. Next up: ${a.steps[step + 1].n}.`, "mission", { label: `Open case · ${a.title}`, name: a.title });

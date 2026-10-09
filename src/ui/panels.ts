@@ -22,7 +22,7 @@ import { portrait, portraitScope } from "./portrait";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep, stepDur } from "../game/arcs";
-import { FLASHBACK_BOSSES, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
+import { FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 import { AUTOS, autoCut } from "../data/automation";
@@ -31,7 +31,7 @@ import { menuNew } from "./badges";
 import { narration, type NarrationEntry, type NarrationTag } from "./fx";
 import { EPILOGUE, EPILOGUE_CLOSE, EPILOGUE_TITLE } from "../data/epilogue";
 
-export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "heatinfo" | "med" | "rep";
+export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "heatinfo" | "med" | "rep" | "fosa";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
@@ -42,11 +42,11 @@ export const SECTIONS: [TabId, string][] = [
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"], ["gad", "Gadgets"], ["fav", "Favors"],
   ["list", "The List"], ["file", "Michael's File"], ["stats", "Stats"], ["auto", "Automation"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
-  ["options", "Menu"], ["settings", "Settings"], ["narrator", "Narrator"], ["heatinfo", "Heat and Attention"],
+  ["options", "Menu"], ["settings", "Settings"], ["fosa", "The Fall of Sam Axe"], ["narrator", "Narrator"], ["heatinfo", "Heat and Attention"],
 ];
 
 /** What the menu button offers. Crew, Covers, Gadgets and Favors stay in The Loft, so they aren't here. */
-export const MENU: TabId[] = ["list", "file", "stats", "auto", "story", "rogue", "med", "rep", "faq", "settings"];
+export const MENU: TabId[] = ["list", "file", "stats", "auto", "story", "rogue", "med", "rep", "faq", "fosa", "settings"];
 
 
 
@@ -391,14 +391,21 @@ function narrator(): string {
 /** The menu behind the hamburger button. */
 function options(): string {
   const fresh = menuNew();
-  return `<div class="menugrid">${MENU.map(id => `<button data-modal="${id}">${titleOf(id)}${fresh[id] ? `<span class="newchip">NEW</span>` : ""}</button>`).join("")}</div>`;
+  return `<div class="menugrid">${MENU.filter(id => id !== "fosa" || S.arcsDone[SAM_ARC_ID]).map(id => `<button data-modal="${id}">${titleOf(id)}${fresh[id] ? `<span class="newchip">NEW</span>` : ""}</button>`).join("")}</div>`;
 }
 
-/** Already played Sam's flashback? Say so. Otherwise a button asks Sam for it, for anyone who is past the episode that offers it. */
-function samExtra(): string {
-  if (S.arcsDone[SAM_ARC_ID]) return "Already told";
-  if (S.samOffered || arcAvailable(SAM_ARC)) return "It's in your Open Cases";
-  return `<button data-act="setting" data-arg="samfall">Play it now</button>`;
+/** Sam's story, once it's been told: how you told it, and a way to hear it again. Only in the menu after it's closed. */
+function fosa(): string {
+  const a = SAM_ARC;
+  const told = SAM_ACTS.map((act, i) => {
+    const k = S.samChoices[i], o = k !== undefined ? act.options[k] : null;
+    return `<div class="box"><b>${act.title}</b>${o ? `<div class="small" style="color:var(--gold)">You told it: ${o.label}</div><div class="small" style="color:var(--text)">${o.result}</div>` : `<div class="small">Not yet answered this time.</div>`}</div>`;
+  }).join("");
+  const again = S.samReplay
+    ? `<div class="small" style="margin-top:8px">Sam is telling it again. Look for it under Open Cases.</div>`
+    : `<div class="btns"><button data-act="replay" ${S.boss || S.active.length ? "disabled" : ""}>Hear it again</button></div>
+       <div class="small" style="margin-top:6px">${S.boss || S.active.length ? "Finish what's running first. " : ""}Everything else waits while Sam tells it, and your answers can change. The favors, the medal and the cover were yours the first time.</div>`;
+  return `<div class="small" style="margin-bottom:8px">${a.epilogue}</div><h2>How you told it</h2>${told}${again}`;
 }
 
 /** Sound, saves and the other switches that used to live in the footer. */
@@ -410,8 +417,6 @@ function settings(): string {
     ${row("Pop-ups", S.popups ? "On, in the middle of the screen" : "Off, small corner notes instead", "popups")}
     ${row("Big numbers", S.sci ? "Scientific (1.23e9)" : "Letters (1.23B)", "numfmt")}
   </div>
-  <h2 style="margin-top:14px">Extras</h2>
-  <div class="drow"><span class="dlabel">The Fall of Sam Axe (FoSA)</span><span class="dtext">${samExtra()}</span></div>
   <h2 style="margin-top:14px">Your save</h2>
   <div class="small" id="saveinfo" style="margin-bottom:8px${st.warn ? ";color:var(--gold)" : ""}">${st.text}</div>
   <div class="btns"><button data-act="setting" data-arg="export">Export save</button><button data-act="setting" data-arg="import">Import save</button><button data-act="setting" data-arg="wipe">Wipe save</button></div>
@@ -524,7 +529,7 @@ function faq(): string {
 const VIEWS: Record<TabId, () => string> = {
   faq,
   list: theList,
-  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, narrator, heatinfo: heatInfo, story, med: medals, rep: reinstate,
+  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, fosa, narrator, heatinfo: heatInfo, story, med: medals, rep: reinstate,
 };
 
 export const panelHTML = (tab: TabId): string => { portraitScope(tab); return VIEWS[tab](); };

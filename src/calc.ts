@@ -280,5 +280,5 @@ export function conChance(): number {
 
 /** The Fall of Sam Axe is underway (a step is running, its showdown is on, or you're between steps), so the game wears its flashback look. */
 export const inFlashback = (): boolean =>
-  !!S.active.some(m => m.arc?.id === SAM_ARC_ID) || !!S.boss?.arc && S.boss.arc.id === SAM_ARC_ID ||
+  S.samReplay || !!S.active.some(m => m.arc?.id === SAM_ARC_ID) || !!S.boss?.arc && S.boss.arc.id === SAM_ARC_ID ||
   ((S.arcStep[SAM_ARC_ID] || 0) > 0 && !S.arcsDone[SAM_ARC_ID]);

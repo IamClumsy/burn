@@ -11,7 +11,7 @@ import { portrait, portraitScope } from "../ui/portrait";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { tabTitle } from "../ui/render";
 import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
-import { arcAvailable, askSamForStory, rememberBowling, startArc, stepDur } from "./arcs";
+import { arcAvailable, rememberBowling, replaySamStory, startArc, stepDur } from "./arcs";
 import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
 import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missionReward } from "../calc";
@@ -38,9 +38,9 @@ import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
 import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
-import { inFlashback } from "../calc";
+import { inFlashback, samSharp } from "../calc";
 import { fillBoard, gatedEpReady, missionWeight, newMission, resolveMission, startMission } from "./missions";
-import { actionBlock, bossAction, bossWeight, spawnBoss, tickBoss } from "./bosses";
+import { actionBlock, bossAction, bossWeight, spawnBoss, tickBoss, winBoss } from "./bosses";
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
 import { spawnClient, spawnEvent } from "./events";
 import { seasonOf } from "../data/missions";
@@ -1675,15 +1675,38 @@ describe("The Fall of Sam Axe", () => {
     expect(document.body.classList.contains("flashback")).toBe(false);
   });
 
-  it("a Settings button lets you ask Sam for it if you're already past Season 5", () => {
-    S.life = 1e3; S.episodesDone = {}; S.samOffered = false; dismissAllNotices();
+  it("the menu lists The Fall of Sam Axe only after it's closed, and lets you hear it again without a second helping of rewards", () => {
+    S.life = 5e8; S.samOffered = true; S.arcsDone = {}; S.samReplay = false; dismissAllNotices();
+    expect(panelHTML("options")).not.toContain('data-modal="fosa"');
+    expect(panelHTML("settings")).not.toContain("FoSA");
+    S.arcsDone[SAM_ARC_ID] = true; S.arcStep[SAM_ARC_ID] = 7; S.samChoices = { 0: 1, 1: 0, 2: 0, 3: 1 };
+    expect(panelHTML("options")).toContain('data-modal="fosa"');
+    expect(panelHTML("fosa")).toContain("How you told it");
     expect(arcAvailable(SAM_ARC)).toBe(false);
-    expect(panelHTML("settings")).toContain('data-arg="samfall"');
-    askSamForStory();
-    expect(S.samOffered).toBe(true);
+    S.favors = 0;
+    replaySamStory();
+    expect(S.samReplay).toBe(true);
     expect(arcAvailable(SAM_ARC)).toBe(true);
-    expect(panelHTML("settings")).not.toContain('data-arg="samfall"');
-    expect(panelHTML("settings")).toMatch(/Open Cases/);
+    expect(S.arcStep[SAM_ARC_ID]).toBe(0);
+    expect(inFlashback()).toBe(true);                   // everything else waits again
+    expect(samSharp()).toBe(true);                      // and you keep what you earned
+    dismissAllNotices();
+    // play it through: new answers, no favors
+    for (let step = 0; step < SAM_ARC.steps.length; step++) {
+      dismissAllNotices(); startArc("samfall");
+      const st = SAM_ARC.steps[step];
+      if (st.act !== undefined) { answer(1); if (st.boss) answer(0); }
+      else if (SAM_BEATS[step]) answer(0);
+      if (st.boss) { winBoss(); break; }
+      const m = S.active.find(x => x.arc?.id === "samfall")!; m.chance = 1; resolveMission(m);
+    }
+    expect(S.arcsDone[SAM_ARC_ID]).toBe(true);
+    expect(S.samReplay).toBe(false);
+    expect(S.favors).toBe(0);                           // the first time paid them
+    expect(S.samChoices[0]).toBe(1);
+    expect(inFlashback()).toBe(false);
+    expect(arcAvailable(SAM_ARC)).toBe(false);
+    dismissAllNotices();
   });
 
   it("remembering the bowling alley boosts Step 1 once, and the button then goes away", () => {

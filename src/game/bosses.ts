@@ -46,11 +46,11 @@ export function startFlashbackBoss(id: string, arc: string, step: number): void 
 export function winBoss(): void {
   const b = bossDef()!, arc = S.boss?.arc;
   if (b.flashback) { // not on the List: pay out, and the case moves on
-    const reward = cps() * 200 * b.hpm + 500, fav = Math.ceil(2 * b.hpm);
+    const reward = cps() * 200 * b.hpm + 500, fav = S.samReplay ? 0 : Math.ceil(2 * b.hpm);
     earn(reward); S.favors += fav;
     S.boss = null; S.bossCd = nextBossGap();
     chime();
-    toast(b.n + " outmaneuvered", `+${money(reward)}, +${fav} favors`, "good");
+    toast(b.n + " outmaneuvered", `+${money(reward)}${fav ? `, +${fav} favors` : ""}`, "good");
     say(b.win ?? b.n + " is beaten.");
     if (arc) advanceArc(arc.id, arc.step);
     return;

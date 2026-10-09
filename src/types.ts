@@ -140,7 +140,7 @@ export interface GameState {
   /** How you told each act of The Fall of Sam Axe (act number to the option you picked). */
   samChoices: Dict<number>;
   /** Has Sam offered to tell The Fall of Sam Axe yet? */
-  samOffered: boolean; backupNudged: boolean; intel: number;
+  samOffered: boolean; samReplay: boolean; backupNudged: boolean; intel: number;
   /** The Organization's grip on you: starts at 100 and is worn down by wins. */
   grip: number;
   /** Names of people on the List that you know about (from wins or Simon's tips). */

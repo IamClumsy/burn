@@ -941,7 +941,7 @@ describe("Ghosts From the Past", () => {
 
   it("anyone the story has taken off the board turns into a ghost once their time has passed", () => {
     S.story = 0;
-    const gone: [string, number][] = [["strickler", 4], ["gilroy", 4], ["brennen", 5], ["barrett", 5], ["anson", 6], ["vaughn", 6], ["card", 7], ["gray", 7], ["bly", 7]];
+    const gone: [string, number][] = [["strickler", 4], ["gilroy", 4], ["brennen", 5], ["barrett", 5], ["anson", 6], ["card", 7], ["gray", 7], ["bly", 7]];
     const seasonStart = [0, 0, 1e5, 2e6, 3e7, 5e8, 8e9, 1e11];
     for (const [id, season] of gone) {
       S.life = seasonStart[season - 1] + 1;
@@ -951,9 +951,14 @@ describe("Ghosts From the Past", () => {
     }
   });
 
+  it("only characters who die in the show can be ghosts (checked against the Burn Notice wiki)", () => {
+    const dies = ["bly", "carla", "cowan", "strickler", "gilroy", "brennen", "barrett", "anson", "card", "gray"].sort();
+    expect(BOSSES.filter(b => b.ghost).map(b => b.id).sort()).toEqual(dies);
+  });
+
   it("people who are still around are never ghosts", () => {
     S.life = 1e13; S.story = 99;
-    for (const id of ["paxson", "larry", "oneill", "riley", "burke", "sonya", "kendrick"]) expect(bossView(boss(id)).n, id).toBe(boss(id).n);
+    for (const id of ["paxson", "larry", "oneill", "vaughn", "riley", "burke", "sonya", "kendrick"]) expect(bossView(boss(id)).n, id).toBe(boss(id).n);
   });
 
   it("Cowan, who dies in the first Season's story, is a ghost once that beat has passed", () => {

@@ -44,7 +44,6 @@ export const BOSSES: Boss[] = [
    intro:"Mason Gilroy arrives in town to 'clean things up'. The method looks a lot like a list of unsolved crimes.",
    file:"Mason Gilroy was a former MI6 spy turned freelance psychopath who arranged coups for a living. He killed Michael's CIA contact, took ten million dollars to spring a prisoner from a flight, and was then left strapped to a bomb in his own car by the man he'd freed."},
   {id:"vaughn", n:"Vaughn Anderson", title:"The Organization's handler, who arrives with a tactical team", at:4e7, hpm:4.6, m:["heat","att"],
-   ghost:{from:{season:6}, legacy:"A tactical team arrives with Vaughn Anderson's paperwork and no one left to answer to."},
    mech:"Dragnet: heat and Organization attention both climb.",
    intro:"Vaughn Anderson says he's your new handler. His tactical team says otherwise.",
    file:"Vaughn Anderson was the Organization's handler assigned to Michael after Simon was recaptured. He used Michael to find the man behind Simon's escape, was fooled by Michael and Simon more than once, and later brought a tactical team to Miami. He ended up in the same prison as Simon."},

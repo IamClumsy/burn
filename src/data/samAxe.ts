@@ -86,7 +86,7 @@ export const FLASHBACK_BOSSES: Boss[] = [
 /** Sam remembers the bowling alley (Michael's cameo in the movie), a small nod before Act One. */
 export const BOWLING = {
   title: "The Bowling Alley",
-  text: "Before any of it, Sam remembers a bowling alley and a younger, scruffier Michael, years before the burn notice, hearing him out about a romantic mess and giving him straight advice. Sam did not follow all of it. Still, a good friend's advice makes the first step a little easier (+8% on Step 1).",
+  text: "Before any of it, Sam remembers a bowling alley and a younger, scruffier Michael (Sam calls him Mike), years before the burn notice, hearing him out about a romantic mess and giving him straight advice. Sam did not follow all of it. Still, a good friend's advice makes the first step a little easier (+8% on Step 1).",
   say: "Sam stares at a bowling ball and remembers Michael's advice. He'd have been better off taking all of it.",
   succ: 0.08,
 };

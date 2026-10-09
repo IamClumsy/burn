@@ -152,7 +152,7 @@ function missions(): string {
       return `<div class="box"><b>${a.title}</b> <span class="chip">Step ${k + 1} of ${a.steps.length}</span>
         <div class="small">${a.blurb}</div>
         <div class="small" style="color:var(--text)">Next: ${st.n} · ${st.dur}s · +${st.heat} heat${S.allies[a.ally] ? "" : ""}</div>
-        <div class="btns"><button data-act="arc" data-arg="${a.id}" ${S.active.length >= 3 ? "disabled" : ""}>Start this step</button>${a.id === SAM_ARC_ID && k === 0 && !S.samChoices.bowling ? `<span class="small" style="display:inline-flex;align-items:center;gap:6px">${portrait("michaelpre", 28)}<button data-act="bowling">Remember the bowling alley</button></span>` : ""}</div></div>`;
+        <div class="btns"><button data-act="arc" data-arg="${a.id}" ${S.active.length >= 3 ? "disabled" : ""}>Start this step</button>${a.id === SAM_ARC_ID && k === 0 && !S.samChoices.bowling ? `<span class="small" style="display:inline-flex;align-items:center;gap:6px">${portrait("michaelpre", 28)}<button data-act="bowling">Remember Mike at the bowling alley</button></span>` : ""}</div></div>`;
     }).join("");
   }
   if (S.active.length) {

@@ -1891,6 +1891,15 @@ describe("The Fall of Sam Axe", () => {
     expect(html.indexOf("Lifetime earnings")).toBeGreaterThan(html.lastIndexOf("class=\"drow"));    // the money sits below the file
   });
 
+  it("a case in progress shows Seen when you've already done that episode", () => {
+    S.board = []; S.active = []; S.episodesDone = {}; fillBoard();
+    const m = S.board.find(x => x.ep)!; startMission(m.uid);
+    expect(panelHTML("mis")).not.toMatch(/In Progress[\s\S]*Seen/);
+    S.episodesDone[m.ep!] = true;
+    expect(panelHTML("mis")).toMatch(/In Progress[\s\S]*>Seen</);
+    S.active = [];
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

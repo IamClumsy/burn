@@ -37,7 +37,7 @@ export const FAQ: FaqSection[] = [
     {q: "Why does the fixer's price keep changing?",
      a: () => "Fixers come and go. Each one who turns up has their own price and their own reach: some are cheap and do a little, some are pricey and do a lot, and now and then you'll get lucky. They move on after a minute or so, and once you pay one, a different one takes their place. Prices also climb the closer the Organization is to you, so it's cheaper to deal with them early. Barry and a loosened grip bring prices down."},
     {q: "What's \"Their grip on you\"?",
-     a: () => `A bar that starts at 100% and drops as you win: missions, boss encounters, closed cases, and outsmarting handlers. It grants permanent perks: ${GRIP_PERKS.map(p => `at ${p.at}%, ${p.desc.toLowerCase()}`).join("; ")}.`},
+     a: () => `A bar that starts at 100% and drops as you win: missions, boss encounters, closed cases, and outsmarting handlers. Someone new is always after Michael, so it starts over at 100% every time a new Season opens, and you earn the perks again. At each stage it grants a perk: ${GRIP_PERKS.map(p => `at ${p.at}%, ${p.desc.toLowerCase()}`).join("; ")}.`},
     {q: "What are handler errands?",
      a: () => "Once the Organization is watching, a handler sends you a job. You can do it as asked (big pay, more attention), do it your own way (a gamble that can loosen their grip or backfire), or refuse (some heat, but you stay your own man). Who calls follows the show: Carla at first, then Management himself after her fall, then Vaughn, and finally Tom Card."},
     {q: "What's The List?",

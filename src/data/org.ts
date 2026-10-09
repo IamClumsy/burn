@@ -40,6 +40,16 @@ export const GRIP_PERKS: GripPerk[] = [
   {at:0,  name:"Cut Loose",    desc:"+10% income", inc:0.1},
 ];
 
+/** Someone new is always after Michael: each Season the Organization's grip on you starts over, with a new hand on the leash. */
+export const SEASON_GRIP: Record<number, string> = {
+  2: "Carla Baxter has her hooks in you now, and she's brought deadlines.",
+  3: "Carla's gone, but Management never stops. A detective, an old mentor with a bomb, and a man called Brennen are all circling.",
+  4: "A new handler arrives with a tactical team and a list with your name at the top.",
+  5: "Anson Fullerton has plans for you, and plans behind his plans.",
+  6: "Tom Card pulls strings you didn't know were attached, and Olivia Riley is coming for you.",
+  7: "The CIA, a criminal syndicate and a man with a grudge: everyone wants a piece of Michael.",
+};
+
 /** What the Organization has on you, revealed as their attention peaks. */
 export const DOSSIER: { peak: number; label: string; text: string }[] = [
   {peak:0,  label:"Subject",            text:"Michael Westen"},

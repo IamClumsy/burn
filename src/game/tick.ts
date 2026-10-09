@@ -3,6 +3,7 @@ import { choiceMult, cps, gripAtt, heatMult, owned } from "../calc";
 import { checkEnding, tickOrg } from "./org";
 import { GENS } from "../data/ops";
 import { STORY } from "../data/story";
+import { SEASON_GRIP } from "../data/org";
 import { MEDALS } from "../data/medals";
 import { seasonsOpen } from "../data/missions";
 import { chime } from "../audio";
@@ -36,7 +37,10 @@ export function milestones(): void {
   const open = seasonsOpen(S.life);
   if (open > S.seasonOpen) {
     S.seasonOpen = open;
-    toast(`Season ${open} cases are open`, "New clients are knocking, and the cases are getting bigger.", "story");
+    // someone new is always after Michael: their grip on you starts over
+    S.grip = 100;
+    const foe = SEASON_GRIP[open] ?? "Someone new has your number.";
+    toast(`Season ${open} cases are open`, `New clients are knocking, and the cases are getting bigger.\n\nTheir grip on you starts over: ${foe}`, "story");
     say(`Word spreads. Season ${open} cases start turning up on your board.`);
     chime();
   }

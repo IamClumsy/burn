@@ -19,7 +19,7 @@ import { allBeaten, checkEnding, newFixer, reduceGrip, simonTip, spawnErrand, ti
 import { FIXERS, FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
 import { bribeCost, bribeDrop } from "../calc";
 import { payOffFixer, toggleAuto } from "./actions";
-import { GRIP_PERKS, TIERS, handlerFor } from "../data/org";
+import { GRIP_PERKS, SEASON_GRIP, TIERS, handlerFor } from "../data/org";
 import { UPGS } from "../data/upgrades";
 import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
@@ -1129,6 +1129,26 @@ describe("Bosses turn up in the season they debut", () => {
   it("the first bosses of a young game are Season 1 and 2 foes, never Paxson", () => {
     S.life = 1e5; S.allies = {};
     for (let i = 0; i < 200; i++) { S.boss = null; spawnBoss(); expect(["bly", "carla"]).toContain(S.boss!.id); }
+  });
+});
+
+describe("A new Season, a new hold on you", () => {
+  it("the Organization's grip starts over at 100% whenever a Season opens, with a word about who's after you", () => {
+    S.life = 1e5; S.seasonOpen = 1; S.grip = 20;
+    milestones();
+    expect(S.seasonOpen).toBe(2);
+    expect(S.grip).toBe(100);
+    expect(document.getElementById("nM")!.textContent).toMatch(/grip on you starts over: Carla/);
+  });
+
+  it("mid-season, wins still wear it down and keep it down", () => {
+    S.life = 1e5; S.seasonOpen = 2; S.grip = 60;
+    milestones();
+    expect(S.grip).toBe(60);
+  });
+
+  it("every Season has its own foe line", () => {
+    for (let n = 2; n <= 7; n++) expect(SEASON_GRIP[n], `Season ${n}`).toBeTruthy();
   });
 });
 

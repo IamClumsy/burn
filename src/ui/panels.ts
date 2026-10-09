@@ -346,7 +346,7 @@ function statsView(): string {
 
 function theList(): string {
   const next = GRIP_PERKS.find(p => S.grip > p.at);
-  let h = `<div class="small" style="margin-bottom:8px">The Organization burned you, and they still hold a grip on you. Wins wear it down: missions, bosses, closed cases, and dealing with handlers on your own terms.</div>
+  let h = `<div class="small" style="margin-bottom:8px">The Organization burned you, and they still hold a grip on you. Wins wear it down: missions, bosses, closed cases, and dealing with handlers on your own terms. When a new Season opens, someone new is after you and it starts over at 100%.</div>
     <div class="box"><div class="row"><b>Their grip on you</b><span class="small">${Math.ceil(S.grip)}%</span></div>
       <div class="bar"><i style="width:${S.grip}%;background:linear-gradient(90deg,var(--sea),#7b5cff)"></i></div>
       ${GRIP_PERKS.map(p => `<div class="small" style="color:${S.grip <= p.at ? "var(--gold)" : "var(--dim)"}">${S.grip <= p.at ? "✓" : "○"} At ${p.at}%: ${p.name}, ${p.desc}</div>`).join("")}

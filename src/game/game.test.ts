@@ -38,7 +38,7 @@ import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
 import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
-import { grossLife, helpsOn, inFlashback, samSharp } from "../calc";
+import { grossLife, inFlashback, samSharp } from "../calc";
 import { fillBoard, gatedEpReady, missionWeight, newMission, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, bossWeight, spawnBoss, tickBoss, winBoss } from "./bosses";
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
@@ -276,7 +276,7 @@ describe("pronouns on the mission board", () => {
     for (const [ally, word] of [["fiona", "her"], ["madeline", "her"], ["sam", "him"], ["jesse", "him"], ["barry", "him"]]) {
       S.allies = {};
       S.board = [{ uid: 1, n: "t", dur: 10, succ: .5, heat: 1, rm: 1, fav: 1, ally, kid: false, send: false }];
-      S.life = 1e12; S.episodesDone["402"] = true;
+      S.life = 1e6;
       const text = panelHTML("mis");
       expect(text, ally).toContain(`to ask ${word} for help (+25%)`);
     }
@@ -1924,21 +1924,6 @@ describe("The Fall of Sam Axe", () => {
     expect(formatWait(9000 * 3600e3)).toBe("over a year");
   });
 
-  it("Madeline is in the early cases but doesn't help in any Season 1 or 2 episode, even once hired", () => {
-    S.life = 1e12; S.allies.madeline = true;
-    const early = MISSIONS.find(m => m.ally === "madeline" && +m.ep! < 302)!;
-    const later = MISSIONS.find(m => m.ally === "madeline" && +m.ep! >= 302)!;
-    const card = (m: typeof early) => ({ uid: 7, n: m.n, dur: m.dur, succ: m.succ, heat: m.heat, rm: m.rm, fav: m.fav, ally: m.ally, kid: !!m.kid, send: true, ep: m.ep, epTitle: m.epTitle });
-    S.board = [card(early)];
-    expect(panelHTML("mis")).not.toContain("Ask Madeline for help");
-    expect(panelHTML("mis")).toContain("wasn't helping Michael yet");
-    S.board = [card(later)];
-    expect(panelHTML("mis")).toContain("Ask Madeline for help");
-    S.auto.crew = true; S.cred = 5; S.active = []; S.board = [card(early)]; startMission(7);
-    expect(S.active[0].sent).toBe(null);               // not even the auto-crew setting sends her
-    S.active = []; S.auto.crew = false;
-  });
-
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);
@@ -2142,7 +2127,7 @@ describe("Automation", () => {
   it("with auto-send on, a mission asks the right crew member for help by itself, and they take a cut", () => {
     S.cred = 3; S.auto.crew = true; S.autoOwned.crew = true; S.allies.sam = true;
     S.board = []; fillBoard();
-    const m = S.board.find(x => x.ally === "sam") ?? S.board.find(x => helpsOn(x)) ?? S.board[0];
+    const m = S.board.find(x => x.ally === "sam") ?? S.board[0];
     S.allies[m.ally] = true;
     startMission(m.uid);
     expect(S.active[0].sent).toBe(m.ally);
@@ -2156,7 +2141,7 @@ describe("Automation", () => {
 
   it("sending a crew member by hand doesn't cost a cut", () => {
     S.cred = 3; S.allies.sam = true; S.board = []; fillBoard();
-    const m = S.board.find(x => x.ally === "sam") ?? S.board.find(x => helpsOn(x)) ?? S.board[0];
+    const m = S.board.find(x => x.ally === "sam") ?? S.board[0];
     S.allies[m.ally] = true; m.send = true;
     startMission(m.uid);
     expect(S.active[0].auto).toBe(false);

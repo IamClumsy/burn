@@ -22,8 +22,6 @@ export interface Ally {
   debutEp?: string;
   /** Can only be hired once you have done their debut episode, not just once the season opens. */
   gateEp?: boolean;
-  /** The first episode where they actually help Michael. In earlier episodes they are in the story but can't lend a hand. */
-  helpsFrom?: string;
 }
 
 export interface MissionTpl {

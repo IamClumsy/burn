@@ -1,7 +1,7 @@
 import { S } from "../state";
 import { fresh, setState } from "../state";
 import {
-  referralCost, allyHere, bribeCost, bribeDrop, bulkCost, buyN, contactPrice, credGain, favorsLeft, hangOutPrice, owned, perk, perkCost, recentFavors,
+  recipeCash, referralCost, allyHere, bribeCost, bribeDrop, bulkCost, buyN, contactPrice, credGain, favorsLeft, hangOutPrice, owned, perk, perkCost, recentFavors,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -96,6 +96,10 @@ export function buyPerk(id: string): void {
 export function craft(id: string): void {
   const r = RECIPES.find(x => x.id === id)!;
   if (!Object.entries(r.need).every(([k, v]) => S.junk[k] >= v)) return;
+  const cash = recipeCash(r);
+  if (S.cash < cash) return;
+  if (id === "sub" && S.fx.sub > 0) return; // one at a time
+  S.cash -= cash;
   for (const [k, v] of Object.entries(r.need)) S.junk[k] -= v;
   if (id === "smoke") { S.heat = Math.max(0, S.heat - 30); S.att = Math.max(0, S.att - 10); }
   if (id === "sweep") S.att = Math.max(0, S.att - 30);
@@ -104,6 +108,7 @@ export function craft(id: string): void {
   if (id === "jobs") S.fx.jobs = 120;
   if (id === "fast") S.fx.fast = 180;
   if (id === "pay") S.fx.pay = 180;
+  if (id === "sub") { S.fx.sub = 21600; say("The sub slips under the harbor. Nobody is looking for a man who isn't anywhere. Six hours of quiet."); }
   S.stats.crafted++;
   chime(); say("Held together with tape and optimism. It works.");
 }

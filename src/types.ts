@@ -89,7 +89,8 @@ export interface FixerQuote {
 }
 
 export interface Perk { id: string; name: string; desc: string }
-export interface Recipe { id: string; name: string; desc: string; need: Dict<number> }
+/** A gadget. `rare` ones also cost cash: `cash` is how many minutes of your income they take. */
+export interface Recipe { id: string; name: string; desc: string; need: Dict<number>; rare?: boolean; cash?: number }
 /** Permanent bonuses a story choice can grant. Values are fractions: inc 0.1 means +10% income. */
 export interface ChoiceFx { inc?: number; heat?: number; att?: number; mis?: number; succ?: number; favors?: number }
 export interface StoryChoice {

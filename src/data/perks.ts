@@ -15,5 +15,6 @@ export const RECIPES: Recipe[] = [
   {id:"jobs",   name:"Fake ID Kit",         desc:"Jobs ×6 for 2 minutes",                             need:{tape:2,wire:1}},
   {id:"fast",   name:"Burner Phone Bundle", desc:"Missions run twice as fast for 3 minutes",          need:{wire:1,micro:1,tape:1}},
   {id:"pay",    name:"Forged Paper Trail",  desc:"Missions pay ×2 for 3 minutes",                     need:{tape:2,bleach:1,micro:1}},
+  {id:"sub",    name:"Submarine",           desc:"Heat and the Organization both lose track of you for 6 hours: nothing builds, and heat cools as usual", need:{tape:15,wire:15,bleach:10,micro:10}, rare:true, cash:60},
 ];
-export const FX_NAMES: Dict<string> = {jam:"Jammer",boost:"Booster ×3",jobs:"Fake IDs ×6",fast:"Fast Talk",pay:"Paper Trail ×2"};
+export const FX_NAMES: Dict<string> = {jam:"Jammer",boost:"Booster ×3",jobs:"Fake IDs ×6",fast:"Fast Talk",pay:"Paper Trail ×2",sub:"Submarine"};

@@ -77,7 +77,7 @@ const missionMeta = (m: { n: string; ep?: string; epTitle?: string }): Narration
 export function resolveMission(m: ActiveMission): void {
   const meta = missionMeta(m);
   S.active = S.active.filter(x => x.uid !== m.uid);
-  S.att = Math.min(100, S.att + 8);
+  if (!(S.fx.sub > 0)) S.att = Math.min(100, S.att + 8); // not while you're underwater
   if (Math.random() < m.chance) {
     payClient(m.reward); S.favors += m.fav; S.heat += m.heat * heatMult(); S.stats.mDone++;
     if (m.kid) S.stats.kidMissions++;

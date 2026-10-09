@@ -1,7 +1,7 @@
 import { S } from "../state";
 import { REINSTATE_MIN, attNet, bossDef, bribeCost, bribeDrop, clickVal, cover, cps, credGain, heatNet, layAmt, tierDef } from "../calc";
 import { FX_NAMES } from "../data/perks";
-import { money } from "../util";
+import { formatWait, money } from "../util";
 import type { CaseAction } from "../types";
 import { CASE_ACTIONS, MAX_LEADS, ROTATING } from "../data/caseActions";
 import { actionBlock } from "../game/bosses";
@@ -122,7 +122,7 @@ export function render(): void {
   setText($("rate"), "+" + money(cps()) + "/s  ·  job: " + money(clickVal()));
   setText($("cred"), S.cred ? `Credibility ${S.cred} · ${cover().name} cover` : `${cover().name} cover`);
   const fx = Object.entries(S.fx).filter(([, v]) => v > 0)
-    .map(([k, v]) => `<span class="chip">${FX_NAMES[k]} ${Math.ceil(v)}s</span>`).join("");
+    .map(([k, v]) => `<span class="chip">${FX_NAMES[k]} ${v >= 120 ? formatWait(v * 1000) : Math.ceil(v) + "s"}</span>`).join("");
   if (fx !== lastFx) { $("fx").innerHTML = fx; lastFx = fx; }
   setText($("heatnum"), Math.floor(S.heat) + "%");
   $("heatbar").style.width = Math.min(100, S.heat) + "%";

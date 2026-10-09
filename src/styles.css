@@ -78,6 +78,8 @@
   .nl-crew{--c:var(--sea)} .nl-story{--c:var(--gold)} .nl-away{--c:#4aa3ff} .nl-client{--c:#ffd166} .nl-deal{--c:#ffb86b} .nl-decision{--c:var(--pink)}
   .s1{--e:#2ee6d6} .s2{--e:#ff4fa3} .s3{--e:#ffd166} .s4{--e:#ff9a3c} .s5{--e:#a56bff} .s6{--e:#ff4d5e} .s7{--e:#4aa3ff}
   .nl.s1,.nl.s2,.nl.s3,.nl.s4,.nl.s5,.nl.s6,.nl.s7{border-left-color:var(--e)}
+  .chip.rare{background:#ffd166;color:#150c20;font-weight:700;letter-spacing:1px;font-size:10px;margin-left:6px}
+  .item.rare{border-color:#ffd16688;box-shadow:0 0 14px #ffd16622}
   .menugrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
   .menugrid button{padding:14px 10px;font-size:14px;letter-spacing:.5px;text-align:center}
   .modal{display:none;position:fixed;inset:0;background:#000b;z-index:25;align-items:center;justify-content:center;padding:20px}

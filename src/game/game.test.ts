@@ -22,7 +22,7 @@ import { buyGen, callNate, craft, payOffFixer, setCover, toggleAuto } from "./ac
 import { FX_NAMES, RECIPES } from "../data/perks";
 import { GENS, OP_CAP } from "../data/ops";
 import { MEDALS } from "../data/medals";
-import { attNet, buyN, bulkCost, cover, heatFactors, heatGain, heatNet } from "../calc";
+import { attGain, attNet, buyN, bulkCost, cover, heatFactors, heatGain, heatNet, recipeCash } from "../calc";
 import { GRIP_PERKS, SEASON_GRIP, TIERS, handlerFor } from "../data/org";
 import { OP_TIERS, UPGS } from "../data/upgrades";
 import { COVERS } from "../data/covers";
@@ -1489,6 +1489,67 @@ describe("Net heat and net attention bars", () => {
     S.heat = 0; render();
     expect(a.classList.contains("down")).toBe(true);
     expect(document.getElementById("netatttxt")!.textContent).toMatch(/^▼ −0\.20\/s$/);
+  });
+});
+
+describe("The Submarine", () => {
+  const stockSub = () => { S.junk = { tape: 20, wire: 20, bleach: 20, micro: 20 }; S.gens = { inf: 50, tape: 30 }; S.cash = 1e12; };
+
+  it("is a rare gadget that costs a lot of junk and an hour of income", () => {
+    const r = RECIPES.find(x => x.id === "sub")!;
+    expect(r.rare).toBe(true);
+    expect(Object.values(r.need).reduce((a, b) => a + b, 0)).toBeGreaterThanOrEqual(40);
+    S.gens = { inf: 50, tape: 30 };
+    expect(recipeCash(r)).toBeGreaterThanOrEqual(cps() * 3600 * 0.99);
+  });
+
+  it("needs the cash as well as the junk", () => {
+    stockSub(); S.cash = 10;
+    craft("sub");
+    expect(S.fx.sub || 0).toBe(0);
+    expect(S.junk.tape).toBe(20);
+    S.cash = 1e12;
+    craft("sub");
+    expect(S.fx.sub).toBe(21600);
+    expect(S.cash).toBeLessThan(1e12);
+    expect(S.junk.tape).toBe(5);
+  });
+
+  it("for six hours heat doesn't build and the Organization doesn't gain on you", () => {
+    stockSub(); S.heat = 40; S.att = 40; craft("sub");
+    expect(heatMult()).toBe(0);
+    expect(heatGain()).toBe(0);
+    expect(attGain()).toBe(0);
+    tick(10);
+    expect(S.heat).toBeLessThan(40);        // it still cools
+    expect(S.att).toBeLessThanOrEqual(40);   // and attention doesn't climb
+  });
+
+  it("finishing a mission doesn't draw attention while you're under", () => {
+    stockSub(); S.att = 10; craft("sub");
+    const t = MISSIONS[0];
+    const m = { uid: 7101, n: t.n, dur: 1, succ: 1, heat: 5, rm: 1, fav: 1, ally: t.ally, kid: false, elder: false, send: false, ep: t.ep, epTitle: t.epTitle, sent: null, left: 0, chance: 1, reward: 100 };
+    S.active = [m]; resolveMission(m);
+    expect(S.att).toBe(10);
+  });
+
+  it("only one at a time, and it runs down while you're away", () => {
+    stockSub(); craft("sub");
+    const junk = S.junk.tape; craft("sub");
+    expect(S.junk.tape).toBe(junk);
+    catchUp(3600);
+    expect(S.fx.sub).toBeLessThan(21600 - 3000);
+    expect(S.fx.sub).toBeGreaterThan(0);
+  });
+
+  it("the Gadgets card marks it RARE, and the chip counts in hours", () => {
+    stockSub();
+    const html = panelHTML("gad");
+    expect(html).toContain("RARE");
+    expect(html).toMatch(/Submarine[\s\S]*15 duct tape/);
+    craft("sub"); render();
+    expect(document.getElementById("fx")!.textContent).toMatch(/Submarine 5h 5\dm|Submarine 6h/);
+    expect(panelHTML("heatinfo")).toContain("Submarine");
   });
 });
 

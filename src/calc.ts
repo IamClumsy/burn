@@ -93,8 +93,11 @@ export function heatFactors(): { label: string; v: number }[] {
   return f.filter(x => Math.abs(x.v - 1) > 1e-9 || x.label.startsWith("Cover") || x.label.startsWith("Organization"));
 }
 
+/** What a rare gadget costs in cash right now: an hour of your income, never less than a floor. */
+export const recipeCash = (r: { cash?: number }): number => (r.cash ? Math.max(5000, cps() * 60 * r.cash) : 0);
+
 export function heatMult(): number {
-  if (S.fx.jam > 0) return 0;
+  if (S.fx.jam > 0 || S.fx.sub > 0) return 0;
   return heatFactors().reduce((m, x) => m * x.v, 1);
 }
 
@@ -107,7 +110,7 @@ export const HEAT_COOLING = 1.2;
 export const heatNet = (): number => heatGain() - HEAT_COOLING;
 
 /** Attention built per second: more the hotter you are, scaled by your story choices and how loose their grip is. */
-export const attGain = (): number => (0.05 + S.heat * 0.004) * choiceMult("att") * gripAtt();
+export const attGain = (): number => (S.fx.sub > 0 ? 0 : (0.05 + S.heat * 0.004) * choiceMult("att") * gripAtt());
 /** Attention shed per second: only when you're lying low (heat under 20%). */
 export const attCooling = (): number => (S.heat < 20 ? 0.25 : 0);
 export const attNet = (): number => attGain() - attCooling();

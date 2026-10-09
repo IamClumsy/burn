@@ -3,7 +3,7 @@ import type { ContactId } from "../types";
 import {
   REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, cps, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
-  HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
+  recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { REFERRAL, UPGS } from "../data/upgrades";
@@ -217,8 +217,11 @@ function gadgets(): string {
   let h = `<div class="small">Junk drops from jobs and Duct-Tape Gadgets.</div><div style="margin:8px 0 12px">` +
     Object.entries(JUNK).map(([k, n]) => `<span class="chip">${n}: ${S.junk[k]}</span>`).join("") + `</div>`;
   h += RECIPES.map(r => {
-    const ok = Object.entries(r.need).every(([k, v]) => S.junk[k] >= v);
-    return item("craft", r.id, ok, r.name, r.desc, `<span class="small">${Object.entries(r.need).map(([k, v]) => v + " " + JUNK[k].toLowerCase()).join(", ")}</span>`);
+    const cash = recipeCash(r), under = r.id === "sub" && S.fx.sub > 0;
+    const ok = Object.entries(r.need).every(([k, v]) => S.junk[k] >= v) && S.cash >= cash && !under;
+    const price = Object.entries(r.need).map(([k, v]) => v + " " + JUNK[k].toLowerCase()).join(", ") + (cash ? ` + ${money(cash)}` : "");
+    const title = r.rare ? `${r.name} <span class="chip rare">RARE</span>` : r.name;
+    return item("craft", r.id, ok, title, under ? `${r.desc} (active: ${formatWait(S.fx.sub * 1000)} left)` : r.desc, `<span class="small">${price}</span>`, r.rare ? "rare" : "");
   }).join("");
   return h;
 }
@@ -302,7 +305,7 @@ const perSec = (n: number): string => `${n >= 0 ? "+" : "−"}${Math.abs(n).toFi
 
 /** How heat and the Organization's attention move, and exactly why, so the numbers are never a mystery. */
 function heatInfo(): string {
-  const noise = opsNoise(), factors = heatFactors(), jam = S.fx.jam > 0;
+  const noise = opsNoise(), factors = heatFactors(), jam = S.fx.jam > 0 || S.fx.sub > 0;
   const hm = heatMult(), gain = heatGain(), net = heatNet();
   const heatEta = net > 0 ? `At this rate you reach 100% heat (a burn) in about ${formatWait((100 - S.heat) / net * 1000)}.`
     : S.heat > 0 ? `You're cooling, and heat hits zero in about ${formatWait(S.heat / -net * 1000)}.` : "You're at zero and staying there.";
@@ -311,6 +314,7 @@ function heatInfo(): string {
     row("Your operations", `${fmt(noise)} noise × 0.012 = ${perSec(noise * 0.012)}`, "each operation you own, the later ones louder"),
     ...factors.map(f => row(f.label, `×${f.v.toFixed(2)}`)),
     jam ? row("Door-Cam Jammer", `heat gain stopped for ${Math.ceil(S.fx.jam)}s`) : "",
+    S.fx.sub > 0 ? row("Submarine", `nothing builds for ${formatWait(S.fx.sub * 1000)}`, "heat and attention both stand still") : "",
     row("Heat built", `${perSec(gain)}`, jam ? "" : `(×${hm.toFixed(2)} in all)`),
     row("Cooling", perSec(-HEAT_COOLING), "the world forgets a little every second"),
     row("Net heat", `<b style="color:${net > 0 ? "var(--bad)" : "var(--sea)"}">${perSec(net)}</b>`),

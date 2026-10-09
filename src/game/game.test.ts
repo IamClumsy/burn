@@ -1609,6 +1609,26 @@ describe("A new Season, a new hold on you", () => {
   });
 });
 
+describe("Rogues unlock with the seasons, in reach of a normal game", () => {
+  it("the whole List is reachable: the last Rogue appears well under a trillion", () => {
+    expect(Math.max(...BOSSES.map(b => b.at))).toBeLessThan(1e12);
+  });
+
+  it("each Season brings its own foes, in order, and no Season is skipped", () => {
+    const seasons = BOSSES.map(b => seasonsOpen(b.at));
+    expect(seasons).toEqual([...seasons].sort((a, b) => a - b));
+    for (let n = 1; n <= 7; n++) expect(seasons, `Season ${n}`).toContain(n);
+  });
+
+  it("a locked Rogue says which Season and how much", () => {
+    S.life = 1e4;
+    const html = panelHTML("rogue");
+    expect(html).toMatch(/Season 2 · at \$100K/);
+    expect(html).toMatch(/Season 7 · at \$/);
+    expect(html).not.toMatch(/Appears at/);
+  });
+});
+
 describe("Late-story changes to bosses and the ending", () => {
   it("Cowan and Anson turn into what they left behind after their story beats", () => {
     const cowan = BOSSES.find(b => b.id === "cowan")!, anson = BOSSES.find(b => b.id === "anson")!;

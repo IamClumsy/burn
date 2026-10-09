@@ -19,6 +19,8 @@ export interface ChoiceStyle {
   big?: string;
   /** Use the teal "client at the door" look instead of the default. */
   client?: boolean;
+  /** Use the Navy-inquiry paper look (The Fall of Sam Axe's acts). */
+  inquiry?: boolean;
 }
 
 export function showChoice(
@@ -33,6 +35,7 @@ export function showChoice(
   $("evtD").textContent = desc;
   $("evtBig").textContent = style.big ?? "";
   $("evtDlg").classList.toggle("client", !!style.client);
+  $("evtDlg").classList.toggle("inquiry", !!style.inquiry);
   $("evtO").innerHTML = "";
   options.forEach(([label, run], i) => {
     const b = document.createElement("button");

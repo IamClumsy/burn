@@ -162,6 +162,13 @@
   #evt .dlg.client{border-color:var(--sea);box-shadow:0 0 40px #2ee6d655,0 20px 60px #000c;max-width:480px}
   #evt .dlg.client h3{color:var(--sea);font-size:20px}
   #evt .dlg.client .evtbig{display:block}
+  #evt .dlg.inquiry{background:#e9dfc8;color:#2b2418;border:2px solid #8a7a55;border-radius:4px;box-shadow:0 20px 60px #000c;font-family:Georgia,"Times New Roman",serif;max-width:520px}
+  #evt .dlg.inquiry h3{color:#5a1d14;font-size:19px;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid #8a7a55;padding-bottom:6px}
+  #evt .dlg.inquiry p,#evt .dlg.inquiry .evtd{color:#2b2418;font-style:italic}
+  #evt .dlg.inquiry button{background:#d8cba9;color:#2b2418;border:1px solid #8a7a55;font-family:inherit}
+  #evt .dlg.inquiry button:hover{background:#cdbd93}
+  body.flashback::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:40;background:radial-gradient(ellipse at center,#0000 45%,#2a160055 100%),#b8863a1f;mix-blend-mode:multiply}
+  body.flashback main,body.flashback header{filter:sepia(.45) saturate(.9) contrast(1.03)}
   #evt button.primary{background:linear-gradient(#2ee6d6,#1aa89c);color:#04201d;border:none;font-weight:700;padding:13px;font-size:16px}
   #evt button.primary:hover:not(:disabled){background-color:transparent;filter:brightness(1.1)}
   #notice{display:none;position:fixed;inset:0;background:#000d;z-index:40;align-items:center;justify-content:center;padding:20px}

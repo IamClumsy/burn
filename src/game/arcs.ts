@@ -30,7 +30,7 @@ export function startArc(id: string): void {
       S.samChoices[st.act!] = k;
       if (o.fx.favors) S.favors += o.fx.favors;
       return o.result;
-    }]), () => launchStep(a, step));
+    }]), () => launchStep(a, step), { inquiry: true });
     return;
   }
   launchStep(a, step);

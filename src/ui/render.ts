@@ -1,5 +1,5 @@
 import { S } from "../state";
-import { REINSTATE_MIN, attNet, bossDef, bribeCost, bribeDrop, clickVal, cover, cps, credGain, heatNet, layAmt, tierDef } from "../calc";
+import { REINSTATE_MIN, attNet, inFlashback, bossDef, bribeCost, bribeDrop, clickVal, cover, cps, credGain, heatNet, layAmt, tierDef } from "../calc";
 import { FX_NAMES } from "../data/perks";
 import { formatWait, money } from "../util";
 import type { CaseAction } from "../types";
@@ -116,6 +116,7 @@ function paintDock(): void {
 
 export function render(): void {
   if (openModal) markSeen(openModal); // anything that turns up while you're looking at a screen is already seen
+  document.body.classList.toggle("flashback", inFlashback());
   paintTitle();
   paintDock();
   setText($("cash"), money(S.cash));

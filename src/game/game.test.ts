@@ -38,6 +38,7 @@ import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
 import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
+import { inFlashback } from "../calc";
 import { fillBoard, gatedEpReady, missionWeight, newMission, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, bossWeight, spawnBoss, tickBoss } from "./bosses";
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
@@ -50,7 +51,7 @@ import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
 import { MISSIONS, seasonsOpen } from "../data/missions";
 import { clientCut, crewCut } from "../data/automation";
-import { SAM_ACTS, SAM_ARC } from "../data/samAxe";
+import { SAM_ACTS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
 import { earn, merge } from "../state";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
@@ -1654,6 +1655,20 @@ describe("The Fall of Sam Axe", () => {
     for (let i = 0; i < 200; i++) { S.board = []; S.active = []; fillBoard(); expect(S.board.some(m => m.ep === "516")).toBe(false); }
     for (const t of MISSIONS) if (t.ep && seasonOf(t.ep) === 5 && t.ep !== "516") S.episodesDone[t.ep] = true;
     expect(gatedEpReady()).toBe(true);
+  });
+
+  it("the game wears a flashback look, and the act pop-ups an inquiry look, while the case is on", () => {
+    S.life = 5e8; dismissAllNotices();
+    expect(inFlashback()).toBe(false);
+    startArc("samfall");
+    expect(document.getElementById("evtDlg")!.classList.contains("inquiry")).toBe(true);
+    answer(0);
+    expect(inFlashback()).toBe(true);
+    render();
+    expect(document.body.classList.contains("flashback")).toBe(true);
+    S.active = []; S.arcStep[SAM_ARC_ID] = 0;
+    render();
+    expect(document.body.classList.contains("flashback")).toBe(false);
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

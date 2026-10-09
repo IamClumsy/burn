@@ -257,3 +257,8 @@ export function conChance(): number {
   const c = 0.7 + tierDef().succ + choiceSucc() + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0);
   return Math.min(0.95, c);
 }
+
+/** The Fall of Sam Axe is underway (a step is running, its showdown is on, or you're between steps), so the game wears its flashback look. */
+export const inFlashback = (): boolean =>
+  !!S.active.some(m => m.arc?.id === SAM_ARC_ID) || !!S.boss?.arc && S.boss.arc.id === SAM_ARC_ID ||
+  ((S.arcStep[SAM_ARC_ID] || 0) > 0 && !S.arcsDone[SAM_ARC_ID]);

@@ -18,13 +18,14 @@ import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missi
 import { allBeaten, checkEnding, newFixer, reduceGrip, simonTip, spawnErrand, tickOrg } from "./org";
 import { FIXERS, FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
 import { bribeCost, bribeDrop } from "../calc";
-import { buyGen, callNate, craft, payOffFixer, toggleAuto } from "./actions";
+import { buyGen, callNate, craft, payOffFixer, setCover, toggleAuto } from "./actions";
 import { FX_NAMES, RECIPES } from "../data/perks";
 import { GENS, OP_CAP } from "../data/ops";
 import { MEDALS } from "../data/medals";
-import { attNet, buyN, bulkCost, heatFactors, heatGain, heatNet } from "../calc";
+import { attNet, buyN, bulkCost, cover, heatFactors, heatGain, heatNet } from "../calc";
 import { GRIP_PERKS, SEASON_GRIP, TIERS, handlerFor } from "../data/org";
 import { OP_TIERS, UPGS } from "../data/upgrades";
+import { COVERS } from "../data/covers";
 import { ALLIES } from "../data/allies";
 import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
@@ -1388,6 +1389,38 @@ describe("Crew abilities are worth the cooldown", () => {
     expect(d("barry")).toMatch(/5 minutes/);
     expect(d("jesse")).toMatch(/4 minutes/);
     expect(d("nate")).toMatch(/10 minutes/);
+  });
+});
+
+describe("Cover identities", () => {
+  it("there are plenty, in the order they unlock, and each one is a trade-off", () => {
+    expect(COVERS.length).toBeGreaterThanOrEqual(12);
+    expect(COVERS.map(c => c.unlock)).toEqual([...COVERS.map(c => c.unlock)].sort((a, b) => a - b));
+    expect(new Set(COVERS.map(c => c.id)).size).toBe(COVERS.length);
+    for (const c of COVERS) {
+      const ups = [c.job, c.inc, c.mis].some(v => v > 1), downs = [c.inc, c.mis].some(v => v < 1) || c.heat > 1;
+      const quieter = c.heat < 1;
+      expect(c.desc.length, c.name).toBeGreaterThan(8);
+      if (c.id !== "con") expect(downs || quieter || ups, c.name).toBe(true);
+      expect(c.job, c.name).toBeGreaterThan(0); expect(c.inc, c.name).toBeGreaterThan(0.5); expect(c.mis, c.name).toBeGreaterThan(0.5);
+    }
+  });
+
+  it("a high-reward cover costs you in heat, and a quiet cover costs you in income", () => {
+    for (const c of COVERS) {
+      if (c.mis >= 1.4 || c.inc >= 1.4) expect(c.heat, c.name).toBeGreaterThanOrEqual(1);
+      if (c.heat <= 0.6) expect(c.inc, c.name).toBeLessThan(1);
+    }
+  });
+
+  it("only the ones you've earned can be picked", () => {
+    S.life = 2e6; S.coverCd = 0; S.cover = "con";
+    setCover("yacht");
+    expect(S.cover).toBe("con");
+    S.life = 2e7;
+    setCover("yacht");
+    expect(S.cover).toBe("yacht");
+    expect(cover().mis).toBe(1.2);
   });
 });
 

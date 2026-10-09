@@ -195,8 +195,8 @@ export function prestige(): void {
   setState(Object.assign(fresh(), keep));
   S.stats.reinstated++;
   fillBoard();
-  if (hadFiona) { // every fresh start, Fiona takes a little time to herself
-    S.fionaAway = 240 + Math.random() * 240; S.fionaWhy = "reinstate";
+  if (hadFiona) { // every fresh start, Fiona disappears for one to four hours
+    S.fionaAway = 3600 + Math.random() * 10800; S.fionaWhy = "reinstate";
     say(pick(LINES.fionaGone));
   }
   say(pick(LINES.prest)); toast("Reinstated", "+" + gain + " Credibility");

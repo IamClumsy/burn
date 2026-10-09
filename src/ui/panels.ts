@@ -298,7 +298,7 @@ function reinstate(): string {
   // the next Credibility point arrives when this run's earnings reach (g + 1)^2 x 10M
   const nextAt = Math.max(REINSTATE_MIN, (g + 1) ** 2 * 1e7), left = Math.max(0, nextAt - S.run);
   const eta = c > 0 ? ` At ${money(c)}/s that's about ${formatWait(left / c * 1000)}.` : "";
-  const fi = S.allies.fiona ? `<li>Fiona needs a little time to herself after each reinstatement, a few minutes.</li>` : "";
+  const fi = S.allies.fiona ? `<li>Fiona disappears for one to four hours after each reinstatement. Her missions wait, and so does her income bonus.</li>` : "";
   const preview = `<div class="box" style="margin:8px 0"><b>The preview</b>
     <ul class="small" style="margin:6px 0 0 16px;padding:0;color:var(--text)">
       <li>Credibility: ${S.cred} now (+${S.cred * 10}% income) → <b>${after}</b> after (+${after * 10}% income).</li>

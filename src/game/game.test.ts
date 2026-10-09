@@ -973,13 +973,13 @@ describe("Reinstating: preview, stats and Fiona's time off", () => {
     expect(panelHTML("rep")).toMatch(/Qualifies at \$100M this run/);
   });
 
-  it("reinstating sends Fiona off for a few minutes, and she can't be sent on missions meanwhile", () => {
+  it("reinstating sends Fiona off for one to four hours, and she can't be sent on missions meanwhile", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     S.allies.fiona = true; S.run = 2e8; S.stats.bestRun = 0;
     prestige();
     expect(S.stats.bestRun).toBe(2e8);
-    expect(S.fionaAway).toBeGreaterThanOrEqual(240);
-    expect(S.fionaAway).toBeLessThanOrEqual(480);
+    expect(S.fionaAway).toBeGreaterThanOrEqual(3600);
+    expect(S.fionaAway).toBeLessThanOrEqual(14400);
     expect(awayWhy("fiona")!.short).toMatch(/on her own/);
     expect(allyHere("fiona")).toBe(false);
     S.fionaAway = 0;

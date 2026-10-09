@@ -38,7 +38,7 @@ import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
 import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
-import { fillBoard, missionWeight, newMission, resolveMission, startMission } from "./missions";
+import { fillBoard, gatedEpReady, missionWeight, newMission, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, bossWeight, spawnBoss, tickBoss } from "./bosses";
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
 import { spawnClient, spawnEvent } from "./events";
@@ -1611,15 +1611,13 @@ describe("The Fall of Sam Axe", () => {
     }
   };
 
-  it("is a seven-step Open Case in four acts that opens with Season 5", () => {
+  it("is a seven-step Open Case in four acts offered through an episode", () => {
     expect(SAM_ARC.steps.length).toBe(7);
     expect(SAM_ARC.steps.filter(s => s.act !== undefined).map(s => s.act)).toEqual([0, 1, 2, 3]);
     expect(SAM_ARC.steps[SAM_ARC.steps.length - 1].boss).toBe("veracruz");
-    expect(seasonsOpen(SAM_ARC.at)).toBe(5);
     expect(SAM_ACTS.length).toBe(4);
     for (const act of SAM_ACTS) expect(act.options.length).toBe(2);
-    S.life = 4e8; expect(arcAvailable(SAM_ARC)).toBe(false);
-    S.life = 5e8; expect(arcAvailable(SAM_ARC)).toBe(true);
+    S.life = 4e8; expect(arcAvailable(SAM_ARC)).toBe(true); // the episode is the gate, not the income
   });
 
   it("Sam offers it when Beatriz turns up in Depth Perception, or in Season 6 if you never see her", () => {
@@ -1648,6 +1646,14 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
     milestones();
     expect(noticeOpen()).toBe(false);                   // only once
+  });
+
+  it("Depth Perception stays off the board until every other Season 5 case is done", () => {
+    S.life = 5e8; S.episodesDone = {};
+    expect(gatedEpReady()).toBe(false);
+    for (let i = 0; i < 200; i++) { S.board = []; S.active = []; fillBoard(); expect(S.board.some(m => m.ep === "516")).toBe(false); }
+    for (const t of MISSIONS) if (t.ep && seasonOf(t.ep) === 5 && t.ep !== "516") S.episodesDone[t.ep] = true;
+    expect(gatedEpReady()).toBe(true);
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

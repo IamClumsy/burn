@@ -487,6 +487,11 @@ function theList(): string {
     const status = done ? "Crossed off" : known ? "Known, not yet faced" + (note ? `. ${note}` : "") : "Unknown";
     return `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : known ? "color:var(--text)" : "color:var(--dim)"}"><span style="display:flex;align-items:center;gap:8px">${portrait(b.id, 30, !!(known || done))}${done ? "✓ " : "○ "}${known || done ? b.n : "??????"}</span><span>${status}</span></div>`;
   }).join("");
+  if (S.samOffered || S.arcsDone[SAM_ARC_ID]) { // the flashback's one-off foe, noted beside the List but never counted on it
+    const done = !!S.arcsDone[SAM_ARC_ID];
+    h += `<div class="small" style="margin-top:10px;color:var(--dim)">Not on the List, once only:</div>` + FLASHBACK_BOSSES.map(b =>
+      `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : "color:var(--dim)"}"><span style="display:flex;align-items:center;gap:8px">${portrait(b.id, 30, done)}${done ? "✓ " : "○ "}${done ? b.n : "??????"}</span><span>${done ? "Beaten in Sam's story" : "Waiting in Sam's story"}</span></div>`).join("");
+  }
   h += S.cleanRecord
     ? `<div class="box" style="margin-top:8px;border-color:var(--gold)"><b>The burn is lifted.</b><div class="small" style="color:var(--text)">Every name is crossed off. You're clear, and your income is up 25% for good.</div></div>`
     : `<div class="small" style="margin-top:6px">Beat each of them to cross them off. Your intel contact sometimes passes you a name. Finish the List to lift the burn.</div>`;

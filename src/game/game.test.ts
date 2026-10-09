@@ -1735,6 +1735,18 @@ describe("The Fall of Sam Axe", () => {
     expect(html).toContain("never turns up again");
   });
 
+  it("Veracruz is noted beside The List too, without counting toward it", () => {
+    S.samOffered = false; S.arcsDone = {};
+    expect(panelHTML("list")).not.toContain("once only");
+    S.samOffered = true;
+    expect(panelHTML("list")).toContain("once only");
+    expect(panelHTML("list")).not.toContain("Commandante Veracruz");
+    S.arcsDone[SAM_ARC_ID] = true;
+    const html = panelHTML("list");
+    expect(html).toContain("Commandante Veracruz");
+    expect(html).toContain(`(0/${BOSSES.length} crossed off)`);
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

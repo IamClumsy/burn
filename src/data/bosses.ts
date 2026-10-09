@@ -1,10 +1,10 @@
 import type { Boss } from "../types";
 
 export const BOSSES: Boss[] = [
-  {id:"paxson", n:"Detective Paxson", title:"A Miami police detective who put a tail on you and wants your operation shut down", at:5e3, hpm:1, m:["heat"],
-   mech:"Round-the-clock tail: your heat climbs steadily while she's on you.",
-   intro:"Detective Paxson has noticed the unusual activity around you, Fiona and Sam. She's come to end it.",
-   file:"Michelle Paxson is a Miami police detective. She noticed unusual activity around Michael, Fiona and Sam and set out to shut it down, putting a tail on Michael around the clock. For a long stretch she was the only enemy with official authority. Michael got her off his back by handing her one of Miami's most dangerous men."},
+  {id:"bly", n:"Jason Bly", title:"A government agent who leans on your friends and family to make you stop", at:5e3, hpm:0.9, m:["heat"],
+   mech:"Leaning on your people: your heat climbs steadily while he's pressing.",
+   intro:"Jason Bly has your file, a list of the people you love, and all the patience in the world. He'd like you to stop.",
+   file:"Jason Bly is a Central Security Service agent handed Michael's case once the FBI pulled its team. He tried to scare Michael off by threatening his friends and family, until Michael built a file framing him for taking bribes and used it to get his own dossier. They crossed paths again in a bank robbery gone wrong and came away with mutual respect. Years later Bly was the one questioning Fiona, and he died when a grenade went off in his car, burning the evidence he'd risked everything to get."},
   {id:"carla",  n:"Carla Baxter", title:"The Organization's case officer, the one who ordered your burn so she could use you", at:1e5, hpm:1.6, m:["rush"],
    mech:"Deadlines: she sets brutal ones, so the clock runs 50% faster.",
    after:{
@@ -31,6 +31,10 @@ export const BOSSES: Boss[] = [
    mech:"Silenced: your allies' ability cooldowns freeze while he's here.",
    intro:"Phillip Cowan says the reason you were burned is bigger than both of you. He'll tell you. Maybe. If nobody shoots first.",
    file:"Phillip Cowan was told by his superiors to burn Michael and a man named Victor. He later told Michael the reason was bigger than either of them. An assassin working for Carla shot him before he could say what it was."},
+  {id:"paxson", n:"Detective Paxson", title:"A Miami police detective who put a tail on you and wants your operation shut down", at:2e6, hpm:1, m:["heat"],
+   mech:"Round-the-clock tail: your heat climbs steadily while she's on you.",
+   intro:"Detective Paxson has noticed the unusual activity around you, Fiona and Sam. She's come to end it.",
+   file:"Michelle Paxson is a Miami police detective. She noticed unusual activity around Michael, Fiona and Sam and set out to shut it down, putting a tail on Michael around the clock. For a long stretch she was the only enemy with official authority. Michael got her off his back by handing her one of Miami's most dangerous men."},
   {id:"larry",  n:"Larry Sizemore", title:"Your former mentor, a hired killer who's convinced he can turn you into him", at:5e6, hpm:2.2, m:["heal"],
    mech:"Unkillable: he recovers health while you fight, just like the day he was declared dead.",
    intro:"Larry Sizemore shows up unannounced, all smiles. He wants a father-and-son thing, and he'll burn the city down to get it.",
@@ -84,4 +88,16 @@ export const BOSSES: Boss[] = [
    mech:"Endgame: shorter clock, rising attention, and no Lay Low.",
    intro:"Olivia Riley has put you at the top of her list. She notices small details. She's already noticed yours.",
    file:"Olivia Riley is a senior CIA officer put in charge of taking Michael down after Card's death. She's a legend in counterintelligence who notices small details and hits where it hurts. She vowed to hunt Michael down after he and his team left her in a lake."},
+  {id:"burke", n:"Randall Burke", title:"A man the CIA calls a terrorist, who is working for something bigger", at:2e12, hpm:7.4, m:["fx"],
+   mech:"An assignment, not a job: your active boosts are stripped while he's testing you.",
+   intro:"Randall Burke says that if you can clean yourself up, he has a use for you. He doesn't say what for, and he doesn't need to.",
+   file:"Randall Burke was presented to Michael as the leader of an international terror ring, and Michael infiltrated him in the Dominican Republic as a washed-up rogue agent. The deeper Michael went, the clearer it got that Burke was not the head of anything: he answered to someone far more powerful. He gave his life in an explosion so that Michael could free Sonya, whom he called the key to everything."},
+  {id:"sonya", n:"Sonya Lebedenko", title:"A former Russian agent with over-the-top assignments, and a short fuse", at:3e12, hpm:7.8, m:["heat","rush"],
+   mech:"Over-the-top assignments, short fuses: heat climbs and the clock runs 50% faster.",
+   intro:"Sonya Lebedenko has a job for you. It is loud, it is criminal, and she needs it done by morning.",
+   file:"Sonya Lebedenko is a former Russian agent whom Burke called the future. After Michael freed her, she handed him a string of loud and criminal assignments and introduced him to her boss, James Kendrick. She ultimately decided Fiona was a threat and drew a gun on her, and Michael ended it."},
+  {id:"kendrick", n:"James Kendrick", title:"The head of a criminal syndicate who tests everyone's loyalty the hard way", at:5e12, hpm:8.4, m:["att","freeze"],
+   mech:"Loyalty tests: attention climbs and your allies' ability cooldowns freeze.",
+   intro:"James Kendrick says the CIA has to question threats, and he doesn't. He'd like to know where you really stand.",
+   file:"James Kendrick runs an international criminal syndicate that believes it eliminates evil by any means. He broke Michael down with sensory torture and drugs to learn where his loyalties lay, then recruited him. Kendrick once wiped out his own Delta Force unit for refusing to stop a mission that would have harmed innocents. He only really lost Michael when Michael watched Sonya turn on Fiona."},
 ];

@@ -42,7 +42,7 @@ import { actionDmg, conChance, cps, genMult, referralCost, referralMult, upgrade
 import { checkBurn } from "./heat";
 import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
-import { MISSIONS } from "../data/missions";
+import { MISSIONS, seasonsOpen } from "../data/missions";
 import { earn, merge } from "../state";
 import type { GameState } from "../types";
 import { render } from "../ui/render";
@@ -670,7 +670,8 @@ describe("sketches around the game", () => {
   it("Rogues shows faces for the people you've met and silhouettes for the rest", () => {
     S.life = 1e6; // only the early bosses are open
     const html = panelHTML("rogue");
-    expect(html).toContain("Sketch of paxson");
+    expect(html).toContain("Sketch of carla");
+    expect(html).not.toContain("Sketch of paxson"); // she doesn't turn up until Season 3
     expect(html).not.toContain("Sketch of riley");
   });
 
@@ -1114,6 +1115,20 @@ describe("Fixer variety", () => {
     expect(document.getElementById("bribe")!.textContent).toMatch(/^Buy a drink for Ray/);
     payOffFixer();
     expect(document.getElementById("log")!.textContent).toMatch(/Ray hears you out\. The Organization loses interest/);
+  });
+});
+
+describe("Bosses turn up in the season they debut", () => {
+  it("no boss is available before the season they first appear in the show", () => {
+    // first appearance season per the show (Wikipedia's list of characters)
+    const debut: Record<string, number> = { bly: 1, carla: 2, cowan: 1, paxson: 3, larry: 2, oneill: 3, brennen: 2, strickler: 3, gilroy: 3, barrett: 4, anson: 5, vaughn: 4, card: 6, gray: 6, riley: 6, burke: 7, sonya: 7, kendrick: 7 };
+    expect(BOSSES.map(b => b.id).sort()).toEqual(Object.keys(debut).sort());
+    for (const b of BOSSES) expect(seasonsOpen(b.at), b.n).toBeGreaterThanOrEqual(debut[b.id]);
+  });
+
+  it("the first bosses of a young game are Season 1 and 2 foes, never Paxson", () => {
+    S.life = 1e5; S.allies = {};
+    for (let i = 0; i < 200; i++) { S.boss = null; spawnBoss(); expect(["bly", "carla"]).toContain(S.boss!.id); }
   });
 });
 

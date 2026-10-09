@@ -51,6 +51,14 @@ export const LOOKS: Record<string, Look> = {
   pearce: { skin: "#e6bd9c", hair: "long", hairColor: "#3a2a22", jaw: "narrow", outfit: "blazer", outfitColor: "#8d8f98", accent: "#1d1a24", bg: ["#4aa3ff", "#2a1a50"], mood: "stern" },
   // Victor: thinning light-brown hair, light stubble, a patterned open-collar shirt, a cold hard stare
   victor: { skin: "#e3bd9a", hair: "receding", hairColor: "#8a6a4a", facial: "stubble", facialColor: "#a58b68", jaw: "narrow", face: 0.98, outfit: "shirt", outfitColor: "#7d86b8", accent: "#d09ab8", stripes: "#d09ab8", bg: ["#8a8aa0", "#150c20"], mood: "stern" },
+  // Bly: short dark hair, clean-shaven and humorless, a gray-blue suit and a plain tie
+  bly: { skin: "#e6bfa0", hair: "short", hairColor: "#2a211c", jaw: "square", age: 1, outfit: "suit", outfitColor: "#4c5568", accent: "#8a5a5a", bg: ["#4aa3ff", "#150c20"], mood: "stern" },
+  // Burke: dark tousled hair, a few days of stubble, a rumpled open shirt under a jacket
+  burke: { skin: "#dcb08a", hair: "tousled", hairColor: "#2b2019", facial: "stubble", jaw: "square", age: 1, outfit: "shirt", outfitColor: "#5b6070", accent: "#c9bfae", bg: ["#ff9a3c", "#150c20"], mood: "worried" },
+  // Sonya: long straight blond hair, a dark fitted jacket, a level stare
+  sonya: { skin: "#f0cfae", hair: "long", hairColor: "#d9b970", jaw: "narrow", outfit: "leather", outfitColor: "#1b1a22", accent: "#7a1d2a", bg: ["#ff4d5e", "#150c20"], mood: "stern" },
+  // Kendrick: swept gray-brown hair, a close salt-and-pepper beard, a dark jacket over a gray shirt
+  kendrick: { skin: "#d9a98a", hair: "swept", hairColor: "#6a625c", facial: "beard", facialColor: "#8a847e", jaw: "square", face: 1.04, age: 2, outfit: "blazer", outfitColor: "#22232d", accent: "#9aa0ac", bg: ["#7b5cff", "#150c20"], mood: "calm" },
   // Gilroy: short tousled dark hair, a self-satisfied smirk, a cream blazer over a white shirt
   gilroy: { skin: "#ecc6a2", hair: "tousled", hairColor: "#3b2a22", jaw: "square", outfit: "blazer", outfitColor: "#dcc79c", accent: "#f4eef8", bg: ["#ff4d5e", "#150c20"], mood: "sly" },
   // Barrett: combed dark-gray hair, a ruddy weathered face, a dark suit with a red tie

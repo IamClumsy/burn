@@ -14,7 +14,7 @@ import { PERKS, JUNK, RECIPES } from "../data/perks";
 import { STORY } from "../data/story";
 import { MEDALS } from "../data/medals";
 import { ARCS } from "../data/arcs";
-import { MISSIONS, epLabel, episodeOf, seasonOf, seasonsOpen } from "../data/missions";
+import { MISSIONS, SEASON_UNLOCK, epLabel, episodeOf, seasonOf, seasonsOpen } from "../data/missions";
 import { EP_NOTES } from "../data/episodeNotes";
 import { CASE_ACTIONS } from "../data/caseActions";
 import { FAQ } from "../data/faq";
@@ -509,14 +509,32 @@ function theList(): string {
 }
 
 /** Michael's file as the Organization keeps it. More of it fills in as their attention on you peaks. */
+/** The next thing to unlock of each kind, by lifetime earnings, with how long it takes at the current rate. */
+function nextUnlocks(): { what: string; name: string; at: number }[] {
+  const out: { what: string; name: string; at: number }[] = [];
+  const season = SEASON_UNLOCK.findIndex(t => t > S.life);
+  if (season > 0) out.push({ what: "Season", name: `Season ${season + 1} cases`, at: SEASON_UNLOCK[season] });
+  const foe = BOSSES.filter(b => b.at > S.life).sort((a, b) => a.at - b.at)[0];
+  if (foe) out.push({ what: "Rogue", name: "A new foe, Season " + seasonsOpen(foe.at), at: foe.at });
+  const cover = COVERS.filter(c => !c.arc && c.unlock > S.life).sort((a, b) => a.unlock - b.unlock)[0];
+  if (cover) out.push({ what: "Cover", name: cover.name, at: cover.unlock });
+  if (S.story < STORY.length) out.push({ what: "Story", name: "The next Case File lead", at: STORY[S.story].at });
+  return out;
+}
+
 function file(): string {
   const t = tierDef();
+  const rate = cps();
+  const lifetime = `<div class="box"><div class="row"><b>Lifetime earnings</b><span class="small" style="color:var(--gold)">${money(S.life)}</span></div>
+    ${nextUnlocks().map(u => `<div class="row small" style="padding:2px 0"><span>${u.what}: ${u.name}</span><span>${money(u.at)}${rate > 0 ? ` · about ${formatWait(Math.max(0, (u.at - S.life) / rate) * 1000)}` : ""}</span></div>`).join("")}
+    <div class="small" style="margin-top:4px;color:var(--dim)">Lifetime earnings keep counting across Reinstates. The waits assume your income stays where it is now, so they only get shorter as you grow.</div></div>`;
   const rows = DOSSIER.map(d => S.attPeak >= d.peak
     ? `<div class="drow"><span class="dlabel">${d.label}</span><span class="dtext">${d.text}</span></div>`
     : `<div class="drow redacted"><span class="dlabel">██████ ████</span><span class="dtext">████████ ██████ <span class="small">(Reached at ${d.peak}% attention)</span></span></div>`).join("");
   const learned = DOSSIER.filter(d => S.attPeak >= d.peak).length;
   return `<div class="filehead"><div class="who">${portrait("michael", 72)}<div><div class="dstamp">Burned</div>
       <div class="small">Organization file, ${learned} of ${DOSSIER.length} entries filled in</div></div></div></div>
+    ${lifetime}
     <div class="small" style="margin:8px 0">Right now they have you as: <b style="color:var(--text)">${t.name}</b>. ${t.note}</div>
     <div class="dfile">${rows}</div>
     <div class="small" style="margin-top:8px">The more attention you draw from the Organization, the more of this they fill in. The file doesn't shrink, even when your attention drops.</div>`;

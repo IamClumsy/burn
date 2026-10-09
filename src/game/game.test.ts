@@ -1860,6 +1860,15 @@ describe("The Fall of Sam Axe", () => {
     S.active = []; S.arcStep[SAM_ARC_ID] = 0; S.samChoices = {};
   });
 
+  it("Michael's File shows lifetime earnings and what unlocks next, with a wait", () => {
+    S.life = 3.2e10; S.gens = { mad: 10 };
+    const html = panelHTML("file");
+    expect(html).toContain("Lifetime earnings");
+    expect(html).toContain("Season: Season 7 cases");
+    expect(html).toContain("Rogue: A new foe");
+    expect(html).toMatch(/about \d/);
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

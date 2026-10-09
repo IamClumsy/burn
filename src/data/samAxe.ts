@@ -58,6 +58,8 @@ export const SAM_ACTS: SamAct[] = [
 /** The Open Case. The acts start at steps 0, 3, 5 and 6; the last step is the showdown. */
 export const SAM_ARC: Arc = {
   id: SAM_ARC_ID, title: "The Fall of Sam Axe", at: 5e8, ally: "sam", favors: 12,
+  // Beatriz, the girl from the movie, turns up in Depth Perception (Season 5, Episode 16). That's when Sam tells the story.
+  needsEp: "516", orSeason: 6,
   blurb: "At a Navy inquiry in Bogotá, Sam Axe tells the story of the worst assignment of his career. It starts with a married woman, a bedroom window, and a pair of bright blue fatigues.",
   epilogue: "Sam's story is on the record. The clinic's patients are alive, the Governor is under arrest, a village of goat farmers has a nickname for the man with the chin, and Admiral Lawrence is still deciding whether he's allowed to enjoy it.",
   steps: [

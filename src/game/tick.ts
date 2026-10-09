@@ -3,6 +3,8 @@ import { attNet, cps, heatNet, owned } from "../calc";
 import { checkEnding, tickOrg } from "./org";
 import { STORY } from "../data/story";
 import { SEASON_GRIP } from "../data/org";
+import { SAM_ARC } from "../data/samAxe";
+import { arcAvailable } from "./arcs";
 import { MEDALS } from "../data/medals";
 import { seasonsOpen } from "../data/missions";
 import { chime } from "../audio";
@@ -29,6 +31,14 @@ export function milestones(): void {
     S.intel = 2;
     toast("Simon is gone", "Michael had to end it, and he didn't like it. Simon Escher is dead, and his number goes dead with him. Dani Pearce, now at a quiet post in Mumbai, quietly offers to take his place: same kind of favors, steadier hands.", "story");
     say("Simon's number is disconnected. A few days later, a message from Mumbai: \"If you need something, you know who to call.\"");
+  }
+  if (!S.samOffered && arcAvailable(SAM_ARC)) { // Sam offers to tell the story of Colombia
+    S.samOffered = true;
+    const beatriz = !!S.episodesDone["516"];
+    toast("Sam has a story", beatriz
+      ? "Beatriz is safe, and Sam goes quiet in the way he does when a name from long ago turns up. \"I met her in Colombia,\" he says. \"Pull up a chair. It's the worst assignment of my career, and I'm going to tell you all of it.\" The Fall of Sam Axe is now an Open Case."
+      : "Sam has been saving a story for a long time. \"Colombia, 2005,\" he says. \"Pull up a chair.\" The Fall of Sam Axe is now an Open Case.", "story");
+    say("Sam clears his throat. This is going to take a while, and he's ordering a drink first.");
   }
   if (!S.backupNudged && S.stats.time >= 7200) {
     S.backupNudged = true;

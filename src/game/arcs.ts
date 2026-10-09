@@ -1,6 +1,7 @@
 import { S } from "../state";
 import { allyFree, missionReward, succChance } from "../calc";
 import { ARCS } from "../data/arcs";
+import { seasonsOpen } from "../data/missions";
 import { beep, chime } from "../audio";
 import { say as sayTag, toast } from "../ui/fx";
 import { reduceGrip } from "./org";
@@ -13,7 +14,8 @@ const say = (t: string): void => sayTag(t, "mission");
 export const arcStep = (a: Arc): number => S.arcStep[a.id] || 0;
 
 export const arcAvailable = (a: Arc): boolean =>
-  S.life >= a.at && !S.arcsDone[a.id] && !S.active.some(m => m.arc?.id === a.id);
+  S.life >= a.at && !S.arcsDone[a.id] && !S.active.some(m => m.arc?.id === a.id) &&
+  (!a.needsEp || !!S.episodesDone[a.needsEp] || seasonsOpen(S.life) >= (a.orSeason ?? 99));
 
 /** Start the next step of a case. Your ally for that case joins automatically if they're free. */
 export function startArc(id: string): void {

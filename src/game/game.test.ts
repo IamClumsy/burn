@@ -1587,6 +1587,7 @@ describe("The stylesheet has rules for the pieces the game builds", () => {
 });
 
 describe("The Fall of Sam Axe", () => {
+  beforeEach(() => { S.episodesDone["516"] = true; }); // Beatriz has turned up
   const answer = (k = 0) => { document.querySelectorAll<HTMLButtonElement>("#evtO button")[k].click(); dismissAllNotices(); };
   const closeDialog = () => { const ok = document.querySelectorAll<HTMLButtonElement>("#evtO button"); if (ok.length) ok[0].click(); };
 
@@ -1619,6 +1620,40 @@ describe("The Fall of Sam Axe", () => {
     for (const act of SAM_ACTS) expect(act.options.length).toBe(2);
     S.life = 4e8; expect(arcAvailable(SAM_ARC)).toBe(false);
     S.life = 5e8; expect(arcAvailable(SAM_ARC)).toBe(true);
+  });
+
+  it("Sam offers it when Beatriz turns up in Depth Perception, or in Season 6 if you never see her", () => {
+    S.episodesDone = {}; S.life = 5e8;
+    expect(arcAvailable(SAM_ARC)).toBe(false);          // Season 5, but Beatriz hasn't shown up
+    S.episodesDone["516"] = true;
+    expect(arcAvailable(SAM_ARC)).toBe(true);
+    S.episodesDone = {}; S.life = 8e9;                  // Season 6 opens: the fallback
+    expect(arcAvailable(SAM_ARC)).toBe(true);
+  });
+
+  it("the offer is a pop-up, made once, and says it's about Beatriz when she's the reason", () => {
+    S.episodesDone = {}; S.life = 5e8; S.samOffered = false;
+    S.story = STORY.length; S.seasonOpen = 5; S.intel = 2; // no other pop-ups to get in the way
+    dismissAllNotices();
+    milestones();
+    expect(S.samOffered).toBe(false);                   // not yet
+    S.episodesDone["516"] = true;
+    milestones();
+    expect(S.samOffered).toBe(true);
+    const seen: string[] = [];
+    while (noticeOpen()) { seen.push(document.getElementById("nT")!.textContent + " " + document.getElementById("nM")!.textContent); dismissNotice(); }
+    const all = seen.join(" | ");
+    expect(all).toMatch(/Sam has a story/);
+    expect(all).toMatch(/Beatriz/);
+    dismissAllNotices();
+    milestones();
+    expect(noticeOpen()).toBe(false);                   // only once
+  });
+
+  it("the Depth Perception mission is the one where Beatriz turns up", () => {
+    const m = MISSIONS.find(x => x.ep === "516")!;
+    expect(m.n).toMatch(/Sam's Old Friend/);
+    expect(m.ally).toBe("sam");
   });
 
   it("each act opens with the Admiral's questions and a choice, and the mission starts after you answer", () => {

@@ -212,7 +212,7 @@ export function prestige(): void {
   const hadFiona = !!S.allies.fiona;
   const keep = {
     cred: S.cred + gain, life: S.life, favors: S.favors + gain, perks: S.perks, allies: keptAllies(), ach: S.ach,
-    stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, sci: S.sci, auto: S.auto, autoOwned: S.autoOwned, seen: S.seen, samChoices: S.samChoices, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
+    stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, sci: S.sci, auto: S.auto, autoOwned: S.autoOwned, seen: S.seen, samChoices: S.samChoices, samOffered: S.samOffered, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
     choices: S.choices, arcStep: S.arcStep, arcsDone: S.arcsDone,
     grip: S.grip, listKnown: S.listKnown, attPeak: S.attPeak, cleanRecord: S.cleanRecord,
     episodesDone: S.episodesDone, seasonOpen: S.seasonOpen, favorLog: S.favorLog, backupNudged: S.backupNudged, intel: S.intel, nateAway: S.nateAway, nateTimer: S.nateTimer, nateStage: S.nateStage,

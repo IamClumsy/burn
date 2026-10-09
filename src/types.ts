@@ -103,6 +103,8 @@ export interface StoryBeat { at: number; t: string; fav: number; x: string; choi
 /** A multi-step case built from a story-heavy episode. Finish every step to close it. */
 export interface Arc {
   id: string; title: string; at: number; ally: string; blurb: string; epilogue: string; favors: number;
+  /** Only offered once you've finished this episode (or, as a fallback so nobody is locked out, once `orSeason` has opened). */
+  needsEp?: string; orSeason?: number;
   steps: { n: string; dur: number; succ: number; heat: number; rm: number; /** Starting this step tells the next act of a flashback. */ act?: number; /** This step is a showdown with a flashback boss. */ boss?: string }[];
 }
 export interface Medal { id: string; n: string; d: string; t: (s: GameState) => boolean }
@@ -136,7 +138,9 @@ export interface GameState {
   /** How much of each menu screen you've seen, so the menu can say when something is new. */
   seen: Dict<number>;
   /** How you told each act of The Fall of Sam Axe (act number to the option you picked). */
-  samChoices: Dict<number>; backupNudged: boolean; intel: number;
+  samChoices: Dict<number>;
+  /** Has Sam offered to tell The Fall of Sam Axe yet? */
+  samOffered: boolean; backupNudged: boolean; intel: number;
   /** The Organization's grip on you: starts at 100 and is worn down by wins. */
   grip: number;
   /** Names of people on the List that you know about (from wins or Simon's tips). */

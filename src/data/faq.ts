@@ -30,6 +30,8 @@ export const FAQ: FaqSection[] = [
   {title: "Heat and the Organization", items: [
     {q: "What is heat?",
      a: () => "Heat is how much attention your activity draws. Jobs, operations and missions raise it. At 100% you're burned again: you lose half your cash and heat drops back to 30. Lay Low cuts it, and Madeline or the Hands-Off Handler upgrade can do it for you."},
+    {q: "Why is my heat going up when I'm not doing anything?",
+     a: () => "Your operations make noise all the time, and the Organization's attention makes that noise count for more. Tap the little i next to Heat or Attention in The Loft for the exact numbers: heat built and cooled per second, every multiplier that applies, and how long until a burn or an ambush at the current rate."},
     {q: "What is the Organization's attention?",
      a: () => `It's how closely the people who burned you are watching. It has ${TIERS.length} stages: ${TIERS.map(t => `${t.name} (${t.min}%+)`).join(", ")}. Higher stages make heat build faster and missions riskier. At 100% you're ambushed: you lose a quarter of your cash and your missions fall apart. Paying off a fixer, Madeline's Family Dinner and your intel contact's favors bring it down.`},
     {q: "Who is Management?",

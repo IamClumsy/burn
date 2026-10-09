@@ -22,7 +22,7 @@ import { buyGen, callNate, craft, payOffFixer, toggleAuto } from "./actions";
 import { FX_NAMES, RECIPES } from "../data/perks";
 import { GENS, OP_CAP } from "../data/ops";
 import { MEDALS } from "../data/medals";
-import { buyN, bulkCost } from "../calc";
+import { attNet, buyN, bulkCost, heatFactors, heatGain, heatNet } from "../calc";
 import { GRIP_PERKS, SEASON_GRIP, TIERS, handlerFor } from "../data/org";
 import { OP_TIERS, UPGS } from "../data/upgrades";
 import { FAQ } from "../data/faq";
@@ -1310,6 +1310,54 @@ describe("Nate's absences", () => {
     callNate();
     expect(S.nateStage).toBe(1);
     expect(document.getElementById("nT")!.textContent).toBe("Nate got married");
+  });
+});
+
+describe("The heat and attention info view", () => {
+  it("what it says matches what the game actually does each second", () => {
+    S.gens = { inf: 50, tape: 30, sam: 20 }; S.heat = 40; S.att = 30;
+    const net = heatNet(), anet = attNet();
+    expect(net).toBeCloseTo(heatGain() - 1.2, 10);
+    tick(1);
+    expect(S.heat).toBeCloseTo(40 + net, 6);
+    expect(S.att).toBeCloseTo(30 + anet, 2); // heat moved a hair during the second
+  });
+
+  it("lists the multipliers that apply, and leaves out the ones that don't", () => {
+    S.upgs.h1 = true; S.allies.sam = true;
+    const labels = heatFactors().map(f => f.label).join("|");
+    expect(labels).toContain("Quiet Methods");
+    expect(labels).toContain("Sam's perk");
+    expect(labels).toContain("Cover:");
+    expect(labels).toContain("Organization stage");
+    expect(labels).not.toContain("Cooler Head");
+    expect(heatMult()).toBeCloseTo(heatFactors().reduce((m, f) => m * f.v, 1), 10);
+  });
+
+  it("the Door-Cam Jammer shows up and stops heat gain", () => {
+    S.gens = { inf: 50 }; S.fx.jam = 60;
+    expect(heatMult()).toBe(0);
+    expect(heatGain()).toBe(0);
+    expect(panelHTML("heatinfo")).toContain("Door-Cam Jammer");
+  });
+
+  it("the page explains heat, attention, rates, and when you'd burn or get ambushed", () => {
+    S.gens = { inf: 200, tape: 200, sam: 200, fi: 200, mad: 200 }; S.heat = 30; S.att = 40;
+    const html = panelHTML("heatinfo");
+    expect(html).toContain("Net heat");
+    expect(html).toContain("Net attention");
+    expect(html).toMatch(/[+−]\d+\.\d\d\/s/);
+    expect(html).toMatch(/reach 100% heat \(a burn\) in about/);
+    expect(html).toContain("What helps");
+  });
+
+  it("it says when you're cooling instead", () => {
+    S.gens = {}; S.heat = 50; S.att = 20;
+    expect(panelHTML("heatinfo")).toMatch(/You're cooling/);
+  });
+
+  it("the Loft has an info button on both bars", () => {
+    expect(document.querySelectorAll('.infobtn[data-modal="heatinfo"]').length).toBe(2);
   });
 });
 

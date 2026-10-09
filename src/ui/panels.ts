@@ -3,6 +3,7 @@ import type { ContactId } from "../types";
 import {
   REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, cps, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
+  HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { REFERRAL, UPGS } from "../data/upgrades";
@@ -29,7 +30,7 @@ import { menuNew } from "./badges";
 import { narrationLines } from "./fx";
 import { EPILOGUE, EPILOGUE_CLOSE, EPILOGUE_TITLE } from "../data/epilogue";
 
-export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "med" | "rep";
+export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "heatinfo" | "med" | "rep";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
@@ -40,7 +41,7 @@ export const SECTIONS: [TabId, string][] = [
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"], ["gad", "Gadgets"], ["fav", "Favors"],
   ["list", "The List"], ["file", "Michael's File"], ["stats", "Stats"], ["auto", "Automation"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
-  ["options", "Menu"], ["settings", "Settings"], ["narrator", "Narrator"],
+  ["options", "Menu"], ["settings", "Settings"], ["narrator", "Narrator"], ["heatinfo", "Heat and Attention"],
 ];
 
 /** What the menu button offers. Crew, Covers, Gadgets and Favors stay in The Loft, so they aren't here. */
@@ -296,6 +297,53 @@ function automation(): string {
   return `<div class="small" style="margin-bottom:8px">Credibility from Reinstating buys you help with the chores. Switch them on or off any time.</div>${rows}`;
 }
 
+/** "+0.42/s" or "−0.80/s". */
+const perSec = (n: number): string => `${n >= 0 ? "+" : "−"}${Math.abs(n).toFixed(2)}/s`;
+
+/** How heat and the Organization's attention move, and exactly why, so the numbers are never a mystery. */
+function heatInfo(): string {
+  const noise = opsNoise(), factors = heatFactors(), jam = S.fx.jam > 0;
+  const hm = heatMult(), gain = heatGain(), net = heatNet();
+  const heatEta = net > 0 ? `At this rate you reach 100% heat (a burn) in about ${formatWait((100 - S.heat) / net * 1000)}.`
+    : S.heat > 0 ? `You're cooling, and heat hits zero in about ${formatWait(S.heat / -net * 1000)}.` : "You're at zero and staying there.";
+  const row = (label: string, value: string, note = "") => `<div class="drow"><span class="dlabel">${label}</span><span class="dtext">${value}${note ? ` <span class="small">${note}</span>` : ""}</span></div>`;
+  const heatRows = [
+    row("Your operations", `${fmt(noise)} noise × 0.012 = ${perSec(noise * 0.012)}`, "each operation you own, the later ones louder"),
+    ...factors.map(f => row(f.label, `×${f.v.toFixed(2)}`)),
+    jam ? row("Door-Cam Jammer", `heat gain stopped for ${Math.ceil(S.fx.jam)}s`) : "",
+    row("Heat built", `${perSec(gain)}`, jam ? "" : `(×${hm.toFixed(2)} in all)`),
+    row("Cooling", perSec(-HEAT_COOLING), "the world forgets a little every second"),
+    row("Net heat", `<b style="color:${net > 0 ? "var(--bad)" : "var(--sea)"}">${perSec(net)}</b>`),
+  ].join("");
+  const ag = attGain(), ac = attCooling(), an = attNet();
+  const attEta = an > 0 ? `At this rate attention reaches 100% (an ambush) in about ${formatWait((100 - S.att) / an * 1000)}.`
+    : S.att > 0 ? `It's falling, and reaches zero in about ${formatWait(S.att / -an * 1000)}.` : "It's at zero and staying there.";
+  const cm = choiceMult("att"), gm = gripAtt();
+  const attRows = [
+    row("Base", "+0.05/s", "they're always a little curious"),
+    row("Your heat", `${S.heat.toFixed(0)}% × 0.004 = ${perSec(S.heat * 0.004)}`, "the hotter you are, the more they notice"),
+    cm !== 1 ? row("Your story choices", `×${cm.toFixed(2)}`) : "",
+    gm !== 1 ? row("Their grip on you", `×${gm.toFixed(2)}`, "loosening it slows them") : "",
+    row("Attention built", perSec(ag)),
+    row("Lying low", ac ? perSec(-ac) : "none", ac ? "heat is under 20%, so they lose interest" : "only while heat is under 20%"),
+    row("Net attention", `<b style="color:${an > 0 ? "var(--bad)" : "var(--sea)"}">${perSec(an)}</b>`),
+  ].join("");
+  const boss = S.boss ? `<div class="small" style="margin-top:8px;color:var(--gold)">A case is on right now, and it changes this: ${bossDef()?.mech ?? ""}</div>` : "";
+  return `<div class="small" style="margin-bottom:8px">Heat is how loud you are right now. The Organization's attention is how closely they're watching. They feed each other: heat builds attention, and each attention stage makes your operations build heat faster.</div>
+    <h2>Heat: ${S.heat.toFixed(0)}%</h2><div class="dfile">${heatRows}</div><div class="small" style="margin:6px 0 12px">${heatEta}</div>
+    <h2>The Organization's attention: ${S.att.toFixed(0)}% (${tierDef().name})</h2><div class="dfile">${attRows}</div><div class="small" style="margin:6px 0 12px">${attEta}</div>
+    ${boss}
+    <h2>What helps</h2>
+    <ul class="small" style="margin:6px 0 0 16px;padding:0;color:var(--text)">
+      <li>Lay Low: knocks heat down at once.</li>
+      <li>Quiet Methods, Cooler Head, a quieter cover, and Sam: all slow how fast heat builds.</li>
+      <li>Hands-Off Handler upgrade (and Madeline): lay low for you at 90% and 95%.</li>
+      <li>Door-Cam Jammer gadget: no heat gain for three minutes.</li>
+      <li>A fixer, Madeline's Family Dinner or a Bug Sweeper: take attention off directly.</li>
+      <li>Wearing down their grip: it makes attention build slower.</li>
+    </ul>`;
+}
+
 /** The narrator's history in a pop-up, in bigger type, newest first. */
 function narrator(): string {
   const lines = narrationLines();
@@ -426,7 +474,7 @@ function faq(): string {
 const VIEWS: Record<TabId, () => string> = {
   faq,
   list: theList,
-  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, narrator, story, med: medals, rep: reinstate,
+  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, narrator, heatinfo: heatInfo, story, med: medals, rep: reinstate,
 };
 
 export const panelHTML = (tab: TabId): string => { portraitScope(tab); return VIEWS[tab](); };

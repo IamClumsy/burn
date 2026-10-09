@@ -81,14 +81,36 @@ export function clickVal(): number {
   return v * (1 + S.cred * 0.1) * (1 + 0.02 * S.ach.length);
 }
 
+/** Everything that scales how fast your operations build heat, with a plain name for each. */
+export function heatFactors(): { label: string; v: number }[] {
+  const f: { label: string; v: number }[] = [{ label: `Cover: ${cover().name}`, v: cover().heat }];
+  if (S.upgs.h1) f.push({ label: "Quiet Methods upgrade", v: 0.6 });
+  if (S.allies.sam) f.push({ label: "Sam's perk", v: 0.85 });
+  if (perk("head") > 0) f.push({ label: `Cooler Head perk (level ${perk("head")})`, v: Math.max(0.3, 1 - 0.05 * perk("head")) });
+  const c = choiceMult("heat");
+  if (c !== 1) f.push({ label: "Your story choices", v: c });
+  f.push({ label: `Organization stage: ${tierDef().name}`, v: tierDef().heat });
+  return f.filter(x => Math.abs(x.v - 1) > 1e-9 || x.label.startsWith("Cover") || x.label.startsWith("Organization"));
+}
+
 export function heatMult(): number {
   if (S.fx.jam > 0) return 0;
-  let m = cover().heat;
-  if (S.upgs.h1) m *= 0.6;
-  if (S.allies.sam) m *= 0.85;
-  m *= Math.max(0.3, 1 - 0.05 * perk("head"));
-  return m * choiceMult("heat") * tierDef().heat;
+  return heatFactors().reduce((m, x) => m * x.v, 1);
 }
+
+/** The noise your operations make: each one counts more the further down the list it is. */
+export const opsNoise = (): number => GENS.reduce((a, g, i) => a + owned(g.id) * (1 + i * 0.3), 0);
+/** Heat built per second by your operations, before the world cools you down. */
+export const heatGain = (): number => opsNoise() * 0.012 * heatMult();
+export const HEAT_COOLING = 1.2;
+/** Net heat change per second (negative means you're cooling). */
+export const heatNet = (): number => heatGain() - HEAT_COOLING;
+
+/** Attention built per second: more the hotter you are, scaled by your story choices and how loose their grip is. */
+export const attGain = (): number => (0.05 + S.heat * 0.004) * choiceMult("att") * gripAtt();
+/** Attention shed per second: only when you're lying low (heat under 20%). */
+export const attCooling = (): number => (S.heat < 20 ? 0.25 : 0);
+export const attNet = (): number => attGain() - attCooling();
 
 export const layAmt = (): number => (S.upgs.h2 ? 60 : 35);
 export const layCdMax = (): number => (S.allies.madeline ? 4 : 8);

@@ -517,10 +517,10 @@ function theList(): string {
 
 /** Michael's file as the Organization keeps it. More of it fills in as their attention on you peaks. */
 /** The next thing to unlock of each kind, by lifetime earnings, with how long it takes at the current rate. */
-function nextUnlocks(): { what: string; name: string; at: number; have: number }[] {
-  const out: { what: string; name: string; at: number; have: number }[] = [];
+function nextUnlocks(): { what: string; name: string; at: number; have: number; right?: string }[] {
+  const out: { what: string; name: string; at: number; have: number; right?: string }[] = [];
   const season = SEASON_UNLOCK.findIndex(t => t > S.life);
-  if (waitingOn()) out.push({ what: "Season", name: `Season ${waitingOn() + 1} cases (finish Season ${waitingOn()}: ${seasonLeft(waitingOn())} left)`, at: SEASON_UNLOCK[waitingOn()], have: S.life });
+  if (waitingOn()) out.push({ what: "Season", name: `Season ${waitingOn() + 1} cases (finish Season ${waitingOn()}: ${seasonLeft(waitingOn())} left)`, at: SEASON_UNLOCK[waitingOn()], have: S.life, right: `${seasonLeft(waitingOn())} cases to go` });
   else if (season > 0) out.push({ what: "Season", name: `Season ${season + 1} cases`, at: SEASON_UNLOCK[season], have: S.life });
   const foe = BOSSES.filter(b => b.at > grossLife()).sort((a, b) => a.at - b.at)[0];
   if (foe) out.push({ what: "Rogue", name: "A new foe, Season " + seasonsOpen(foe.at), at: foe.at, have: grossLife() });
@@ -535,7 +535,7 @@ function file(): string {
   const rate = cps();
   const lifetime = `<div class="box"><div class="row"><b>Lifetime earnings</b><span class="small" style="color:var(--gold)">${money(grossLife())}</span></div>
     <div class="row small"><span>Michael's take (10%)</span><span>${money(S.life)}</span></div>
-    ${nextUnlocks().map(u => `<div class="row small" style="padding:2px 0"><span>${u.what}: ${u.name}</span><span>${money(u.at)}${rate > 0 ? ` · about ${formatWait(Math.max(0, (u.at - u.have) / rate) * 1000)}` : ""}</span></div>`).join("")}
+    ${nextUnlocks().map(u => `<div class="row small" style="padding:2px 0"><span>${u.what}: ${u.name}</span><span>${u.right ?? `${money(u.at)}${rate > 0 ? ` · about ${formatWait(Math.max(0, (u.at - u.have) / rate) * 1000)}` : ""}`}</span></div>`).join("")}
     <div class="small" style="margin-top:4px;color:var(--dim)">Lifetime earnings are the full fees, including what you hand back, and they open the foes on The List. Michael's take opens Seasons, covers and story leads. Both keep counting across Reinstates. The waits assume your income stays where it is now, so they only get shorter as you grow.</div></div>`;
   // Where they have you right now sits in the file itself, between Status and Former Occupation.
   const standing = `<div class="drow"><span class="dlabel">Organization Status</span><span class="dtext"><b>${t.name}</b>. ${t.note}</span></div>`;

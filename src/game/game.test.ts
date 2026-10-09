@@ -1973,6 +1973,7 @@ describe("The Fall of Sam Axe", () => {
     for (let i = 0; i < 100; i++) { S.board = []; fillBoard(); expect(S.board.every(m => seasonOf(m.ep!) === 1)).toBe(true); }
     expect(panelHTML("mis")).toContain("Season 2 is waiting");
     expect(panelHTML("file")).toMatch(/finish Season 1/);
+    expect(panelHTML("file")).toMatch(/\d+ cases to go/);                       // no misleading wait: the money is already there
     for (const m of seasonOf1(1)) S.episodesDone[m.ep!] = true;
     expect(openSeasons()).toBe(2);                                // Season 1 done opens Season 2, but 3 still waits on 2
     expect(waitingOn()).toBe(2);
@@ -1989,6 +1990,15 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
     milestones();
     expect(noticeOpen()).toBe(false);
+    S.seasonGate = false;
+  });
+
+  it("an Open Case waits for its episode's Season in a new game", () => {
+    S.seasonGate = true; S.seasonOpen = 1; S.episodesDone = {}; S.life = 5e6;
+    const lesser = ARCS.find(a => a.id === "lesserevil")!;       // Season 2, Episode 16
+    expect(arcAvailable(lesser)).toBe(false);                    // Season 2 is waiting on Season 1
+    for (const m of MISSIONS) if (seasonOf(m.ep!) === 1) S.episodesDone[m.ep!] = true;
+    expect(arcAvailable(lesser)).toBe(true);
     S.seasonGate = false;
   });
 

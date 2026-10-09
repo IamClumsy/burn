@@ -61,7 +61,7 @@ export const FAQ: FaqSection[] = [
     {q: "Why do missions with kids never fail?",
      a: () => "It's Michael's rule. Anything involving a kid always succeeds, no matter how hot things are. Those missions are marked \"Never fails.\" Asking an ally to help on one earns an extra favor, since better odds wouldn't help."},
     {q: "Why can't I hire Jesse yet?",
-     a: () => "Characters only join when they join the show. Jesse first turns up in Season 4, so he can't be hired, and won't appear on missions, until Season 4 cases open. His missions are all from the episodes he's actually in.",
+     a: () => "Characters only join when they join the show. Jesse first turns up in Season 4, so he can't be hired until Season 4 cases are open and you have finished \"Fast Friends\", the episode where he joins (look for it on the board; the game tells you the moment he is ready). He won't appear on missions before then. His missions are all from the episodes he's actually in.",
     },
     {q: "What does Madeline help with?",
      a: () => "Michael doesn't ask his mother for help until Season 3, and she isn't part of the spy business or cheap to bring in. On missions she only helps with cases involving kids or older folks, and those cases show her as the one to ask. Her other perks, a faster Lay Low and automatic Lay Low at 95% heat, work all the time."},

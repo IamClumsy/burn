@@ -6,6 +6,7 @@ import { beep, chime } from "../audio";
 import { money, pick, weightedPick } from "../util";
 import { say, toast, type NarrationMeta } from "../ui/fx";
 import { advanceArc, failArcStep } from "./arcs";
+import { ALLIES } from "../data/allies";
 import { crewCut } from "../data/automation";
 import { reduceGrip } from "./org";
 import { EP_NOTES, outcomeLine } from "../data/episodeNotes";
@@ -82,7 +83,11 @@ export function resolveMission(m: ActiveMission): void {
     if (m.kid) S.stats.kidMissions++;
     if (m.kid && m.sent) { S.favors += 1; say("Having the right person along made all the difference. +1 favor.", "mission", meta); }
     if (m.arc) advanceArc(m.arc.id, m.arc.step);
-    if (m.ep) S.episodesDone[m.ep] = true;
+    if (m.ep) {
+      S.episodesDone[m.ep] = true;
+      const joins = ALLIES.find(a => a.gateEp && a.debutEp === m.ep && !S.allies[a.id]); // their episode opens the door to hiring them
+      if (joins) { toast(`${joins.name} is in`, `${joins.name.split(" ")[0]} can now be part of your Crew.`, "story"); say(`${joins.name.split(" ")[0]} can now be part of your Crew.`, "crew"); }
+    }
     reduceGrip(1);
     say(m.kid ? pick(KID_LINES) : pick(LINES.mOk), "mission", meta);
     const note = m.ep ? EP_NOTES[m.ep] : undefined;

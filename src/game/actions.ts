@@ -49,7 +49,7 @@ export function buyReferral(): void {
 
 export function hireAlly(id: string): void {
   const a = ALLIES.find(x => x.id === id)!;
-  if (S.allies[id] || S.cash < a.cost || !allyAvailable(a.debut)) return;
+  if (S.allies[id] || S.cash < a.cost || !allyAvailable(a)) return;
   S.cash -= a.cost; S.allies[id] = true;
   chime(); toast(a.name + " joins you", a.perk);
   say(a.name + " is on the team. Try not to get them killed.");

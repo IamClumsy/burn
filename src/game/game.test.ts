@@ -497,18 +497,34 @@ describe("Jesse joins in Season 4", () => {
     expect(S.cash).toBe(1e12);
   });
 
-  it("can be hired once Season 4 opens", () => {
+  it("can be hired once Season 4 is open and his episode, Fast Friends, is done", () => {
     S.cash = 1e12; S.life = 3e7; // Season 4's threshold
+    S.episodesDone = {};
+    hireAlly("jesse");
+    expect(S.allies.jesse).toBeUndefined();            // the season alone isn't enough
+    expect(panelHTML("crew")).toContain("Fast Friends");
+    S.episodesDone["402"] = true;
     hireAlly("jesse");
     expect(S.allies.jesse).toBe(true);
   });
 
+  it("finishing his episode tells you he can join your Crew", () => {
+    S.life = 3e7; S.episodesDone = {}; S.allies.jesse = undefined as any; delete S.allies.jesse; dismissAllNotices();
+    const m = S.board.find(x => x.ep === "402") ?? { ...MISSIONS.find(x => x.ep === "402")!, uid: 99, send: false, kid: false } as any;
+    S.active = [{ ...m, sent: null, left: 0, chance: 1, reward: 0, auto: false }];
+    resolveMission(S.active[0]);
+    expect(document.getElementById("nM")!.textContent).toContain("can now be part of your Crew");
+    dismissAllNotices();
+  });
+
   it("the crew list says when he joins, and doesn't offer to hire him early", () => {
-    S.cash = 1e12; S.life = 1e6;
+    S.cash = 1e12; S.life = 1e6; S.episodesDone = {};
     const html = panelHTML("crew");
     expect(html).toContain("until Season 4");
     expect(html).not.toContain("Hire Jesse Porter");
     S.life = 3e7;
+    expect(panelHTML("crew")).not.toContain("Hire Jesse Porter");   // Season 4 is open, but his episode isn't done
+    S.episodesDone["402"] = true;
     expect(panelHTML("crew")).toContain("Hire Jesse Porter");
   });
 
@@ -664,7 +680,7 @@ describe("notifications", () => {
 
 describe("sketches around the game", () => {
   it("the Crew pop-up shows a portrait for every contact and ally", () => {
-    S.life = 1e12; S.allies.sam = true;
+    S.life = 1e12; S.allies.sam = true; S.episodesDone["402"] = true;
     const html = panelHTML("crew");
     for (const id of ["seymour", "victor", "sam", "fiona", "barry", "madeline", "nate", "jesse"]) {
       expect(html, id).toContain(`Sketch of ${id}`);
@@ -2467,7 +2483,7 @@ describe("asking allies for help, not sending them", () => {
 
 describe("Crew pop-up order", () => {
   it("lists allies cheapest first, after the frienemies", () => {
-    S.life = 1e12;
+    S.life = 1e12; S.episodesDone["402"] = true;
     const html = panelHTML("crew");
     const at = (name: string) => html.indexOf(name);
     const order = ["Seymour Talbot", "Victor Stecker-Epps", "Barry Burkowski</b>", "Hire Sam Axe", "Hire Fiona Glenanne", "Hire Barry Burkowski", "Hire Nate Westen", "Hire Madeline Westen", "Hire Jesse Porter"].map(at);

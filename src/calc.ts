@@ -47,7 +47,8 @@ export const gripAtt = (): number => gripPerks().reduce((m, p) => m * (1 + (p.at
 export const gripFixer = (): number => gripPerks().reduce((m, p) => m * (p.fixer ?? 1), 1);
 
 /** Has this ally's season opened yet? Someone who debuts in Season 4 can't be hired in Season 2. */
-export const allyAvailable = (debut?: number): boolean => !debut || seasonsOpen(S.life) >= debut;
+export const allyAvailable = (a: { debut?: number; debutEp?: string; gateEp?: boolean }): boolean =>
+  (!a.debut || seasonsOpen(S.life) >= a.debut) && (!a.gateEp || !a.debutEp || !!S.episodesDone[a.debutEp]);
 
 /** The endless upgrade: every level makes all income a bit bigger, forever. */
 export const referralMult = (): number => Math.pow(REFERRAL.gain, S.referrals);

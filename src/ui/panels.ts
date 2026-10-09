@@ -201,8 +201,9 @@ function crew(): string {
     ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() && favorsLeft("seymour") > 0 ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div>
     <div class="small" style="margin-top:4px">${favorStatus(c.id)}</div></div></div></div>`; }).join("");
   return contact + ALLIES.map(a => {
-    if (!S.allies[a.id] && !allyAvailable(a.debut)) {
-      return item("hire", a.id, false, a.name, `${a.bio} Doesn't join the story until Season ${a.debut}.`, `<div class="small">Season ${a.debut}</div>`, "", portrait(a.id, 48, false));
+    if (!S.allies[a.id] && !allyAvailable(a)) {
+      const gate = a.gateEp && a.debutEp && seasonsOpen(S.life) >= (a.debut ?? 0) ? MISSIONS.find(m => m.ep === a.debutEp) : undefined;
+      return item("hire", a.id, false, a.name, gate ? `${a.bio} Joins your crew once you finish "${gate.n}" (Season ${a.debut}, ${gate.epTitle}).` : `${a.bio} Doesn't join the story until Season ${a.debut}.`, `<div class="small">${gate ? "After " + gate.epTitle : "Season " + a.debut}</div>`, "", portrait(a.id, 48, false));
     }
     if (!S.allies[a.id]) return item("hire", a.id, S.cash >= a.cost, "Hire " + a.name, `${a.bio} Perk: ${a.perk}`, `<div class="cost">${money(a.cost)}</div>`, "", portrait(a.id, 48));
     const cd = Math.ceil(S.allyCd[a.id] || 0), busy = S.active.some(m => m.sent === a.id), here = allyHere(a.id);

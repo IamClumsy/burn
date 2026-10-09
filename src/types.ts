@@ -20,6 +20,8 @@ export interface Ally {
   debut?: number;
   /** The episode code (season x 100 + episode) they first appear in. Their missions never come earlier. */
   debutEp?: string;
+  /** Can only be hired once you have done their debut episode, not just once the season opens. */
+  gateEp?: boolean;
 }
 
 export interface MissionTpl {

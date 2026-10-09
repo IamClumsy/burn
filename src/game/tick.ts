@@ -1,12 +1,11 @@
 import { S, earn } from "../state";
-import { attNet, cps, heatNet, inFlashback, owned } from "../calc";
+import { attNet, cps, heatNet, inFlashback, openSeasons, owned } from "../calc";
 import { checkEnding, tickOrg } from "./org";
 import { STORY } from "../data/story";
 import { SEASON_GRIP } from "../data/org";
 import { SAM_ARC } from "../data/samAxe";
 import { arcAvailable } from "./arcs";
 import { MEDALS } from "../data/medals";
-import { seasonsOpen } from "../data/missions";
 import { chime } from "../audio";
 import { pick } from "../util";
 import { say as sayTag, toast } from "../ui/fx";
@@ -44,7 +43,7 @@ export function milestones(): void {
     S.backupNudged = true;
     toast("Back up your save", "Your game lives in this browser only. Use export at the bottom of the page to keep a copy, just in case.");
   }
-  const open = seasonsOpen(S.life);
+  const open = openSeasons();
   if (open > S.seasonOpen) {
     S.seasonOpen = open;
     // someone new is always after Michael: their grip on you starts over

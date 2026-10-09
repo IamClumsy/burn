@@ -53,6 +53,8 @@ import { MISSIONS, seasonsOpen } from "../data/missions";
 import { clientCut, crewCut } from "../data/automation";
 import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from "../data/samAxe";
 import { earn, merge } from "../state";
+import { readSave, save } from "../persist";
+import { openSeasons, seasonOneLeft } from "../calc";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
 import { menuNew } from "../ui/badges";
@@ -66,7 +68,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  setState(fresh()); fillBoard();
+  setState(fresh()); S.seasonGate = false; fillBoard(); // the Season 2 gate has its own tests
   document.getElementById("log")!.innerHTML = ""; // narration from one test shouldn't leak into the next
   clearNarration();
   dismissAllNotices(); // nor should a notification left on screen
@@ -939,7 +941,7 @@ describe("Ghosts From the Past", () => {
 
   it("anyone the story has taken off the board turns into a ghost once their time has passed", () => {
     S.story = 0;
-    const gone: [string, number][] = [["strickler", 4], ["gilroy", 4], ["brennen", 5], ["barrett", 5], ["anson", 6], ["vaughn", 6], ["card", 7], ["gray", 7], ["riley", 7], ["bly", 7]];
+    const gone: [string, number][] = [["strickler", 4], ["gilroy", 4], ["brennen", 5], ["barrett", 5], ["anson", 6], ["vaughn", 6], ["card", 7], ["gray", 7], ["bly", 7]];
     const seasonStart = [0, 0, 1e5, 2e6, 3e7, 5e8, 8e9, 1e11];
     for (const [id, season] of gone) {
       S.life = seasonStart[season - 1] + 1;
@@ -951,7 +953,7 @@ describe("Ghosts From the Past", () => {
 
   it("people who are still around are never ghosts", () => {
     S.life = 1e13; S.story = 99;
-    for (const id of ["paxson", "larry", "oneill", "burke", "sonya", "kendrick"]) expect(bossView(boss(id)).n, id).toBe(boss(id).n);
+    for (const id of ["paxson", "larry", "oneill", "riley", "burke", "sonya", "kendrick"]) expect(bossView(boss(id)).n, id).toBe(boss(id).n);
   });
 
   it("Cowan, who dies in the first Season's story, is a ghost once that beat has passed", () => {
@@ -1935,6 +1937,44 @@ describe("The Fall of Sam Axe", () => {
     expect(html).toContain('property="og:image" content="https://');
     expect(html).toContain("summary_large_image");
     expect(readFileSync(resolve(__dirname, "../../public/og.png")).length).toBeGreaterThan(10000);
+  });
+
+  it("a won case is remembered: Seen chip, Spy notebook, the count, the save, and Reinstate", () => {
+    S.episodesDone = {}; S.board = []; S.active = []; fillBoard();
+    const m = S.board.find(x => x.ep)!;
+    expect(panelHTML("mis")).not.toContain(">Seen<");
+    startMission(m.uid);
+    const a = S.active.find(x => x.ep === m.ep)!; a.chance = 1; resolveMission(a);
+    expect(S.episodesDone[m.ep!]).toBe(true);
+    expect(panelHTML("story")).toContain("Spy notebook (1)");                        // the Case File's notebook
+    expect(panelHTML("stats")).toContain(`1 of ${MISSIONS.length}`);
+    save();
+    const back = merge(readSave()!);
+    expect(back.episodesDone[m.ep!]).toBe(true);                                     // survives a reload
+    S.cred = 0; S.life = 1e12; S.run = 1e12;
+    prestige();
+    expect(S.episodesDone[m.ep!]).toBe(true);                                        // and a Reinstate
+    dismissAllNotices();
+  });
+
+  it("Season 2 needs every Season 1 case done as well as the money", () => {
+    S.life = 5e6; S.seasonOpen = 1; S.seasonGate = true; S.episodesDone = {}; S.board = []; S.active = [];
+    expect(seasonsOpen(S.life)).toBeGreaterThanOrEqual(2);       // the money alone would open it
+    expect(openSeasons()).toBe(1);
+    expect(seasonOneLeft()).toBe(MISSIONS.filter(m => seasonOf(m.ep!) === 1).length);
+    for (let i = 0; i < 100; i++) { S.board = []; fillBoard(); expect(S.board.every(m => seasonOf(m.ep!) === 1)).toBe(true); }
+    expect(panelHTML("mis")).toContain("Season 2 is waiting");
+    expect(panelHTML("file")).toMatch(/finish Season 1/);
+    for (const m of MISSIONS) if (seasonOf(m.ep!) === 1) S.episodesDone[m.ep!] = true;
+    expect(seasonOneLeft()).toBe(0);
+    expect(openSeasons()).toBeGreaterThanOrEqual(2);
+    expect(panelHTML("mis")).not.toContain("Season 2 is waiting");
+    S.seasonGate = false;
+  });
+
+  it("anyone who already reached Season 2 keeps it, whatever their record says", () => {
+    S.life = 5e6; S.seasonOpen = 2; S.seasonGate = true; S.episodesDone = {};
+    expect(openSeasons()).toBeGreaterThanOrEqual(2);
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

@@ -3,7 +3,7 @@ import type { ContactId } from "../types";
 import {
   REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, cps, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
-  samSharp, grossLife, inFlashback, slotOpen, wouldBeHelped, SOLO_SLOTS, HELP_SLOTS, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
+  samSharp, grossLife, openSeasons, seasonOneLeft, inFlashback, slotOpen, wouldBeHelped, SOLO_SLOTS, HELP_SLOTS, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { REFERRAL, UPGS } from "../data/upgrades";
@@ -143,9 +143,10 @@ function upgrades(): string {
 
 function missions(): string {
   const done = Object.keys(S.episodesDone).length;
-  let h = `<div class="small mishead">Case files: <b style="color:var(--text)">${done} of ${MISSIONS.length}</b> episodes · Season ${seasonsOpen(S.life)} cases open</div>
+  let h = `<div class="small mishead">Case files: <b style="color:var(--text)">${done} of ${MISSIONS.length}</b> episodes · Season ${openSeasons()} cases open</div>
     <div class="small" style="margin-bottom:8px">Up to 3 missions at once, plus a fourth slot that only takes a case an ally is helping with (${S.active.length}/${SOLO_SLOTS + HELP_SLOTS}). Clients pay well. Michael keeps what he needs for expenses and hands the rest back. Ask an ally for help for +25% success (or +1 favor on cases that can't fail). They're busy until it ends.</div>`;
   const open = ARCS.filter(arcAvailable);
+  if (seasonsOpen(S.life) >= 2 && openSeasons() < 2) h += `<div class="box" style="border-color:var(--gold)"><b>Season 2 is waiting.</b> <div class="small">You've earned enough, but Season 2 opens once you've done every Season 1 case (${seasonOneLeft()} left). Look for the ones without a Seen tag.</div></div>`;
   if (inFlashback()) h += `<div class="box"><b>Sam is telling his story.</b> <div class="small">Everything else waits: no new cases, no clients, no visitors, and your other jobs and the Organization hold still until he finishes.</div></div>`;
   if (open.length) {
     h += `<h2>Open Cases</h2>` + open.map(a => {
@@ -516,7 +517,8 @@ function theList(): string {
 function nextUnlocks(): { what: string; name: string; at: number; have: number }[] {
   const out: { what: string; name: string; at: number; have: number }[] = [];
   const season = SEASON_UNLOCK.findIndex(t => t > S.life);
-  if (season > 0) out.push({ what: "Season", name: `Season ${season + 1} cases`, at: SEASON_UNLOCK[season], have: S.life });
+  if (openSeasons() < 2 && seasonOneLeft() > 0) out.push({ what: "Season", name: `Season 2 cases (finish Season 1: ${seasonOneLeft()} left)`, at: SEASON_UNLOCK[1], have: S.life });
+  else if (season > 0) out.push({ what: "Season", name: `Season ${season + 1} cases`, at: SEASON_UNLOCK[season], have: S.life });
   const foe = BOSSES.filter(b => b.at > grossLife()).sort((a, b) => a.at - b.at)[0];
   if (foe) out.push({ what: "Rogue", name: "A new foe, Season " + seasonsOpen(foe.at), at: foe.at, have: grossLife() });
   const cover = COVERS.filter(c => !c.arc && c.unlock > S.life).sort((a, b) => a.unlock - b.unlock)[0];

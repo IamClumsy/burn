@@ -69,7 +69,6 @@ export const BOSSES: Boss[] = [
    intro:"Tyler Gray is somewhere you can't see. You can feel the scope on you anyway.",
    file:"Tyler Gray was a CIA operative and former Marine sniper working on Tom Card's orders. He took the shot at the airport, then was sent after Michael in Panama. When he learned Card had lied to him, he saved Michael's life, and Card shot him for it."},
   {id:"riley",  n:"Olivia Riley",  title:"A senior CIA counterintelligence officer, a legend at hitting where it hurts", at:6e10, hpm:7.0, m:["rush","att","nolay"],
-   ghost:{from:{season:7}, legacy:"Olivia Riley's investigation is still open in a drawer somewhere, and it still lists you."},
    mech:"Endgame: shorter clock, rising attention, and no Lay Low.",
    intro:"Olivia Riley has put you at the top of her list. She notices small details. She's already noticed yours.",
    file:"Olivia Riley is a senior CIA officer put in charge of taking Michael down after Card's death. She's a legend in counterintelligence who notices small details and hits where it hurts. She vowed to hunt Michael down after he and his team left her in a lake."},

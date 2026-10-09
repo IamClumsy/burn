@@ -5,7 +5,7 @@ import { COVERS } from "./data/covers";
 import { BOSSES } from "./data/bosses";
 import { BOWLING, FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC_ID, SAM_BEATS } from "./data/samAxe";
 import { STORY } from "./data/story";
-import { seasonsOpen } from "./data/missions";
+import { MISSIONS, seasonOf, seasonsOpen } from "./data/missions";
 import { DAY_MS, FAVORS_PER_DAY } from "./data/pacing";
 import { GRIP_PERKS, TIERS } from "./data/org";
 import { REFERRAL } from "./data/upgrades";
@@ -48,7 +48,7 @@ export const gripFixer = (): number => gripPerks().reduce((m, p) => m * (p.fixer
 
 /** Has this ally's season opened yet? Someone who debuts in Season 4 can't be hired in Season 2. */
 export const allyAvailable = (a: { debut?: number; debutEp?: string; gateEp?: boolean }): boolean =>
-  (!a.debut || seasonsOpen(S.life) >= a.debut) && (!a.gateEp || !a.debutEp || !!S.episodesDone[a.debutEp]);
+  (!a.debut || openSeasons() >= a.debut) && (!a.gateEp || !a.debutEp || !!S.episodesDone[a.debutEp]);
 
 /** The endless upgrade: every level makes all income a bit bigger, forever. */
 export const referralMult = (): number => Math.pow(REFERRAL.gain, S.referrals);
@@ -207,6 +207,16 @@ export const REINSTATE_MIN = 1e8;
 export const credGain = (): number => (S.run < REINSTATE_MIN ? 0 : Math.floor(Math.sqrt(S.run / 1e7)));
 
 // ---- missions
+/** Every Season 1 episode done? Season 2 doesn't open until it is, so nobody skips the early cases. */
+export const seasonOneLeft = (): number => MISSIONS.filter(t => t.ep && seasonOf(t.ep) === 1 && !S.episodesDone[t.ep]).length;
+/**
+ * How many Seasons are open: by lifetime earnings, except Season 2 also needs all of Season 1 done.
+ * Anyone who already reached Season 2 keeps it, so saves from before this rule aren't locked out.
+ */
+export const openSeasons = (): number => {
+  const byMoney = seasonsOpen(S.life);
+  return S.seasonGate && byMoney >= 2 && S.seasonOpen < 2 && seasonOneLeft() > 0 ? 1 : byMoney;
+};
 /** Hired and actually around: Nate is only here when he hasn't wandered off. */
 export const allyHere = (id: string): boolean => !!S.allies[id] && !awayWhy(id);
 
@@ -245,7 +255,7 @@ const isGhost = (b: Boss): boolean => {
   const g = b.ghost;
   if (!g) return false;
   if (g.from.beat) return S.story > STORY.findIndex(s => s.t === g.from.beat);
-  return seasonsOpen(S.life) >= (g.from.season ?? 99);
+  return openSeasons() >= (g.from.season ?? 99);
 };
 /** The boss as the game should show them now: once they're gone from the story, a Ghost From the Past. */
 export const bossView = (b: Boss): Boss => {

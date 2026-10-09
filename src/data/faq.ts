@@ -46,6 +46,8 @@ export const FAQ: FaqSection[] = [
      a: () => `The people who helped burn you. Outmaneuvering a boss crosses their name off, and your intel contact sometimes passes you one early. Cross off all ${BOSSES.length} to lift the burn for good: favors and +25% income.`},
   ]},
   {title: "Missions and your crew", items: [
+    {q: "When do new Seasons open?",
+     a: () => "As your lifetime earnings grow, the next Season's cases start turning up on the board. The one exception is Season 2: it also waits until you have done every Season 1 case, so you see all of the early episodes first. Michael's File shows what opens next and how long it should take at your current income."},
     {q: "What do the numbers on a mission mean?",
      a: () => "On a running mission, the seconds are how long until it finishes and the percentage is its chance to succeed. That chance is locked in when you start. If it fails, you take extra heat and get nothing."},
     {q: "How many missions can run at once?",

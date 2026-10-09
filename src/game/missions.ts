@@ -1,6 +1,6 @@
 import { S, payClient } from "../state";
-import { allyFree, awayWhy, heatMult, inFlashback, slotOpen, wouldBeHelped, missionReward, succChance } from "../calc";
-import { MISSIONS, episodeOf, missionUnlocked, seasonOf, seasonsOpen } from "../data/missions";
+import { allyFree, awayWhy, heatMult, inFlashback, openSeasons, slotOpen, wouldBeHelped, missionReward, succChance } from "../calc";
+import { MISSIONS, episodeOf, missionUnlocked, seasonOf } from "../data/missions";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
 import { money, pick, weightedPick } from "../util";
@@ -18,7 +18,7 @@ import type { ActiveMission, Mission } from "../types";
  */
 export function missionWeight(t: { ep?: string }): number {
   const unseen = t.ep ? !S.episodesDone[t.ep] : false;
-  const current = t.ep ? seasonOf(t.ep) === seasonsOpen(S.life) : false;
+  const current = t.ep ? seasonOf(t.ep) === openSeasons() : false;
   return (unseen ? 4 : 1) * (current ? 3 : 1);
 }
 
@@ -28,7 +28,7 @@ export const gatedEpReady = (): boolean => MISSIONS.every(t => !t.ep || seasonOf
 
 export function newMission(): Mission {
   // Only seasons you've unlocked, and nothing that's already on the board or running.
-  const open = MISSIONS.filter(t => missionUnlocked(t, S.life) && (t.ep !== GATED_EP || gatedEpReady()));
+  const open = MISSIONS.filter(t => missionUnlocked(t, S.life) && (!t.ep || seasonOf(t.ep) <= openSeasons()) && (t.ep !== GATED_EP || gatedEpReady()));
   // someone who's away (Nate wandered off, Fiona taken) can't help, so at most one of their cases waits on the board
   const blocked = (ally: string) => !!awayWhy(ally) && S.board.some(m => m.ally === ally);
   const fresh = open.filter(t => !S.board.some(m => m.n === t.n) && !S.active.some(m => m.n === t.n) && !blocked(t.ally));

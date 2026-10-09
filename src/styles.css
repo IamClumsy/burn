@@ -80,6 +80,21 @@
   .nl.s1,.nl.s2,.nl.s3,.nl.s4,.nl.s5,.nl.s6,.nl.s7{border-left-color:var(--e)}
   .chip.rare{background:#ffd166;color:#150c20;font-weight:700;letter-spacing:1px;font-size:10px;margin-left:6px}
   .item.rare{border-color:#ffd16688;box-shadow:0 0 14px #ffd16622}
+  .dockbtn.menu{position:relative}
+  .dockbtn.menu.has-new::after{content:"";position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:var(--pink);border:2px solid #150c20;box-shadow:0 0 8px var(--pink)}
+  .menugrid button{position:relative}
+  .menugrid button .newchip{position:absolute;top:6px;right:8px;font-size:10px;letter-spacing:1px;padding:1px 6px;border-radius:8px;background:var(--pink);color:#150c20;font-weight:700}
+  .infobtn{width:20px;height:20px;padding:0;margin-left:4px;border-radius:50%;font-size:12px;font-style:italic;font-family:Georgia,serif;line-height:1;vertical-align:middle;background:transparent;color:var(--dim);border:1px solid var(--line)}
+  .infobtn:hover:not(:disabled){color:var(--text);border-color:var(--pink);background-color:transparent}
+  .netbar{display:flex;align-items:center;gap:8px;width:100%;margin:-2px 0 6px;padding:2px 0;background:none;border:0;border-radius:0;font-size:11px;color:var(--dim);text-align:left}
+  .netbar:hover:not(:disabled){background:none;color:var(--text)}
+  .nb-lab{flex:none;min-width:74px;letter-spacing:.5px}
+  .nb-track{position:relative;flex:1;height:8px;border-radius:4px;background:#0b0610;border:1px solid var(--line);overflow:hidden}
+  .nb-track::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line)}
+  .nb-track i{position:absolute;top:0;bottom:0;left:50%;width:0;border-radius:4px}
+  .nb-val{flex:none;min-width:82px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+  .netbar.up .nb-track i{background:var(--bad)} .netbar.up .nb-val{color:var(--bad)}
+  .netbar.down .nb-track i{background:var(--good)} .netbar.down .nb-val{color:var(--good)}
   .menugrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
   .menugrid button{padding:14px 10px;font-size:14px;letter-spacing:.5px;text-align:center}
   .modal{display:none;position:fixed;inset:0;background:#000b;z-index:25;align-items:center;justify-content:center;padding:20px}

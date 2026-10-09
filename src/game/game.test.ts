@@ -1573,6 +1573,17 @@ describe("The Submarine", () => {
   });
 });
 
+describe("The stylesheet has rules for the pieces the game builds", () => {
+  it("every class the interface relies on is styled", () => {
+    const css = readFileSync("src/styles.css", "utf8");
+    const needed = [
+      "dock", "dockface", "dockbar", "dockbtn", "has-new", "newchip", "menugrid", "infobtn", "netbar", "nb-track", "nb-val",
+      "narr", "nl", "nl-head", "nl-tag", "nl-ep", "nl-mission", "nl-fail", "nl-boss", "nl-crew", "nl-story", "rare", "drow", "dfile", "mishead", "portrait",
+    ];
+    for (const c of needed) expect(css, `.${c}`).toMatch(new RegExp(`\\.${c}[^a-zA-Z0-9_-]`));
+  });
+});
+
 describe("Crew events", () => {
   it("events about a crew member only come up once they're on the crew", () => {
     const gated = EVENTS.filter(e => e.needs);

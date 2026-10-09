@@ -13,7 +13,7 @@ export const TRAP_MIN_LEADS = 3;
 
 /** What Michael does on a case. Nobody gets punched; people get outmaneuvered. */
 export const CASE_ACTIONS: CaseActionDef[] = [
-  {id:"investigate", name:"Work the Angle", hint:"Dig into their story. Builds a lead.", cd:0.6,
+  {id:"investigate", name:"Play an Angle", hint:"Dig into their story. Builds a lead.", cd:0.6,
    lines:["A phone record, a receipt, a parking stub. Something doesn't add up.",
           "You watch from across the street and write down what they do when they think no one's looking.",
           "A name comes up twice. That's a lead."]},

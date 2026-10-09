@@ -1924,6 +1924,12 @@ describe("The Fall of Sam Axe", () => {
     expect(formatWait(9000 * 3600e3)).toBe("over a year");
   });
 
+  it("keyboard focus is visible and reduced-motion settings are respected", () => {
+    const css = readFileSync(resolve(__dirname, "../styles.css"), "utf8");
+    expect(css).toMatch(/button:focus-visible/);
+    expect(css).toMatch(/prefers-reduced-motion:reduce/);
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

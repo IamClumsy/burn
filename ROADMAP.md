@@ -6,7 +6,7 @@ What's built is listed at the bottom. This is what's left, roughly in the order 
 
 - **Real-device playtest:** phone and tablet widths, a long session, and a couple of Reinstates. Watch Vercel's INP numbers after each deploy (the flashback look was reworked once already to keep clicks fast).
 - **Pacing pass after a long playthrough:** several Reinstates in, check boss timing, favor prices, how fast the late Seasons open, and how long the last foes on The List take (Burke $110B, Sonya $180B, Kendrick $300B).
-- **Accessibility pass:** keyboard focus for pop-ups and the case tile, a reduced-motion setting, and contrast on the dimmed cards.
+- **Accessibility pass:** keyboard focus rings and reduced-motion are in; still to do is a check of contrast on the dimmed cards and focus handling inside pop-ups.
 - **Share image:** a 1200×630 preview for links, using the header art and the photos.
 
 ## 2. An ending that lands
@@ -28,7 +28,7 @@ What's built is listed at the bottom. This is what's left, roughly in the order 
 - **Sound pass:** a few more cues and a volume slider rather than on/off.
 - **Install as an app:** works offline, with a home-screen icon.
 - **Seasonal flavor:** a one-line recap card when each new Season opens.
-- **Tablet check:** the in-between widths haven't had a proper look.
+- **Tablet check:** phone and tablet widths have had a look; a real device would still be worth it.
 
 ## Built so far, for reference
 

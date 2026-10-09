@@ -110,6 +110,10 @@
   /* No transform on hover: lifting a button can move it out from under the cursor and make it flicker. */
   button:hover:not(:disabled){border-color:var(--pink);background-color:#321d46}
   button:disabled{opacity:.4;cursor:not-allowed}
+  /* keyboard users can see where they are */
+  button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+  /* people who ask their device for less motion get none: no pops, shakes or floating numbers */
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
   /* Choices you can act on get a pink outline, so they read as buttons on a phone (where there is no hover) */
   .btns button:not(:disabled),.bossacts button:not(:disabled),#evtO button:not(:disabled){border:1.5px solid color-mix(in srgb,var(--pink) 75%,var(--line))}
   .btns button:active:not(:disabled),.bossacts button:active:not(:disabled){background-color:#4a2060;border-color:var(--pink)}

@@ -39,7 +39,7 @@ import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
 import { fillBoard, missionWeight, newMission, resolveMission, startMission } from "./missions";
-import { actionBlock, bossAction, spawnBoss, tickBoss } from "./bosses";
+import { actionBlock, bossAction, bossWeight, spawnBoss, tickBoss } from "./bosses";
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
 import { spawnClient, spawnEvent } from "./events";
 import { seasonOf } from "../data/missions";
@@ -1717,6 +1717,35 @@ describe("Rogues unlock with the seasons, in reach of a normal game", () => {
     expect(html).toMatch(/Season 2 · at \$100K/);
     expect(html).toMatch(/Season 7 · at \$/);
     expect(html).not.toMatch(/Appears at/);
+  });
+});
+
+describe("Everyone on the List gets their turn", () => {
+  const spawnMany = (n: number): string[] => { const out: string[] = []; for (let i = 0; i < n; i++) { S.boss = null; spawnBoss(); out.push(S.boss!.id); } S.boss = null; return out; };
+
+  it("foes you haven't beaten are far likelier than ones you have", () => {
+    S.life = 5e8; S.allies = {};
+    const open = BOSSES.filter(b => S.life >= b.at && !b.needs); // O'Neill only comes for Fiona
+    const beaten = open[0];
+    S.bossKills[beaten.id] = 3;
+    const ids = spawnMany(1500);
+    expect(ids.filter(i => i === beaten.id).length / ids.length).toBeLessThan(1 / open.length);
+    for (const b of open) expect(ids, b.id).toContain(b.id);
+  });
+
+  it("Carla's Last Orders turns up once her story has passed, within a normal number of cases", () => {
+    S.life = 5e8; S.allies = {}; S.story = STORY.findIndex(b => b.t === "Lesser Evil") + 1;
+    let seen = 0;
+    for (let i = 0; i < 40; i++) { S.boss = null; spawnBoss(); if (S.boss!.id === "carla") { expect(bossDef()!.n).toBe("Carla's Last Orders"); seen++; } }
+    expect(seen).toBeGreaterThan(0);
+  });
+
+  it("the weight prefers the current Season, and unbeaten over beaten", () => {
+    S.life = 5e8;
+    const carla = BOSSES.find(b => b.id === "carla")!, anson = BOSSES.find(b => b.id === "anson")!;
+    expect(bossWeight(anson)).toBeGreaterThan(0);
+    S.bossKills.carla = 1;
+    expect(bossWeight(carla)).toBeLessThan(bossWeight({ ...carla, id: "x" }));
   });
 });
 

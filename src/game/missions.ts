@@ -3,7 +3,7 @@ import { allyFree, awayWhy, heatMult, missionReward, succChance } from "../calc"
 import { MISSIONS, episodeOf, missionUnlocked, seasonOf, seasonsOpen } from "../data/missions";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
-import { money, pick } from "../util";
+import { money, pick, weightedPick } from "../util";
 import { say, toast, type NarrationMeta } from "../ui/fx";
 import { advanceArc, failArcStep } from "./arcs";
 import { reduceGrip } from "./org";
@@ -20,20 +20,13 @@ export function missionWeight(t: { ep?: string }): number {
   return (unseen ? 4 : 1) * (current ? 3 : 1);
 }
 
-function weightedMission<T extends { ep?: string }>(list: T[]): T {
-  const weights = list.map(missionWeight);
-  let r = Math.random() * weights.reduce((a, b) => a + b, 0);
-  for (let i = 0; i < list.length; i++) { r -= weights[i]; if (r < 0) return list[i]; }
-  return list[list.length - 1];
-}
-
 export function newMission(): Mission {
   // Only seasons you've unlocked, and nothing that's already on the board or running.
   const open = MISSIONS.filter(t => missionUnlocked(t, S.life));
   // someone who's away (Nate wandered off, Fiona taken) can't help, so at most one of their cases waits on the board
   const blocked = (ally: string) => !!awayWhy(ally) && S.board.some(m => m.ally === ally);
   const fresh = open.filter(t => !S.board.some(m => m.n === t.n) && !S.active.some(m => m.n === t.n) && !blocked(t.ally));
-  const t = weightedMission(fresh.length ? fresh : open.filter(x => !blocked(x.ally)).length ? open.filter(x => !blocked(x.ally)) : open);
+  const t = weightedPick(fresh.length ? fresh : open.filter(x => !blocked(x.ally)).length ? open.filter(x => !blocked(x.ally)) : open, missionWeight);
   return {
     uid: S.uid++, n: t.n, dur: t.dur, succ: t.succ, heat: t.heat, rm: t.rm, fav: t.fav, ally: t.ally,
     kid: !!t.kid, elder: !!t.elder, send: false, ep: t.ep, epTitle: t.epTitle,

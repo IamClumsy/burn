@@ -1,20 +1,29 @@
 import { S, earn } from "../state";
 import { actionDmg, allyHere, bossDef, bossHP, bossView, conChance, cps, heatMult } from "../calc";
 import { CASE_ACTIONS, CREW_LINES, MAX_LEADS, TRAP_MIN_LEADS } from "../data/caseActions";
-import type { CaseAction } from "../types";
+import type { Boss, CaseAction } from "../types";
+import { seasonsOpen } from "../data/missions";
 import { BOSSES } from "../data/bosses";
 import { beep, chime } from "../audio";
-import { fmt, money, pick } from "../util";
+import { fmt, money, pick, weightedPick } from "../util";
 import { floatText, hitBoss, say as sayTag, shake, toast } from "../ui/fx";
 import { checkBurn } from "./heat";
 import { learnName, reduceGrip } from "./org";
 import { nextBossGap } from "../data/pacing";
 const say = (t: string): void => sayTag(t, "boss");
 
+/**
+ * Who turns up next. Someone you haven't outmaneuvered yet is far more likely than someone you have, and
+ * foes from the Season you're in come first, so everyone on the List gets their turn.
+ */
+export function bossWeight(b: Boss): number {
+  return (S.bossKills[b.id] ? 1 : 6) * (seasonsOpen(b.at) === seasonsOpen(S.life) ? 2 : 1);
+}
+
 export function spawnBoss(): void {
   const pool = BOSSES.filter(b => S.life >= b.at && (!b.needs || S.allies[b.needs]));
   if (!pool.length) { S.bossCd = 60; return; }
-  const b = bossView(pick(pool)), max = bossHP(b);
+  const b = bossView(weightedPick(pool, bossWeight)), max = bossHP(b);
   S.boss = { id: b.id, hp: max, max, left: 75 };
   shake(); beep(100, 0.5, "sawtooth", 0.08, -40);
   toast("BOSS: " + b.n, b.title, "bad", true);

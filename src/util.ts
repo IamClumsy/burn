@@ -1,5 +1,13 @@
 export const pick = <T,>(a: readonly T[]): T => a[Math.floor(Math.random() * a.length)];
 
+/** Pick one at random, where each item's chance is proportional to its weight. */
+export function weightedPick<T>(list: readonly T[], weight: (t: T) => number): T {
+  const w = list.map(weight);
+  let r = Math.random() * w.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < list.length; i++) { r -= w[i]; if (r < 0) return list[i]; }
+  return list[list.length - 1];
+}
+
 const SUFFIX = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
 
 /** Show big numbers as 1.23e9 instead of 1.23B. A display choice only; nothing in the game changes. */

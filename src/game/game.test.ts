@@ -36,7 +36,7 @@ import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
 import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
-import { fillBoard, resolveMission, startMission } from "./missions";
+import { fillBoard, missionWeight, newMission, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, spawnBoss, tickBoss } from "./bosses";
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
 import { spawnClient, spawnEvent } from "./events";
@@ -1206,6 +1206,37 @@ describe("Gadgets are worth making", () => {
     expect(FX_NAMES.boost).toBe("Booster ×3");
     tick(10);
     expect(S.fx.boost).toBeLessThan(120);
+  });
+});
+
+describe("The board favors this season's cases", () => {
+  const draw = (n: number) => { const out: string[] = []; for (let i = 0; i < n; i++) { S.board = []; out.push(newMission().ep!); } return out; };
+  const share = (eps: string[], season: number) => eps.filter(e => seasonOf(e) === season).length / eps.length;
+
+  it("cases from the Season you're in come up far more than their fair share", () => {
+    S.life = 5e8; // Season 5: 18 of the 80 open cases
+    const fair = 18 / 80;
+    expect(share(draw(1500), 5)).toBeGreaterThan(fair * 1.6);
+  });
+
+  it("episodes you haven't done come up before ones you have", () => {
+    S.life = 5e8;
+    for (const m of MISSIONS) if (seasonOf(m.ep!) < 5) S.episodesDone[m.ep!] = true;
+    expect(share(draw(1000), 5)).toBeGreaterThan(0.7);
+  });
+
+  it("nothing on the board is ever repeated, and old seasons still show up now and then", () => {
+    S.life = 5e8;
+    S.board = []; fillBoard();
+    expect(new Set(S.board.map(m => m.n)).size).toBe(3);
+    expect(share(draw(1500), 1)).toBeGreaterThan(0.02);
+  });
+
+  it("the weight is highest for an unseen case in the current season", () => {
+    S.life = 5e8;
+    expect(missionWeight({ ep: "505" })).toBeGreaterThan(missionWeight({ ep: "205" }));
+    S.episodesDone["505"] = true;
+    expect(missionWeight({ ep: "505" })).toBeLessThan(missionWeight({ ep: "506" }));
   });
 });
 

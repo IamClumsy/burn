@@ -49,7 +49,7 @@ export const FAQ: FaqSection[] = [
     {q: "Why can't I ask an ally for help on a mission?",
      a: () => "The mission card says why. They're either not hired yet (hire them from Crew), already helping with another mission, or, for Nate, wandered off. An ally can only help with one mission at a time, and the case missions ask theirs for help automatically. A mission built around someone, like the ones about Nate or Fiona, can't be started at all while they're away: Nate has wandered off, or Fiona is still recovering from being taken. Do something else and come back."},
     {q: "Where do the missions come from?",
-     a: () => "Every mission is adapted from an episode of the show, and the board shows which one. Season 1 cases are open from the start, and later seasons open as you earn more, so the cases get bigger as Michael's reputation grows. The Missions card keeps count of how many episodes you've worked."},
+     a: () => "Every mission is adapted from an episode of the show, and the board shows which one. Season 1 cases are open from the start, and later seasons open as you earn more, so the cases get bigger as Michael's reputation grows. The Missions card keeps count of how many episodes you've worked. The board favors episodes you haven't done yet, and cases from the Season you're in turn up most often, so each Season is possible to finish."},
     {q: "Who are the faces?",
      a: () => "The people from the show, shown as pictures. They appear in Crew, Rogues, The List and boss encounters. Someone you haven't met yet is a ? silhouette until you do. Nate has two pictures: the one you start with, and a new one after he comes back from Vegas with Ruth."},
     {q: "What's the spy notebook?",

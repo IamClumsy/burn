@@ -1,6 +1,6 @@
 import { S, payClient } from "../state";
 import { allyFree, awayWhy, heatMult, missionReward, succChance } from "../calc";
-import { MISSIONS, missionUnlocked } from "../data/missions";
+import { MISSIONS, missionUnlocked, seasonOf, seasonsOpen } from "../data/missions";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
 import { money, pick } from "../util";
@@ -10,11 +10,28 @@ import { reduceGrip } from "./org";
 import { EP_NOTES, outcomeLine } from "../data/episodeNotes";
 import type { ActiveMission, Mission } from "../types";
 
+/**
+ * How likely a case is to turn up. Episodes you haven't done yet come up far more often than ones you have,
+ * and cases from the Season you're in come up most of all, so a season is possible to finish.
+ */
+export function missionWeight(t: { ep?: string }): number {
+  const unseen = t.ep ? !S.episodesDone[t.ep] : false;
+  const current = t.ep ? seasonOf(t.ep) === seasonsOpen(S.life) : false;
+  return (unseen ? 4 : 1) * (current ? 3 : 1);
+}
+
+function weightedMission<T extends { ep?: string }>(list: T[]): T {
+  const weights = list.map(missionWeight);
+  let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < list.length; i++) { r -= weights[i]; if (r < 0) return list[i]; }
+  return list[list.length - 1];
+}
+
 export function newMission(): Mission {
   // Only seasons you've unlocked, and nothing that's already on the board or running.
   const open = MISSIONS.filter(t => missionUnlocked(t, S.life));
   const fresh = open.filter(t => !S.board.some(m => m.n === t.n) && !S.active.some(m => m.n === t.n));
-  const t = pick(fresh.length ? fresh : open);
+  const t = weightedMission(fresh.length ? fresh : open);
   return {
     uid: S.uid++, n: t.n, dur: t.dur, succ: t.succ, heat: t.heat, rm: t.rm, fav: t.fav, ally: t.ally,
     kid: !!t.kid, elder: !!t.elder, send: false, ep: t.ep, epTitle: t.epTitle,

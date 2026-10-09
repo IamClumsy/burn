@@ -293,7 +293,7 @@ function automation(): string {
 
 function reinstate(): string {
   const g = credGain(), c = cps();
-  const keep = `You reset cash, ops, upgrades and missions. You keep perks, medals, story and covers, and your allies too, except anyone who joined late in the story (like Jesse), who you hire again.`;
+  const keep = `You reset cash, ops, upgrades and missions. You keep perks, medals, story and covers, and your allies too, except anyone who joined late in the story (like Madeline and Jesse), who you hire again.`;
   const after = S.cred + g;
   // the next Credibility point arrives when this run's earnings reach (g + 1)^2 x 10M
   const nextAt = Math.max(REINSTATE_MIN, (g + 1) ** 2 * 1e7), left = Math.max(0, nextAt - S.run);

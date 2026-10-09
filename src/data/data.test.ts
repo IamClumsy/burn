@@ -217,6 +217,13 @@ describe("data integrity", () => {
     expect(MISSIONS.filter(m => m.ally === "jesse").length).toBeGreaterThanOrEqual(10);
   });
 
+  it("Madeline joins in Season 3, later than Nate and the rest of the early crew", () => {
+    const m = ALLIES.find(a => a.id === "madeline")!, n = ALLIES.find(a => a.id === "nate")!;
+    expect([m.debut, m.debutEp]).toEqual([3, "302"]);
+    expect(m.cost).toBeGreaterThan(n.cost);
+    expect(MISSIONS.filter(x => x.ally === "madeline").every(x => +x.ep! >= 302)).toBe(true);
+  });
+
   it("Madeline costs more than Barry, who helps from the start", () => {
     const cost = (id: string) => ALLIES.find(a => a.id === id)!.cost;
     expect(cost("madeline")).toBeGreaterThan(cost("barry"));
@@ -224,7 +231,7 @@ describe("data integrity", () => {
 
   it("Madeline only gets missions with kids or older folks", () => {
     const hers = MISSIONS.filter(m => m.ally === "madeline");
-    expect(hers.length).toBeGreaterThanOrEqual(8);
+    expect(hers.length).toBeGreaterThanOrEqual(5);
     for (const m of hers) expect(m.kid || m.elder, m.n).toBeTruthy();
     for (const a of ARCS) expect(a.ally, a.id).not.toBe("madeline");
     expect(MISSIONS.filter(m => m.elder).length).toBeGreaterThanOrEqual(3);

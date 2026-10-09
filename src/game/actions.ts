@@ -173,7 +173,7 @@ export function payOffFixer(): void {
   newFixer(); // that fixer's done; someone else will be along with a different price
 }
 
-/** Allies who debut in a later season (like Jesse) have to be hired again after a reset, since the story starts over. */
+/** Allies who debut in a later season (like Madeline and Jesse) have to be hired again after a reset, since the story starts over. */
 function keptAllies(): Record<string, boolean> {
   const later = new Set(ALLIES.filter(a => a.debut).map(a => a.id));
   return Object.fromEntries(Object.entries(S.allies).filter(([id]) => !later.has(id)));
@@ -182,7 +182,7 @@ function keptAllies(): Record<string, boolean> {
 export function prestige(): void {
   const gain = credGain();
   if (gain < 1) return;
-  if (!confirm(`Get reinstated? You reset cash, ops, upgrades and missions, but gain ${gain} Credibility (+${gain * 10}% income) and ${gain} favors. Allies who joined late in the story, like Jesse, have to be hired again. Perks, medals and story are kept.`)) return;
+  if (!confirm(`Get reinstated? You reset cash, ops, upgrades and missions, but gain ${gain} Credibility (+${gain * 10}% income) and ${gain} favors. Allies who joined late in the story, like Madeline and Jesse, have to be hired again. Perks, medals and story are kept.`)) return;
   S.stats.bestRun = Math.max(S.stats.bestRun, S.run);
   const hadFiona = !!S.allies.fiona;
   const keep = {

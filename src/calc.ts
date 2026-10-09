@@ -207,15 +207,26 @@ export const REINSTATE_MIN = 1e8;
 export const credGain = (): number => (S.run < REINSTATE_MIN ? 0 : Math.floor(Math.sqrt(S.run / 1e7)));
 
 // ---- missions
-/** Every Season 1 episode done? Season 2 doesn't open until it is, so nobody skips the early cases. */
-export const seasonOneLeft = (): number => MISSIONS.filter(t => t.ep && seasonOf(t.ep) === 1 && !S.episodesDone[t.ep]).length;
+/** How many episodes of a Season you haven't done yet. */
+export const seasonLeft = (season: number): number => MISSIONS.filter(t => t.ep && seasonOf(t.ep) === season && !S.episodesDone[t.ep]).length;
 /**
- * How many Seasons are open: by lifetime earnings, except Season 2 also needs all of Season 1 done.
- * Anyone who already reached Season 2 keeps it, so saves from before this rule aren't locked out.
+ * How many Seasons are open: by lifetime earnings, except each new Season also needs every case of the one before it done,
+ * so nobody skips an episode. A Season you've already reached stays open, so saves from before this rule aren't locked out.
  */
 export const openSeasons = (): number => {
   const byMoney = seasonsOpen(S.life);
-  return S.seasonGate && byMoney >= 2 && S.seasonOpen < 2 && seasonOneLeft() > 0 ? 1 : byMoney;
+  if (!S.seasonGate) return byMoney;
+  let open = 1;
+  for (let s = 2; s <= byMoney; s++) {
+    if (s > S.seasonOpen && seasonLeft(s - 1) > 0) break; // the Season before it isn't finished
+    open = s;
+  }
+  return open;
+};
+/** The Season whose unfinished cases are holding the next one back (you've earned it, but haven't seen everything), or 0. */
+export const waitingOn = (): number => {
+  const open = openSeasons();
+  return seasonsOpen(S.life) > open ? open : 0;
 };
 /** Hired and actually around: Nate is only here when he hasn't wandered off. */
 export const allyHere = (id: string): boolean => !!S.allies[id] && !awayWhy(id);

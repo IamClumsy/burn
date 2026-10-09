@@ -1,5 +1,5 @@
 import { S, earn } from "../state";
-import { attNet, cps, heatNet, inFlashback, openSeasons, owned } from "../calc";
+import { attNet, cps, heatNet, inFlashback, openSeasons, owned, seasonLeft, waitingOn } from "../calc";
 import { checkEnding, tickOrg } from "./org";
 import { STORY } from "../data/story";
 import { SEASON_GRIP } from "../data/org";
@@ -42,6 +42,11 @@ export function milestones(): void {
   if (!S.backupNudged && S.stats.time >= 7200) {
     S.backupNudged = true;
     toast("Back up your save", "Your game lives in this browser only. Use export at the bottom of the page to keep a copy, just in case.");
+  }
+  const waiting = waitingOn();
+  if (waiting && !S.seen["wait" + waiting]) { // earned the next Season but haven't seen everything yet: say so once
+    S.seen["wait" + waiting] = 1;
+    toast(`Season ${waiting + 1} is waiting`, `You've earned it, but it opens once you've done every Season ${waiting} case (${seasonLeft(waiting)} left). Those cases will turn up more often now.`, "story");
   }
   const open = openSeasons();
   if (open > S.seasonOpen) {

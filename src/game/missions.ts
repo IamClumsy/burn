@@ -1,5 +1,5 @@
 import { S, payClient } from "../state";
-import { allyFree, awayWhy, heatMult, inFlashback, openSeasons, slotOpen, wouldBeHelped, missionReward, succChance } from "../calc";
+import { allyFree, awayWhy, heatMult, inFlashback, openSeasons, slotOpen, waitingOn, wouldBeHelped, missionReward, succChance } from "../calc";
 import { MISSIONS, episodeOf, missionUnlocked, seasonOf } from "../data/missions";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
@@ -19,7 +19,8 @@ import type { ActiveMission, Mission } from "../types";
 export function missionWeight(t: { ep?: string }): number {
   const unseen = t.ep ? !S.episodesDone[t.ep] : false;
   const current = t.ep ? seasonOf(t.ep) === openSeasons() : false;
-  return (unseen ? 4 : 1) * (current ? 3 : 1);
+  const holdingBack = unseen && !!t.ep && seasonOf(t.ep) === waitingOn(); // the next Season is waiting on this one: bring it up even more
+  return (unseen ? 4 : 1) * (current ? 3 : 1) * (holdingBack ? 3 : 1);
 }
 
 /** Depth Perception (Beatriz) is the Season 5 finale of sorts: it holds back until every other Season 5 case is done. */

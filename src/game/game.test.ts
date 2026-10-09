@@ -54,7 +54,7 @@ import { clientCut, crewCut } from "../data/automation";
 import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from "../data/samAxe";
 import { earn, merge } from "../state";
 import { loadGame, readSave, save } from "../persist";
-import { openSeasons, seasonOneLeft } from "../calc";
+import { openSeasons, seasonLeft, waitingOn } from "../calc";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
 import { menuNew } from "../ui/badges";
@@ -1957,24 +1957,50 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
   });
 
-  it("Season 2 needs every Season 1 case done as well as the money", () => {
-    S.life = 5e6; S.seasonOpen = 1; S.seasonGate = true; S.episodesDone = {}; S.board = []; S.active = [];
-    expect(seasonsOpen(S.life)).toBeGreaterThanOrEqual(2);       // the money alone would open it
+  it("each Season also needs every case of the one before it done, not just the money", () => {
+    S.seasonGate = true; S.seasonOpen = 1; S.episodesDone = {}; S.board = []; S.active = [];
+    const seasonOf1 = (n: number) => MISSIONS.filter(m => seasonOf(m.ep!) === n);
+    S.life = 5e6;                                                  // the money alone would open Seasons 1 to 3
+    expect(seasonsOpen(S.life)).toBeGreaterThanOrEqual(3);
     expect(openSeasons()).toBe(1);
-    expect(seasonOneLeft()).toBe(MISSIONS.filter(m => seasonOf(m.ep!) === 1).length);
+    expect(waitingOn()).toBe(1);
+    expect(seasonLeft(1)).toBe(seasonOf1(1).length);
     for (let i = 0; i < 100; i++) { S.board = []; fillBoard(); expect(S.board.every(m => seasonOf(m.ep!) === 1)).toBe(true); }
     expect(panelHTML("mis")).toContain("Season 2 is waiting");
     expect(panelHTML("file")).toMatch(/finish Season 1/);
-    for (const m of MISSIONS) if (seasonOf(m.ep!) === 1) S.episodesDone[m.ep!] = true;
-    expect(seasonOneLeft()).toBe(0);
-    expect(openSeasons()).toBeGreaterThanOrEqual(2);
-    expect(panelHTML("mis")).not.toContain("Season 2 is waiting");
+    for (const m of seasonOf1(1)) S.episodesDone[m.ep!] = true;
+    expect(openSeasons()).toBe(2);                                // Season 1 done opens Season 2, but 3 still waits on 2
+    expect(waitingOn()).toBe(2);
+    expect(panelHTML("mis")).toContain("Season 3 is waiting");
+    for (const m of seasonOf1(2)) S.episodesDone[m.ep!] = true;
+    expect(openSeasons()).toBeGreaterThanOrEqual(3);
     S.seasonGate = false;
   });
 
-  it("anyone who already reached Season 2 keeps it, whatever their record says", () => {
-    S.life = 5e6; S.seasonOpen = 2; S.seasonGate = true; S.episodesDone = {};
-    expect(openSeasons()).toBeGreaterThanOrEqual(2);
+  it("you're told once when a Season is waiting on the one before it", () => {
+    S.seasonGate = true; S.seasonOpen = 1; S.life = 5e6; S.episodesDone = {}; S.story = 99; S.intel = 2; dismissAllNotices();
+    milestones();
+    expect(document.getElementById("nT")!.textContent + document.getElementById("nM")!.textContent).toMatch(/Season 2 is waiting/);
+    dismissAllNotices();
+    milestones();
+    expect(noticeOpen()).toBe(false);
+    S.seasonGate = false;
+  });
+
+  it("while a Season is waiting, its missing episodes come up far more often", () => {
+    S.seasonGate = true; S.seasonOpen = 1; S.life = 5e6; S.episodesDone = {};
+    const s1 = MISSIONS.find(m => seasonOf(m.ep!) === 1)!;
+    const waiting = missionWeight(s1);
+    S.seasonGate = false;                                         // nothing waiting
+    expect(waiting).toBeGreaterThan(missionWeight(s1));
+    S.episodesDone[s1.ep!] = true; S.seasonGate = true;           // once done, it falls back into the normal rotation
+    expect(missionWeight(s1)).toBe(1 * (seasonOf(s1.ep!) === openSeasons() ? 3 : 1));
+    S.seasonGate = false;
+  });
+
+  it("anyone who already reached a Season keeps it, whatever their record says", () => {
+    S.life = 5e6; S.seasonOpen = 3; S.seasonGate = true; S.episodesDone = {};
+    expect(openSeasons()).toBeGreaterThanOrEqual(3);
   });
 
   it("closing an Open Case counts its episode as seen, and cases closed earlier are counted when a save loads", () => {

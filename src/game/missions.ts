@@ -30,8 +30,10 @@ function weightedMission<T extends { ep?: string }>(list: T[]): T {
 export function newMission(): Mission {
   // Only seasons you've unlocked, and nothing that's already on the board or running.
   const open = MISSIONS.filter(t => missionUnlocked(t, S.life));
-  const fresh = open.filter(t => !S.board.some(m => m.n === t.n) && !S.active.some(m => m.n === t.n));
-  const t = weightedMission(fresh.length ? fresh : open);
+  // someone who's away (Nate wandered off, Fiona taken) can't help, so at most one of their cases waits on the board
+  const blocked = (ally: string) => !!awayWhy(ally) && S.board.some(m => m.ally === ally);
+  const fresh = open.filter(t => !S.board.some(m => m.n === t.n) && !S.active.some(m => m.n === t.n) && !blocked(t.ally));
+  const t = weightedMission(fresh.length ? fresh : open.filter(x => !blocked(x.ally)).length ? open.filter(x => !blocked(x.ally)) : open);
   return {
     uid: S.uid++, n: t.n, dur: t.dur, succ: t.succ, heat: t.heat, rm: t.rm, fav: t.fav, ally: t.ally,
     kid: !!t.kid, elder: !!t.elder, send: false, ep: t.ep, epTitle: t.epTitle,
@@ -39,6 +41,14 @@ export function newMission(): Mission {
 }
 
 export function fillBoard(): void {
+  // if someone just left, keep only the first of their cases and swap the rest for something you can actually do
+  const kept = new Set<string>();
+  S.board = S.board.filter(m => {
+    if (!awayWhy(m.ally)) return true;
+    if (kept.has(m.ally)) return false;
+    kept.add(m.ally);
+    return true;
+  });
   while (S.board.length < 3) S.board.push(newMission());
 }
 

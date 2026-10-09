@@ -1240,6 +1240,36 @@ describe("The board favors this season's cases", () => {
   });
 });
 
+describe("The board when someone is away", () => {
+  it("at most one of Nate's cases waits on the board while he's away", () => {
+    S.allies.nate = true; S.nateAway = true; S.life = 1e12;
+    for (let i = 0; i < 300; i++) {
+      S.board = []; fillBoard();
+      expect(S.board.filter(m => m.ally === "nate").length).toBeLessThanOrEqual(1);
+      expect(S.board.length).toBe(3);
+    }
+  });
+
+  it("when he wanders off, extra Nate cases already on the board are swapped for others", () => {
+    S.life = 1e12; S.allies.nate = true; S.nateAway = false;
+    const nateCases = MISSIONS.filter(m => m.ally === "nate").slice(0, 3);
+    S.board = nateCases.map((t, i) => ({ uid: 9000 + i, n: t.n, dur: t.dur, succ: t.succ, heat: t.heat, rm: t.rm, fav: t.fav, ally: t.ally, kid: false, elder: false, send: false, ep: t.ep, epTitle: t.epTitle }));
+    fillBoard();
+    expect(S.board.filter(m => m.ally === "nate").length).toBe(3); // he's around: fine
+    S.nateAway = true;
+    fillBoard();
+    expect(S.board.filter(m => m.ally === "nate").length).toBe(1);
+    expect(S.board.length).toBe(3);
+  });
+
+  it("with him around, his cases come up as normal", () => {
+    S.allies.nate = true; S.nateAway = false; S.life = 1e12;
+    let most = 0;
+    for (let i = 0; i < 3000; i++) { S.board = []; fillBoard(); most = Math.max(most, S.board.filter(m => m.ally === "nate").length); }
+    expect(most).toBeGreaterThanOrEqual(2);
+  });
+});
+
 describe("Crew events", () => {
   it("events about a crew member only come up once they're on the crew", () => {
     const gated = EVENTS.filter(e => e.needs);

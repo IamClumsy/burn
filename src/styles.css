@@ -163,6 +163,7 @@
   #evt .dlg.client h3{color:var(--sea);font-size:20px}
   #evt .dlg.client .evtbig{display:block}
   #evt .dlg.inquiry{background:#e9dfc8;color:#2b2418;border:2px solid #8a7a55;border-radius:4px;box-shadow:0 20px 60px #000c;font-family:Georgia,"Times New Roman",serif;max-width:520px}
+  #evt .dlg.inquiry #evtD{white-space:pre-line}
   #evt .dlg.inquiry h3{color:#5a1d14;font-size:19px;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid #8a7a55;padding-bottom:6px}
   #evt .dlg.inquiry p,#evt .dlg.inquiry .evtd{color:#2b2418;font-style:italic}
   #evt .dlg.inquiry button{background:#d8cba9;color:#2b2418;border:1px solid #8a7a55;font-family:inherit}

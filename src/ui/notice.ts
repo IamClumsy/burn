@@ -63,6 +63,12 @@ export function dismissNotice(): void {
   pumpNotices();
 }
 
+/** Take any waiting notification with this title out of the queue (not the one on screen), because something else already told you. */
+export function dropNotice(title: string): void {
+  for (let i = queue.length - 1; i >= 0; i--) if (queue[i].title === title && !(showing && i === 0)) queue.splice(i, 1);
+  if (showing) paintCount();
+}
+
 export function dismissAllNotices(): void {
   queue.length = 0;
   showing = false;

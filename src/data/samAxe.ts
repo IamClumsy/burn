@@ -55,6 +55,13 @@ export const SAM_ACTS: SamAct[] = [
   },
 ];
 
+/** The beat between Act Four's answer and the showdown: the road empties and the engines get louder. */
+export const SAM_BRIDGE = {
+  title: "The Road",
+  scene: "The sound reaches the village before the trucks do: engines, far off and coming fast. The goat farmers have taken their places, the clinic is a long way behind them, and Sam stands in the middle of a dirt road with no plan he'd admit to in front of an Admiral. Commandante Veracruz is coming down the mountain with every truck he can find.",
+  go: "Hold the road",
+};
+
 /** The steps between acts: the Admiral cuts in, Sam carries on. No choice to make, just the story. */
 export const SAM_BEATS: Record<number, { title: string; inquiry: string; go: string }> = {
   1: {

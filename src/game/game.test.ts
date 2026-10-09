@@ -51,7 +51,7 @@ import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
 import { MISSIONS, seasonsOpen } from "../data/missions";
 import { clientCut, crewCut } from "../data/automation";
-import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS } from "../data/samAxe";
+import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from "../data/samAxe";
 import { earn, merge } from "../state";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
@@ -1599,7 +1599,10 @@ describe("The Fall of Sam Axe", () => {
       dismissAllNotices(); // a pop-up on screen means you're not starting anything yet
       startArc("samfall");
       const st = SAM_ARC.steps[step];
-      if (st.act !== undefined) { expect(document.getElementById("evtT")!.textContent, `act ${st.act}`).toContain("The Fall of Sam Axe"); answer(0); }
+      if (st.act !== undefined) {
+        expect(document.getElementById("evtT")!.textContent, `act ${st.act}`).toContain("The Fall of Sam Axe"); answer(0);
+        if (st.boss) { expect(document.getElementById("evtT")!.textContent).toContain(SAM_BRIDGE.title); expect(S.boss).toBe(null); answer(0); } // a scene before the showdown
+      }
       else if (SAM_BEATS[step]) { expect(document.getElementById("evtT")!.textContent, `beat ${step}`).toContain("Continued"); answer(0); }
       if (st.boss) {
         expect(S.boss!.id).toBe("veracruz");
@@ -1770,6 +1773,24 @@ describe("The Fall of Sam Axe", () => {
     expect(S.active[0].dur).toBe(Math.round(SAM_ARC.steps[1].dur / 2));
     expect(S.active[0].left).toBe(S.active[0].dur);
     S.active = []; S.arcStep[SAM_ARC_ID] = 0;
+  });
+
+  it("a scene sits between the last answer and the showdown, carries the answer's result, and isn't repeated on a retry", () => {
+    S.life = 5e8; S.allies.sam = true; dismissAllNotices();
+    S.arcStep[SAM_ARC_ID] = 6; S.samChoices[0] = 0; S.samChoices[1] = 0; S.samChoices[2] = 0;
+    startArc("samfall");
+    answer(1);                                        // Act Four's answer opens the scene, not the fight
+    expect(document.getElementById("evtT")!.textContent).toContain(SAM_BRIDGE.title);
+    expect(document.getElementById("evtD")!.textContent).toContain(SAM_ACTS[3].options[1].result);
+    expect(document.getElementById("evtD")!.textContent).toContain("engines");
+    expect(S.boss).toBe(null);
+    expect(noticeOpen()).toBe(false);                 // the result isn't told twice
+    answer(0);
+    expect(S.boss?.id).toBe("veracruz");
+    S.boss = null; dismissAllNotices();
+    startArc("samfall");                              // trying again goes straight to the fight
+    expect((S.boss as { id: string } | null)?.id).toBe("veracruz");
+    S.boss = null;
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

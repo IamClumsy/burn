@@ -6,8 +6,9 @@ import { beep, chime } from "../audio";
 import { say as sayTag, toast } from "../ui/fx";
 import { reduceGrip } from "./org";
 import type { Arc, Mission } from "../types";
-import { BOWLING, SAM_ACTS, SAM_BEATS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
+import { BOWLING, SAM_ACTS, SAM_BEATS, SAM_BRIDGE, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
 import { choiceBusy, showChoice } from "../ui/choice";
+import { dropNotice } from "../ui/notice";
 import { startFlashbackBoss } from "./bosses";
 const say = (t: string): void => sayTag(t, "mission");
 
@@ -49,7 +50,7 @@ export function startArc(id: string): void {
       S.samChoices[st.act!] = k;
       if (o.fx.favors) S.favors += o.fx.favors;
       return o.result;
-    }]), () => launchStep(a, step), { inquiry: true });
+    }]), res => launchStep(a, step, res, `The Fall of Sam Axe · ${act.title}`), { inquiry: true });
     return;
   }
   // The steps between acts get the Admiral cutting in too, once each, with nothing to decide.
@@ -62,11 +63,17 @@ export function startArc(id: string): void {
   launchStep(a, step);
 }
 
-function launchStep(a: Arc, step: number): void {
+function launchStep(a: Arc, step: number, prior?: string, priorTitle?: string): void {
   const st = a.steps[step];
   if (S.active.length >= 3 || arcAvailable(a) === false) return;
   if (st.boss) { // a showdown instead of a mission
     if (S.boss) { say("Finish the case you're on first. The road will still be there."); return; }
+    if (a.id === SAM_ARC_ID && !S.samChoices.bridge && prior !== undefined) { // a beat between the last answer and the fight
+      if (priorTitle) dropNotice(priorTitle); // its result is in this scene, so it needn't pop up again
+      showChoice(`The Fall of Sam Axe · ${SAM_BRIDGE.title}`, `${prior}\n\n${SAM_BRIDGE.scene}`, [[SAM_BRIDGE.go, () => { S.samChoices.bridge = 1; return "Sam holds the road."; }]],
+        () => launchStep(a, step), { inquiry: true });
+      return;
+    }
     startFlashbackBoss(st.boss, a.id, step);
     return;
   }

@@ -25,6 +25,7 @@ import { MEDALS } from "../data/medals";
 import { attNet, buyN, bulkCost, heatFactors, heatGain, heatNet } from "../calc";
 import { GRIP_PERKS, SEASON_GRIP, TIERS, handlerFor } from "../data/org";
 import { OP_TIERS, UPGS } from "../data/upgrades";
+import { ALLIES } from "../data/allies";
 import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
 import { loftBadges } from "../ui/badges";
@@ -1358,6 +1359,35 @@ describe("The heat and attention info view", () => {
 
   it("the Loft has an info button on both bars", () => {
     expect(document.querySelectorAll('.infobtn[data-modal="heatinfo"]').length).toBe(2);
+  });
+});
+
+describe("Crew abilities are worth the cooldown", () => {
+  const gainFrom = (id: string): number => {
+    S.gens = { inf: 60, tape: 30 }; S.allies[id] = true; S.cash = 0; S.allyCd = {};
+    const before = S.cash; useAbility(id);
+    return (S.cash - before) / cps();
+  };
+
+  it("Sam, Fiona and Barry hand over minutes of income, not seconds", () => {
+    expect(gainFrom("sam")).toBeGreaterThanOrEqual(239);
+    expect(gainFrom("fiona")).toBeGreaterThanOrEqual(419);
+    expect(gainFrom("barry")).toBeGreaterThanOrEqual(299);
+  });
+
+  it("Jesse's Fast Talk lasts four minutes", () => {
+    S.allies.jesse = true; S.allyCd = {};
+    useAbility("jesse");
+    expect(S.fx.fast).toBe(240);
+  });
+
+  it("the descriptions on the cards say how long and how much", () => {
+    const d = (id: string) => ALLIES.find(a => a.id === id)!.abDesc;
+    expect(d("sam")).toMatch(/4 minutes/);
+    expect(d("fiona")).toMatch(/7 minutes/);
+    expect(d("barry")).toMatch(/5 minutes/);
+    expect(d("jesse")).toMatch(/4 minutes/);
+    expect(d("nate")).toMatch(/10 minutes/);
   });
 });
 

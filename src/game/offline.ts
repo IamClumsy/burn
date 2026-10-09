@@ -1,11 +1,12 @@
 import { S, earn } from "../state";
 import { cps } from "../calc";
 import { money } from "../util";
-import { say } from "../ui/fx";
+import { say as sayTag } from "../ui/fx";
 import { holdNotices, notify, releaseNotices } from "../ui/notice";
 import { resolveMission } from "./missions";
 import { tickBusy, tickNate } from "./tick";
 import { tickOrg } from "./org";
+const say = (t: string): void => sayTag(t, "away");
 
 /** The longest stretch the game will catch up on in one go. */
 export const AWAY_CAP = 24 * 3600;

@@ -4,19 +4,26 @@ import { notify, type NoticeKind } from "./notice";
 
 let freshTimer: ReturnType<typeof setTimeout> | undefined;
 
+/** What kind of thing the narrator is talking about, for color in the Narrator pop-up. */
+export type NarrationTag = "note" | "mission" | "fail" | "boss" | "heat" | "org" | "crew" | "story" | "quote" | "away" | "client" | "deal" | "decision";
+/** Where it happened: an episode label and its Season, for missions and cases. */
+export interface NarrationMeta { label?: string; season?: number; name?: string }
+export interface NarrationEntry { text: string; tag: NarrationTag; meta?: NarrationMeta }
+
 /** Everything the narrator has said, newest first, for the Narrator pop-up. */
-const history: string[] = [];
-export const narrationLines = (): readonly string[] => history;
+const history: NarrationEntry[] = [];
+export const narration = (): readonly NarrationEntry[] => history;
+export const narrationLines = (): readonly string[] => history.map(h => h.text);
 export const clearNarration = (): void => { history.length = 0; };
 
 /** Narrate a line: it goes to the top of the history and into the strip under the header. */
-export function say(t: string): void {
+export function say(t: string, tag: NarrationTag = "note", meta?: NarrationMeta): void {
   const log = $("log");
   const p = document.createElement("p");
   p.textContent = t;
   log.prepend(p);
   while (log.children.length > 40) log.lastChild!.remove();
-  history.unshift(t);
+  history.unshift({ text: t, tag, meta });
   if (history.length > 150) history.length = 150;
 
   $("vo-latest").textContent = t;

@@ -2,9 +2,10 @@ import { S } from "../state";
 import { allyFree, missionReward, succChance } from "../calc";
 import { ARCS } from "../data/arcs";
 import { beep, chime } from "../audio";
-import { say, toast } from "../ui/fx";
+import { say as sayTag, toast } from "../ui/fx";
 import { reduceGrip } from "./org";
 import type { Arc, Mission } from "../types";
+const say = (t: string): void => sayTag(t, "mission");
 
 export const arcStep = (a: Arc): number => S.arcStep[a.id] || 0;
 
@@ -36,9 +37,9 @@ export function advanceArc(id: string, step: number): void {
     reduceGrip(8);
     chime();
     toast("Case closed: " + a.title, `+${a.favors} favors. ${a.epilogue}`, "good");
-    say(a.epilogue);
+    sayTag(a.epilogue, "mission", { label: `Case closed · ${a.title}`, name: a.title });
   } else {
-    say(`${a.title}: step ${step + 1} done. Next up: ${a.steps[step + 1].n}.`);
+    sayTag(`${a.title}: step ${step + 1} done. Next up: ${a.steps[step + 1].n}.`, "mission", { label: `Open case · ${a.title}`, name: a.title });
   }
 }
 

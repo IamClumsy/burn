@@ -7,12 +7,13 @@ import { MEDALS } from "../data/medals";
 import { seasonsOpen } from "../data/missions";
 import { chime } from "../audio";
 import { pick } from "../util";
-import { say, toast } from "../ui/fx";
+import { say as sayTag, toast } from "../ui/fx";
 import { LINES, NATE_BEATS } from "../data/text";
 import { choiceBusy, showChoice } from "../ui/choice";
 import { checkAmbush, checkBurn, layLow } from "./heat";
 import { fillBoard, resolveMission } from "./missions";
 import { tickBoss } from "./bosses";
+const say = (t: string): void => sayTag(t, "story");
 
 let sec = 0;
 
@@ -73,7 +74,7 @@ export function tickBusy(dt: number): void {
   if (S.busy.left > 0) return;
   const who = S.busy.who;
   S.busy = null;
-  say(`${who} finally lets you go. You've lost an afternoon, but you've got a favor and, somehow, a new handshake.`);
+  sayTag(`${who} finally lets you go. You've lost an afternoon, but you've got a favor and, somehow, a new handshake.`, "deal");
 }
 
 /** Nate comes back: his next story beat the first few times, otherwise a line about it. */
@@ -83,12 +84,12 @@ export function nateReturns(): void {
   if (S.nateStage < NATE_BEATS.length) {
     const beat = NATE_BEATS[S.nateStage++];
     toast(beat.title, beat.text);
-    say(beat.text);
+    sayTag(beat.text, "crew");
     return;
   }
   const line = pick(LINES.nateBack);
   toast("Nate's back", line);
-  say(line);
+  sayTag(line, "crew");
 }
 
 /** Nate wanders off and wanders back on a random timer (20 to 60 minutes away), because it's Nate. */
@@ -101,7 +102,7 @@ export function tickNate(dt: number): void {
   S.nateTimer = 1200 + Math.random() * 2400;
   const line = pick([...LINES.nateAway, ...(S.nateStage === 1 ? LINES.nateAwayVegas : []), ...(S.nateStage >= 2 ? LINES.nateAwayHome : [])]);
   toast("Nate wandered off", line);
-  say(line);
+  sayTag(line, "crew");
 }
 
 export function tick(dt: number): void {

@@ -13,13 +13,14 @@ import { RECIPES } from "../data/perks";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
 import { pick } from "../util";
-import { say, toast } from "../ui/fx";
+import { say as sayTag, toast } from "../ui/fx";
 import { ABILITIES } from "./abilities";
 import { checkBurn } from "./heat";
 import { newFixer, simonTip } from "./org";
 import { SEYMOUR_HANGOUTS } from "../data/contacts";
 import { allyAvailable } from "../calc";
 import { fillBoard, startMission } from "./missions";
+const say = (t: string): void => sayTag(t, "deal");
 
 export function buyGen(id: string): void {
   const g = GENS.find(x => x.id === id)!, n = buyN(g), c = bulkCost(g, n);

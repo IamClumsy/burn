@@ -40,7 +40,7 @@ export function showChoice(
     if (style.primary === i) b.className = "primary";
     b.onclick = () => {
       const result = run();
-      say(result);
+      say(result, "decision");
       toast(title, result);
       $("evt").style.display = "none";
       open = false;

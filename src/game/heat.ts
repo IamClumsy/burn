@@ -3,8 +3,9 @@ import { bossDef, layAmt, layCdMax } from "../calc";
 import { LINES } from "../data/text";
 import { beep } from "../audio";
 import { pick } from "../util";
-import { flashBanner, say, shake } from "../ui/fx";
+import { flashBanner, say as sayTag, shake } from "../ui/fx";
 import { fillBoard } from "./missions";
+const say = (t: string): void => sayTag(t, "heat");
 
 export const layBlocked = (): boolean => !!S.boss && !!bossDef()?.m.includes("nolay");
 

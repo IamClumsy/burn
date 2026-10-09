@@ -6,8 +6,9 @@ import { chime } from "../audio";
 import { money, pick } from "../util";
 import { choiceBusy, showChoice } from "../ui/choice";
 import { render } from "../ui/render";
-import { say } from "../ui/fx";
+import { say as sayTag } from "../ui/fx";
 import { checkBurn } from "./heat";
+const say = (t: string): void => sayTag(t, "client");
 
 export function spawnEvent(): void {
   if (choiceBusy() || S.boss) { setTimeout(spawnEvent, 15000); return; }

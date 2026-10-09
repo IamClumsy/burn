@@ -30,7 +30,7 @@ import { ALLIES } from "../data/allies";
 import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
 import { loftBadges } from "../ui/badges";
-import { clearNarration, say, toast } from "../ui/fx";
+import { clearNarration, narration, say, toast } from "../ui/fx";
 import { dismissAllNotices, dismissNotice, initNotices, noticeCount, noticeOpen, setNoticeGate } from "../ui/notice";
 import { showChoice, choiceBusy } from "../ui/choice";
 import { CONTACT_CAP, allyFree, allyHere, contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance } from "../calc";
@@ -1100,9 +1100,39 @@ describe("The Narrator pop-up", () => {
   it("shows what the narrator has said, newest first and bigger", () => {
     say("First thing."); say("Second thing."); say("Third thing.");
     const html = panelHTML("narrator");
-    expect(html).toMatch(/class="now">Third thing\./);
+    expect(html).toMatch(/nl-note now[^>]*><p>Third thing\./);
     expect(html.indexOf("Second thing.")).toBeLessThan(html.indexOf("First thing."));
     expect(html).toContain("The last 3 things");
+  });
+
+  it("colors each line by what it's about, and puts the episode on mission lines", () => {
+    S.board = []; fillBoard();
+    const t = MISSIONS.find(x => x.ep === "505")!;
+    const m = { uid: 7001, n: t.n, dur: 1, succ: 1, heat: 1, rm: 1, fav: 1, ally: t.ally, kid: false, elder: false, send: false, ep: t.ep, epTitle: t.epTitle, sent: null, left: 0, chance: 1, reward: 100 };
+    S.active = [m];
+    resolveMission(m);
+    const tags = narration().map(e => e.tag);
+    expect(tags).toContain("mission");
+    const withEp = narration().find(e => e.meta?.season === 5)!;
+    expect(withEp.meta!.label).toBe("S5 · E5 · Square One");
+    const html = panelHTML("narrator");
+    expect(html).toContain("nl-mission");
+    expect(html).toMatch(/nl-ep s5">S5 · E5 · Square One/);
+    expect(html).toContain("Mission</span>");
+  });
+
+  it("failures, boss lines and crew lines get their own colors", () => {
+    const t = MISSIONS.find(x => x.ep === "303")!;
+    const m = { uid: 7002, n: t.n, dur: 1, succ: 0, heat: 1, rm: 1, fav: 1, ally: t.ally, kid: false, elder: false, send: false, ep: t.ep, epTitle: t.epTitle, sent: null, left: 0, chance: 0, reward: 100 };
+    S.active = [m];
+    resolveMission(m);
+    S.allies.nate = true; S.nateAway = false; S.nateStage = 3; S.nateTimer = 0;
+    tickNate(0.1);
+    S.life = 1e13; spawnBoss();
+    const tags = new Set(narration().map(e => e.tag));
+    for (const k of ["fail", "crew", "boss"]) expect(tags.has(k as never), k).toBe(true);
+    const html = panelHTML("narrator");
+    for (const k of ["nl-fail", "nl-crew", "nl-boss"]) expect(html, k).toContain(k);
   });
 
   it("says so when there's nothing to read yet", () => {

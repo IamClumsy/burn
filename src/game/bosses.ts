@@ -5,10 +5,11 @@ import type { CaseAction } from "../types";
 import { BOSSES } from "../data/bosses";
 import { beep, chime } from "../audio";
 import { fmt, money, pick } from "../util";
-import { floatText, hitBoss, say, shake, toast } from "../ui/fx";
+import { floatText, hitBoss, say as sayTag, shake, toast } from "../ui/fx";
 import { checkBurn } from "./heat";
 import { learnName, reduceGrip } from "./org";
 import { nextBossGap } from "../data/pacing";
+const say = (t: string): void => sayTag(t, "boss");
 
 export function spawnBoss(): void {
   const pool = BOSSES.filter(b => S.life >= b.at && (!b.needs || S.allies[b.needs]));

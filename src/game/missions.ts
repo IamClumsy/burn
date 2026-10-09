@@ -1,10 +1,10 @@
 import { S, payClient } from "../state";
 import { allyFree, awayWhy, heatMult, missionReward, succChance } from "../calc";
-import { MISSIONS, missionUnlocked, seasonOf, seasonsOpen } from "../data/missions";
+import { MISSIONS, episodeOf, missionUnlocked, seasonOf, seasonsOpen } from "../data/missions";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
 import { money, pick } from "../util";
-import { say, toast } from "../ui/fx";
+import { say, toast, type NarrationMeta } from "../ui/fx";
 import { advanceArc, failArcStep } from "./arcs";
 import { reduceGrip } from "./org";
 import { EP_NOTES, outcomeLine } from "../data/episodeNotes";
@@ -70,30 +70,35 @@ const KID_LINES = [
   "You don't lose when there's a kid involved. You just don't.",
 ];
 
+/** Where a mission's story belongs, for the narrator: its episode, Season and name. */
+const missionMeta = (m: { n: string; ep?: string; epTitle?: string }): NarrationMeta =>
+  m.ep ? { label: `S${seasonOf(m.ep)} · E${episodeOf(m.ep)} · ${m.epTitle || ""}`, season: seasonOf(m.ep), name: m.n } : { name: m.n };
+
 export function resolveMission(m: ActiveMission): void {
+  const meta = missionMeta(m);
   S.active = S.active.filter(x => x.uid !== m.uid);
   S.att = Math.min(100, S.att + 8);
   if (Math.random() < m.chance) {
     payClient(m.reward); S.favors += m.fav; S.heat += m.heat * heatMult(); S.stats.mDone++;
     if (m.kid) S.stats.kidMissions++;
-    if (m.kid && m.sent) { S.favors += 1; say("Having the right person along made all the difference. +1 favor."); }
+    if (m.kid && m.sent) { S.favors += 1; say("Having the right person along made all the difference. +1 favor.", "mission", meta); }
     if (m.arc) advanceArc(m.arc.id, m.arc.step);
     if (m.ep) S.episodesDone[m.ep] = true;
     reduceGrip(1);
-    say(m.kid ? pick(KID_LINES) : pick(LINES.mOk));
+    say(m.kid ? pick(KID_LINES) : pick(LINES.mOk), "mission", meta);
     const note = m.ep ? EP_NOTES[m.ep] : undefined;
     const won = outcomeLine(note, true, pick);
-    if (won) say(won);
-    if (note) say("Spy tip: " + note.tip);
-    if (Math.random() < 0.4) say(pick(LINES.returned));
+    if (won) say(won, "mission", meta);
+    if (note) say("Spy tip: " + note.tip, "mission", meta);
+    if (Math.random() < 0.4) say(pick(LINES.returned), "mission", meta);
     toast("Mission complete: " + m.n, `Paid ${money(m.reward)}. Expenses covered, the rest went back to the people who needed it. +${m.fav} favor`, "good");
     chime();
   } else {
     S.heat += m.heat * 1.5 * heatMult(); S.stats.mFail++;
     if (m.arc) failArcStep(m.arc.id);
-    say(pick(LINES.mBad));
+    say(pick(LINES.mBad), "fail", meta);
     const lost = outcomeLine(m.ep ? EP_NOTES[m.ep] : undefined, false, pick);
-    if (lost) say(lost);
+    if (lost) say(lost, "fail", meta);
     toast("Mission failed: " + m.n, "Extra heat, no pay.", "bad");
     beep(130, 0.3, "sawtooth", 0.06, -50);
   }

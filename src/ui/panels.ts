@@ -27,7 +27,7 @@ import { fmt, formatWait, money } from "../util";
 import { AUTOS } from "../data/automation";
 import { saveStatus } from "../saveStatus";
 import { menuNew } from "./badges";
-import { narrationLines } from "./fx";
+import { narration, type NarrationEntry, type NarrationTag } from "./fx";
 import { EPILOGUE, EPILOGUE_CLOSE, EPILOGUE_TITLE } from "../data/epilogue";
 
 export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "heatinfo" | "med" | "rep";
@@ -344,11 +344,22 @@ function heatInfo(): string {
     </ul>`;
 }
 
-/** The narrator's history in a pop-up, in bigger type, newest first. */
+/** What each kind of line is called in the Narrator pop-up (blank means it's just narration). */
+const NARR_TAGS: Record<NarrationTag, string> = {
+  note: "", quote: "", mission: "Mission", fail: "Setback", boss: "Case", heat: "Heat", org: "Organization",
+  crew: "Crew", story: "Story", away: "While you were away", client: "Client", deal: "Deal", decision: "Decision",
+};
+
+/** The narrator's history in a pop-up: bigger type, colored by what it's about, with the episode on mission lines. */
 function narrator(): string {
-  const lines = narrationLines();
+  const lines = narration();
   if (!lines.length) return `<div class="small">Nothing yet. The narrator is waiting for something to happen.</div>`;
-  return `<div class="narr"><p class="now">${lines[0]}</p>${lines.slice(1).map(l => `<p>${l}</p>`).join("")}</div>
+  const one = (e: NarrationEntry, i: number) => {
+    const label = NARR_TAGS[e.tag], season = e.meta?.season;
+    const chips = (label ? `<span class="nl-tag">${label}</span>` : "") + (e.meta?.label ? `<span class="nl-ep${season ? " s" + season : ""}">${e.meta.label}</span>` : "");
+    return `<div class="nl nl-${e.tag}${i === 0 ? " now" : ""}${season ? " s" + season : ""}">${chips ? `<div class="nl-head">${chips}</div>` : ""}<p>${e.text}</p></div>`;
+  };
+  return `<div class="narr">${lines.map(one).join("")}</div>
     <div class="small" style="margin-top:8px">The last ${lines.length} things the narrator said, newest at the top.</div>`;
 }
 

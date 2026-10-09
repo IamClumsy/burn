@@ -5,10 +5,11 @@ import { EPILOGUE_TITLE, epilogueText } from "../data/epilogue";
 import { ERRANDS, GRIP_PERKS, TIERS, TIER_DOWN, TIER_UP, handlerFor, rollFixer } from "../data/org";
 import { chime } from "../audio";
 import { money, pick } from "../util";
-import { say, toast } from "../ui/fx";
+import { say as sayTag, toast } from "../ui/fx";
 import { choiceBusy, showChoice } from "../ui/choice";
 import { render } from "../ui/render";
 import { checkBurn } from "./heat";
+const say = (t: string): void => sayTag(t, "org");
 
 // ---- attention stages ----
 let lastTier = 0;

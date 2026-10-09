@@ -63,24 +63,21 @@
   .dockfill i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ff8a3c);border-radius:6px}
   .dockbtn{flex:none;width:44px;height:44px;padding:0;border-radius:50%;font-size:18px;background:var(--panel);border:1px solid var(--line);line-height:1}
   .dockbtn.menu{border-radius:12px;width:50px;height:50px;font-size:22px}
-  .narr p{margin:0;padding:11px 2px;font-size:16px;line-height:1.6;color:var(--text);border-bottom:1px solid var(--line)}
-  .narr p.now{font-size:18px;color:#fff;border-left:3px solid var(--pink);padding-left:12px;background:#ff4fa30d}
-  .narr p:last-child{border-bottom:0}
-  .dockbtn.menu{position:relative}
-  .dockbtn.menu.has-new::after{content:"";position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:var(--pink);border:2px solid #150c20;box-shadow:0 0 8px var(--pink)}
-  .menugrid button{position:relative}
-  .menugrid button .newchip{position:absolute;top:6px;right:8px;font-size:10px;letter-spacing:1px;padding:1px 6px;border-radius:8px;background:var(--pink);color:#150c20;font-weight:700}
-  .infobtn{width:20px;height:20px;padding:0;margin-left:4px;border-radius:50%;font-size:12px;font-style:italic;font-family:Georgia,serif;line-height:1;vertical-align:middle;background:transparent;color:var(--dim);border:1px solid var(--line)}
-  .infobtn:hover:not(:disabled){color:var(--text);border-color:var(--pink);background-color:transparent}
-  .netbar{display:flex;align-items:center;gap:8px;width:100%;margin:-2px 0 6px;padding:2px 0;background:none;border:0;border-radius:0;font-size:11px;color:var(--dim);text-align:left}
-  .netbar:hover:not(:disabled){background:none;color:var(--text)}
-  .nb-lab{flex:none;min-width:74px;letter-spacing:.5px}
-  .nb-track{position:relative;flex:1;height:8px;border-radius:4px;background:#0b0610;border:1px solid var(--line);overflow:hidden}
-  .nb-track::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line)}
-  .nb-track i{position:absolute;top:0;bottom:0;left:50%;width:0;border-radius:4px}
-  .nb-val{flex:none;min-width:82px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
-  .netbar.up .nb-track i{background:var(--bad)} .netbar.up .nb-val{color:var(--bad)}
-  .netbar.down .nb-track i{background:var(--good)} .netbar.down .nb-val{color:var(--good)}
+  .narr{--c:var(--dim);display:grid;gap:8px}
+  .nl{--c:#8a7fa0;position:relative;padding:10px 14px 10px 16px;border-radius:10px;background:#1a1226;border:1px solid var(--line);border-left:4px solid var(--c)}
+  .nl p{margin:0;font-size:16px;line-height:1.6;color:var(--text)}
+  .nl.now{background:#271a36;border-color:var(--c);box-shadow:0 0 18px color-mix(in srgb,var(--c) 30%,transparent)}
+  .nl.now p{font-size:18px;color:#fff}
+  .nl-head{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:5px}
+  .nl-tag,.nl-ep{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;padding:2px 8px;border-radius:9px;line-height:1.5}
+  .nl-tag{background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c)}
+  .nl-ep{background:#0b0610;color:var(--e,#cfc6e0);border:1px solid color-mix(in srgb,var(--e,#8a7fa0) 55%,transparent)}
+  .nl-quote{--c:#6f6585} .nl-quote p{font-style:italic;color:var(--dim)}
+  .nl-note{--c:#8a7fa0}
+  .nl-mission{--c:var(--good)} .nl-fail{--c:var(--bad)} .nl-boss{--c:#ff4d5e} .nl-heat{--c:#ff9a3c} .nl-org{--c:#a56bff}
+  .nl-crew{--c:var(--sea)} .nl-story{--c:var(--gold)} .nl-away{--c:#4aa3ff} .nl-client{--c:#ffd166} .nl-deal{--c:#ffb86b} .nl-decision{--c:var(--pink)}
+  .s1{--e:#2ee6d6} .s2{--e:#ff4fa3} .s3{--e:#ffd166} .s4{--e:#ff9a3c} .s5{--e:#a56bff} .s6{--e:#ff4d5e} .s7{--e:#4aa3ff}
+  .nl.s1,.nl.s2,.nl.s3,.nl.s4,.nl.s5,.nl.s6,.nl.s7{border-left-color:var(--e)}
   .menugrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
   .menugrid button{padding:14px 10px;font-size:14px;letter-spacing:.5px;text-align:center}
   .modal{display:none;position:fixed;inset:0;background:#000b;z-index:25;align-items:center;justify-content:center;padding:20px}

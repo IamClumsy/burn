@@ -1,9 +1,10 @@
 import { S, earn } from "../state";
 import { cps } from "../calc";
-import { say } from "../ui/fx";
+import { say as sayTag } from "../ui/fx";
 import { beep } from "../audio";
 import { shake } from "../ui/fx";
 import { pick } from "../util";
+const say = (t: string): void => sayTag(t, "crew");
 
 /** Ally ability effects, keyed by ally id. */
 export const ABILITIES: Record<string, () => void> = {

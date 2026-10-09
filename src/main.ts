@@ -138,7 +138,7 @@ setInterval(save, 2000);
 window.addEventListener("beforeunload", save);
 window.addEventListener("pagehide", save);
 document.addEventListener("visibilitychange", () => { if (document.hidden) save(); });
-setInterval(() => say(pick(QUOTES)), 35000);
+setInterval(() => say(pick(QUOTES), "quote"), 35000);
 
 // Dev-only console hook for manual testing (stripped from production builds).
 if (import.meta.env.DEV) {

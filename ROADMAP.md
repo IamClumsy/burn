@@ -25,7 +25,7 @@ What's built is listed at the bottom. This is what's left, roughly in the order 
 - **Browser notifications:** an opt-in "a boss is at the door" alert when the tab is in the background (the tab title already flags it).
 - **Cloud save or a short save code:** export works, but a long string is awkward on a phone.
 - **Sound pass:** a few more cues and a volume slider rather than on/off.
-- **Install as an app:** works offline, with a home-screen icon.
+- **Install as an app:** built (manifest, icons and an offline worker). Still worth checking on a real phone.
 - **Seasonal flavor:** a one-line recap card when each new Season opens.
 - **Tablet check:** phone and tablet widths have had a look; a real device would still be worth it.
 

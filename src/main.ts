@@ -146,3 +146,8 @@ if (import.meta.env.DEV) {
     Object.assign(window, { __burn: { get S() { return S; }, spawnBoss: b.spawnBoss, spawnErrand: o.spawnErrand, spawnClient: ev.spawnClient, tick, render } });
   });
 }
+
+// Installable and playable offline once it has been opened (production builds only, so dev reloads stay simple)
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("/sw.js").catch(() => { /* private window or blocked: the game works online as usual */ }); });
+}

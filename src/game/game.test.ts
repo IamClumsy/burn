@@ -2084,6 +2084,22 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
   });
 
+  it("the game can be installed as an app: manifest, icons, offline worker and phone tags", () => {
+    const root = resolve(__dirname, "../..");
+    const manifest = JSON.parse(readFileSync(resolve(root, "public/manifest.webmanifest"), "utf8"));
+    expect(manifest.display).toBe("standalone");
+    expect(manifest.start_url).toBe("/");
+    for (const icon of manifest.icons) expect(readFileSync(resolve(root, "public" + icon.src)).length, icon.src).toBeGreaterThan(1000);
+    expect(manifest.icons.some((i: { purpose: string }) => i.purpose === "maskable")).toBe(true);
+    const html = readFileSync(resolve(root, "index.html"), "utf8");
+    expect(html).toContain('rel="manifest"');
+    expect(html).toContain('rel="apple-touch-icon"');
+    expect(html).toContain("apple-mobile-web-app-capable");
+    const sw = readFileSync(resolve(root, "public/sw.js"), "utf8");
+    expect(sw).toContain("addEventListener(\"fetch\"");
+    expect(readFileSync(resolve(root, "vercel.json"), "utf8")).toContain("/sw.js");
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

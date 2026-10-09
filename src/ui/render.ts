@@ -1,5 +1,5 @@
 import { S } from "../state";
-import { REINSTATE_MIN, bossDef, bribeCost, bribeDrop, clickVal, cover, cps, credGain, layAmt, tierDef } from "../calc";
+import { REINSTATE_MIN, attNet, bossDef, bribeCost, bribeDrop, clickVal, cover, cps, credGain, heatNet, layAmt, tierDef } from "../calc";
 import { FX_NAMES } from "../data/perks";
 import { money } from "../util";
 import type { CaseAction } from "../types";
@@ -84,7 +84,29 @@ function paintMenuNew(): void {
   $("dockMenu").setAttribute("aria-label", any ? "Menu: something new" : "Menu");
 }
 
+/**
+ * A little two-way bar under heat and attention: red out to the right when it's building, green out to the left
+ * when it's cooling. `scale` is how many points per second fills a whole side.
+ */
+const netCache = new Map<string, string>();
+function paintNet(id: string, net: number, scale: number): void {
+  const flat = Math.abs(net) < 0.005;
+  const txt = flat ? "steady" : `${net > 0 ? "▲ +" : "▼ −"}${Math.abs(net).toFixed(2)}/s`;
+  const half = Math.min(1, Math.abs(net) / scale) * 50;
+  const key = txt + half.toFixed(1);
+  if (netCache.get(id) === key) return;
+  netCache.set(id, key);
+  const el = $(id), fill = $(id + "fill");
+  setText($(id + "txt"), txt);
+  el.classList.toggle("up", net > 0.005);
+  el.classList.toggle("down", net < -0.005);
+  fill.style.width = half + "%";
+  fill.style.left = net >= 0 ? "50%" : `${50 - half}%`;
+}
+
 function paintDock(): void {
+  paintNet("netheat", heatNet(), 4);
+  paintNet("netatt", attNet(), 0.5);
   paintMenuNew();
   const d = dockProgress(), pct = Math.round(d.pct * 100);
   setText($("docklv"), d.label);

@@ -1424,6 +1424,44 @@ describe("Cover identities", () => {
   });
 });
 
+describe("Net heat and net attention bars", () => {
+  it("each has its own bar under its meter, in the Loft", () => {
+    for (const id of ["netheat", "netatt"]) {
+      const el = document.getElementById(id)!;
+      expect(el, id).not.toBeNull();
+      expect(el.dataset.modal).toBe("heatinfo");
+    }
+    const heat = document.getElementById("heatbar")!, att = document.getElementById("attbar")!;
+    const follows = (a: Node, b: Node) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(follows(heat, document.getElementById("netheat")!)).toBe(true);
+    expect(follows(att, document.getElementById("netatt")!)).toBe(true);
+    expect(follows(document.getElementById("netheat")!, att)).toBe(true);
+  });
+
+  it("red and up when it's building, green and down when it's cooling", () => {
+    S.gens = { inf: 400, tape: 300, sam: 200 }; S.heat = 50; S.att = 20;
+    render();
+    const h = document.getElementById("netheat")!;
+    expect(h.classList.contains("up")).toBe(true);
+    expect(document.getElementById("netheattxt")!.textContent).toMatch(/^▲ \+\d+\.\d\d\/s$/);
+    expect(document.getElementById("netheatfill")!.style.left).toBe("50%");
+    S.gens = {}; render();
+    expect(h.classList.contains("down")).toBe(true);
+    expect(h.classList.contains("up")).toBe(false);
+    expect(document.getElementById("netheattxt")!.textContent).toMatch(/^▼ −1\.20\/s$/);
+    expect(parseFloat(document.getElementById("netheatfill")!.style.left)).toBeLessThan(50);
+  });
+
+  it("attention shows its own rate", () => {
+    S.gens = {}; S.heat = 80; render();
+    const a = document.getElementById("netatt")!;
+    expect(a.classList.contains("up")).toBe(true);
+    S.heat = 0; render();
+    expect(a.classList.contains("down")).toBe(true);
+    expect(document.getElementById("netatttxt")!.textContent).toMatch(/^▼ −0\.20\/s$/);
+  });
+});
+
 describe("Crew events", () => {
   it("events about a crew member only come up once they're on the crew", () => {
     const gated = EVENTS.filter(e => e.needs);

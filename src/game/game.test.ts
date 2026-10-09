@@ -11,7 +11,7 @@ import { portrait, portraitScope } from "../ui/portrait";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { tabTitle } from "../ui/render";
 import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
-import { arcAvailable, startArc } from "./arcs";
+import { arcAvailable, askSamForStory, startArc } from "./arcs";
 import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
 import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missionReward } from "../calc";
@@ -1669,6 +1669,17 @@ describe("The Fall of Sam Axe", () => {
     S.active = []; S.arcStep[SAM_ARC_ID] = 0;
     render();
     expect(document.body.classList.contains("flashback")).toBe(false);
+  });
+
+  it("a Settings button lets you ask Sam for it if you're already past Season 5", () => {
+    S.life = 1e3; S.episodesDone = {}; S.samOffered = false; dismissAllNotices();
+    expect(arcAvailable(SAM_ARC)).toBe(false);
+    expect(panelHTML("settings")).toContain('data-arg="samfall"');
+    askSamForStory();
+    expect(S.samOffered).toBe(true);
+    expect(arcAvailable(SAM_ARC)).toBe(true);
+    expect(panelHTML("settings")).not.toContain('data-arg="samfall"');
+    expect(panelHTML("settings")).toMatch(/Open Cases/);
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

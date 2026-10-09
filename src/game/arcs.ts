@@ -6,7 +6,7 @@ import { beep, chime } from "../audio";
 import { say as sayTag, toast } from "../ui/fx";
 import { reduceGrip } from "./org";
 import type { Arc, Mission } from "../types";
-import { SAM_ACTS, SAM_ARC_ID } from "../data/samAxe";
+import { SAM_ACTS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
 import { choiceBusy, showChoice } from "../ui/choice";
 import { startFlashbackBoss } from "./bosses";
 const say = (t: string): void => sayTag(t, "mission");
@@ -15,7 +15,15 @@ export const arcStep = (a: Arc): number => S.arcStep[a.id] || 0;
 
 export const arcAvailable = (a: Arc): boolean =>
   S.life >= a.at && !S.arcsDone[a.id] && !S.active.some(m => m.arc?.id === a.id) &&
-  (!a.needsEp || !!S.episodesDone[a.needsEp] || seasonsOpen(S.life) >= (a.orSeason ?? 99));
+  (!a.needsEp || !!S.episodesDone[a.needsEp] || seasonsOpen(S.life) >= (a.orSeason ?? 99) || (a.id === SAM_ARC_ID && S.samOffered));
+
+/** Settings button for players who are already past Season 5: Sam tells the story whenever you ask. */
+export function askSamForStory(): void {
+  if (S.arcsDone[SAM_ARC_ID] || S.samOffered || arcAvailable(SAM_ARC)) return;
+  S.samOffered = true;
+  toast("Sam has a story", "\"Colombia, 2005,\" says Sam, and orders a drink. \"Pull up a chair.\" The Fall of Sam Axe is now an Open Case.", "story");
+  say("You asked, so Sam clears his throat. This is going to take a while.");
+}
 
 /** Start the next step of a case. Your ally for that case joins automatically if they're free. */
 export function startArc(id: string): void {

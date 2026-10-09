@@ -15,7 +15,7 @@ import { loadGame, save, wipeSave, exportSave, importSave } from "./persist";
 import { tick } from "./game/tick";
 import { checkBurn, layLow } from "./game/heat";
 import { fillBoard, startMission } from "./game/missions";
-import { startArc } from "./game/arcs";
+import { askSamForStory, startArc } from "./game/arcs";
 import { bossAction } from "./game/bosses";
 import type { CaseAction } from "./types";
 import { scheduleClient, scheduleEvent } from "./game/events";
@@ -36,6 +36,7 @@ function setting(what: string): void {
   if (what === "mute") S.mute = !S.mute;
   else if (what === "popups") S.popups = !S.popups;
   else if (what === "numfmt") { S.sci = !S.sci; setScientific(S.sci); }
+  else if (what === "samfall") askSamForStory();
   else if (what === "export") exportSave();
   else if (what === "wipe") { if (confirm("Wipe your save and start over?")) wipeSave(); }
   else if (what === "import") {

@@ -22,6 +22,7 @@ import { portrait, portraitScope } from "./portrait";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
+import { SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 import { AUTOS, autoCut } from "../data/automation";
@@ -381,6 +382,13 @@ function options(): string {
   return `<div class="menugrid">${MENU.map(id => `<button data-modal="${id}">${titleOf(id)}${fresh[id] ? `<span class="newchip">NEW</span>` : ""}</button>`).join("")}</div>`;
 }
 
+/** Already played Sam's flashback? Say so. Otherwise a button asks Sam for it, for anyone who is past the episode that offers it. */
+function samExtra(): string {
+  if (S.arcsDone[SAM_ARC_ID]) return "Already told";
+  if (S.samOffered || arcAvailable(SAM_ARC)) return "It's in your Open Cases";
+  return `<button data-act="setting" data-arg="samfall">Play it now</button>`;
+}
+
 /** Sound, saves and the other switches that used to live in the footer. */
 function settings(): string {
   const row = (label: string, state: string, act: string) => `<div class="drow"><span class="dlabel">${label}</span><span class="dtext"><button data-act="setting" data-arg="${act}">${state}</button></span></div>`;
@@ -390,6 +398,8 @@ function settings(): string {
     ${row("Pop-ups", S.popups ? "On, in the middle of the screen" : "Off, small corner notes instead", "popups")}
     ${row("Big numbers", S.sci ? "Scientific (1.23e9)" : "Letters (1.23B)", "numfmt")}
   </div>
+  <h2 style="margin-top:14px">Extras</h2>
+  <div class="drow"><span class="dlabel">The Fall of Sam Axe (FoSA)</span><span class="dtext">${samExtra()}</span></div>
   <h2 style="margin-top:14px">Your save</h2>
   <div class="small" id="saveinfo" style="margin-bottom:8px${st.warn ? ";color:var(--gold)" : ""}">${st.text}</div>
   <div class="btns"><button data-act="setting" data-arg="export">Export save</button><button data-act="setting" data-arg="import">Import save</button><button data-act="setting" data-arg="wipe">Wipe save</button></div>

@@ -19,7 +19,7 @@ export const MISSIONS: MissionTpl[] = [
   {n:'Free a Fiancée the Kidnappers Overvalued', dur:66, succ:0.71, heat:19, rm:3.3, fav:2, ally:'fiona', ep:'109', epTitle:'Hard Bargain'},
   {n:'Find a Father Who Vanished With His Son', dur:66, succ:1, heat:19, rm:3.3, fav:2, ally:'madeline', ep:'110', epTitle:'False Flag', kid:true},
   {n:'Help a Woman Who\'s Being Blackmailed Into Smuggling', dur:66, succ:0.71, heat:19, rm:3.3, fav:2, ally:'sam', ep:'111', epTitle:'Dead Drop'},
-  {n:'Dodge the Agents While Looking for Sam', dur:78, succ:0.64, heat:24, rm:4.1, fav:3, ally:'sam', ep:'112', epTitle:'Loose Ends'},
+  {n:'Dodge the Agents While Looking for Sam', dur:78, succ:0.64, heat:24, rm:4.1, fav:3, ally:'fiona', ep:'112', epTitle:'Loose Ends'},
   {n:'Recover Data for a Man Whose Family Was Taken', dur:66, succ:1, heat:20, rm:3.7, fav:2, ally:'fiona', ep:'201', epTitle:'Breaking and Entering', kid:true},
   {n:'Protect a Waitress From a Cartel Stalker', dur:54, succ:0.77, heat:15, rm:2.9, fav:1, ally:'sam', ep:'202', epTitle:'Turn and Burn'},
   {n:'Save a Salesman From a Fake Club and Loan Sharks', dur:54, succ:0.77, heat:15, rm:2.9, fav:1, ally:'barry', ep:'203', epTitle:'Trust Me'},

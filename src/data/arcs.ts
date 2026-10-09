@@ -3,7 +3,7 @@ import type { Arc } from "../types";
 // Multi-step cases adapted from the show's bigger story episodes. Each step is a mission;
 // closing the last one writes a Case File epilogue and pays a favor bonus.
 export const ARCS: Arc[] = [
-  {id:"looseends", title:"Loose Ends", at:3e4, ally:"sam", favors:3,
+  {id:"looseends", title:"Loose Ends", at:3e4, ally:"fiona", favors:3,
    blurb:"Sam's job with a woman and her partner went bad, and he's in the hands of heroin smugglers. Government agents are also looking for you.",
    epilogue:"Sam is home, annoyed, and already complaining about the coffee. Somewhere in a government office, a file about you gets thicker.",
    steps:[

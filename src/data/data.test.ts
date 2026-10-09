@@ -147,6 +147,13 @@ describe("data integrity", () => {
     }
   });
 
+  it("you never ask someone for help finding or rescuing themselves", () => {
+    const names: Record<string, string> = { sam: "Sam", fiona: "Fiona", nate: "Nate", jesse: "Jesse", barry: "Barry", madeline: "Madeline" };
+    const bad = (text: string, ally: string) => new RegExp(`(find|finding|looking for|locate|track down|search for)\\b[^,]*\\b${names[ally]}\\b`, "i").test(text);
+    for (const m of MISSIONS) expect(bad(m.n, m.ally), m.n).toBe(false);
+    for (const a of ARCS) for (const st of a.steps) expect(bad(st.n, a.ally), `${a.title}: ${st.n}`).toBe(false);
+  });
+
   it("every mission names a real ally", () => {
     const ids = new Set(ALLIES.map(a => a.id));
     for (const m of MISSIONS) expect(ids.has(m.ally), m.n).toBe(true);

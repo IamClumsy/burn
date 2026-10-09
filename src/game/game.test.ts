@@ -49,6 +49,7 @@ import { checkBurn } from "./heat";
 import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
 import { MISSIONS, seasonsOpen } from "../data/missions";
+import { clientCut, crewCut } from "../data/automation";
 import { earn, merge } from "../state";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
@@ -1621,29 +1622,61 @@ describe("Crew events", () => {
 });
 
 describe("Automation", () => {
-  it("unlocks with Credibility, and can't be switched on before then", () => {
-    S.cred = 1;
+  it("needs the Credibility first, then favors to buy, then it switches freely", () => {
+    S.favors = 500; S.cred = 1;
     toggleAuto("clients"); toggleAuto("crew");
     expect(S.auto).toEqual({ clients: false, crew: false });
+    expect(S.favors).toBe(500);
     S.cred = 2;
-    toggleAuto("clients"); toggleAuto("crew");
-    expect(S.auto).toEqual({ clients: true, crew: false });
+    toggleAuto("clients");
+    expect(S.auto.clients).toBe(true);
+    expect(S.autoOwned.clients).toBe(true);
+    expect(S.favors).toBe(500 - 30);
+    toggleAuto("crew");                       // Credibility 3 needed
+    expect(S.auto.crew).toBe(false);
+    toggleAuto("clients");                    // off, and it costs nothing to switch
+    expect(S.auto.clients).toBe(false);
+    expect(S.favors).toBe(470);
+    toggleAuto("clients");                    // back on, still free
+    expect(S.auto.clients).toBe(true);
+    expect(S.favors).toBe(470);
     S.cred = 3;
     toggleAuto("crew");
     expect(S.auto.crew).toBe(true);
-    toggleAuto("crew");
-    expect(S.auto.crew).toBe(false);
+    expect(S.favors).toBe(470 - 80);
   });
 
-  it("the Automation card shows what's locked and what's on", () => {
-    S.cred = 2; S.auto.clients = true;
-    const html = panelHTML("auto");
-    expect(html).toMatch(/Auto-take clients[\s\S]*On/);
+  it("can't be bought without the favors", () => {
+    S.cred = 5; S.favors = 10;
+    toggleAuto("clients");
+    expect(S.autoOwned.clients).toBe(false);
+    expect(S.favors).toBe(10);
+  });
+
+  it("the cut each use takes shrinks with Credibility, to a floor", () => {
+    expect(clientCut(2)).toBeCloseTo(0.20);
+    expect(clientCut(10)).toBeLessThan(clientCut(2));
+    expect(clientCut(500)).toBeCloseTo(0.08);
+    expect(crewCut(3)).toBeCloseTo(0.12);
+    expect(crewCut(500)).toBeCloseTo(0.05);
+    for (let c = 0; c < 40; c++) expect(clientCut(c + 1)).toBeLessThanOrEqual(clientCut(c));
+  });
+
+  it("the Automation card shows prices, cuts, what's locked and what's on", () => {
+    S.cred = 2; S.favors = 100;
+    let html = panelHTML("auto");
+    expect(html).toContain("Buy for 30 favors");
+    expect(html).toMatch(/One-time fee: 30 favors\. Then 20%/);
     expect(html).toMatch(/Unlocks at Credibility 3/);
+    toggleAuto("clients");
+    html = panelHTML("auto");
+    expect(html).toMatch(/Auto-take clients[\s\S]*On/);
+    expect(html).toContain("Turn off");
+    expect(html).not.toMatch(/One-time fee: 30/);
   });
 
-  it("an auto-taken client pays a little less and doesn't interrupt you", () => {
-    S.cred = 2; S.auto.clients = true; S.cash = 0; S.gens.inf = 50;
+  it("an auto-taken client pays a cut less and doesn't interrupt you", () => {
+    S.cred = 2; S.auto.clients = true; S.autoOwned.clients = true; S.cash = 0; S.gens.inf = 50;
     const before = S.stats.returned;
     spawnClient();
     expect(document.getElementById("evt")!.style.display).not.toBe("flex");
@@ -1652,13 +1685,27 @@ describe("Automation", () => {
     expect(document.getElementById("log")!.textContent).toMatch(/without breaking stride/);
   });
 
-  it("with auto-send on, a mission asks the right crew member for help by itself", () => {
-    S.cred = 3; S.auto.crew = true; S.allies.sam = true;
+  it("with auto-send on, a mission asks the right crew member for help by itself, and they take a cut", () => {
+    S.cred = 3; S.auto.crew = true; S.autoOwned.crew = true; S.allies.sam = true;
     S.board = []; fillBoard();
     const m = S.board.find(x => x.ally === "sam") ?? S.board[0];
     S.allies[m.ally] = true;
     startMission(m.uid);
     expect(S.active[0].sent).toBe(m.ally);
+    expect(S.active[0].auto).toBe(true);
+    const am = S.active[0]; am.chance = 1; am.reward = 10000;
+    const before = S.stats.returned + S.cash;
+    resolveMission(am);
+    const gained = S.stats.returned + S.cash - before;
+    expect(gained).toBeCloseTo(10000 * (1 - crewCut(3)), 3);
+  });
+
+  it("sending a crew member by hand doesn't cost a cut", () => {
+    S.cred = 3; S.allies.sam = true; S.board = []; fillBoard();
+    const m = S.board.find(x => x.ally === "sam") ?? S.board[0];
+    S.allies[m.ally] = true; m.send = true;
+    startMission(m.uid);
+    expect(S.active[0].auto).toBe(false);
   });
 
   it("an old save without automation settings still loads", () => {

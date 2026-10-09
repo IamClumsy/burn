@@ -88,7 +88,7 @@ export const FAQ: FaqSection[] = [
   ]},
   {title: "Progress and saving", items: [
     {q: "What is Automation?",
-     a: () => "Chores the game will do for you once you've earned enough Credibility from Reinstating. Auto-take clients (Credibility 2) takes a client's case without a pop-up, for a bit less pay. Auto-send crew (Credibility 3) asks the right crew member for help on every mission you start, if they're around and free. Switch each on or off in the Automation pop-up."},
+     a: () => "Chores the game will do for you once you've earned enough Credibility from Reinstating. Each costs favors to buy (Auto-take clients, 30 favors at Credibility 2; Auto-send crew, 80 favors at Credibility 3), and then takes a cut every time it works: automatic clients cost you about 20% of the fee, and crew you send automatically skim about 12% of the mission pay. The cuts shrink with every Credibility point, down to 8% and 5%. Once you own one you can switch it on and off for free in the Automation pop-up."},
     {q: "What's on the Stats card?",
      a: () => "Your totals across every run: time played, income, missions won and lost, bosses beaten, your best single run, and how long you've been away at most. The Reinstate pop-up also previews what a reset would give you and when your next Credibility point arrives, and tells you if Fiona will go off for a while (she does, after every reinstatement, for one to four hours)."},
     {q: "What happens when the List is complete?",

@@ -6,6 +6,7 @@ import { beep, chime } from "../audio";
 import { money, pick, weightedPick } from "../util";
 import { say, toast, type NarrationMeta } from "../ui/fx";
 import { advanceArc, failArcStep } from "./arcs";
+import { crewCut } from "../data/automation";
 import { reduceGrip } from "./org";
 import { EP_NOTES, outcomeLine } from "../data/episodeNotes";
 import type { ActiveMission, Mission } from "../types";
@@ -53,7 +54,7 @@ export function startMission(uid: number): void {
   const m = S.board.splice(i, 1)[0];
   const wantsHelp = m.send || (S.auto.crew && S.cred >= 3 && !!S.allies[m.ally]); // auto-send crew
   const sent = wantsHelp && allyFree(m.ally) ? m.ally : null;
-  S.active.push({ ...m, sent, left: m.dur, chance: succChance(m), reward: missionReward(m) });
+  S.active.push({ ...m, sent, left: m.dur, chance: succChance(m), reward: missionReward(m), auto: !!sent && !m.send });
   fillBoard();
   beep(400, 0.08, "triangle", 0.05);
 }
@@ -72,7 +73,8 @@ export function resolveMission(m: ActiveMission): void {
   S.active = S.active.filter(x => x.uid !== m.uid);
   if (!(S.fx.sub > 0)) S.att = Math.min(100, S.att + 8); // not while you're underwater
   if (Math.random() < m.chance) {
-    payClient(m.reward); S.favors += m.fav; S.heat += m.heat * heatMult(); S.stats.mDone++;
+    const cut = m.auto ? crewCut(S.cred) : 0, paid = m.reward * (1 - cut);
+    payClient(paid); S.favors += m.fav; S.heat += m.heat * heatMult(); S.stats.mDone++;
     if (m.kid) S.stats.kidMissions++;
     if (m.kid && m.sent) { S.favors += 1; say("Having the right person along made all the difference. +1 favor.", "mission", meta); }
     if (m.arc) advanceArc(m.arc.id, m.arc.step);
@@ -84,7 +86,7 @@ export function resolveMission(m: ActiveMission): void {
     if (won) say(won, "mission", meta);
     if (note) say("Spy tip: " + note.tip, "mission", meta);
     if (Math.random() < 0.4) say(pick(LINES.returned), "mission", meta);
-    toast("Mission complete: " + m.n, `Paid ${money(m.reward)}. Expenses covered, the rest went back to the people who needed it. +${m.fav} favor`, "good");
+    toast("Mission complete: " + m.n, `Paid ${money(paid)}${cut ? ` after your crew's ${Math.round(cut * 100)}% cut` : ""}. Expenses covered, the rest went back to the people who needed it. +${m.fav} favor`, "good");
     chime();
   } else {
     S.heat += m.heat * 1.5 * heatMult(); S.stats.mFail++;

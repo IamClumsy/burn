@@ -37,7 +37,7 @@ export interface Mission {
   ep?: string; epTitle?: string;
   elder?: boolean;
 }
-export interface ActiveMission extends Mission { sent: string | null; left: number; chance: number; reward: number }
+export interface ActiveMission extends Mission { sent: string | null; left: number; chance: number; reward: number; /** Sent by Auto-send crew, so the crew takes a cut. */ auto?: boolean }
 
 export interface Cover { id: string; name: string; desc: string; job: number; inc: number; heat: number; mis: number; unlock: number }
 
@@ -128,7 +128,7 @@ export interface GameState {
   /** Show important news as centered pop-ups that wait to be accepted. Off means corner toasts. */
   popups: boolean; seymourBought: number; simonBought: number; barryBought: number;
   /** Nate wanders off and returns on a random timer. */
-  nateAway: boolean; nateTimer: number; nateStage: number; fionaAway: number; fionaWhy: string; auto: { clients: boolean; crew: boolean };
+  nateAway: boolean; nateTimer: number; nateStage: number; fionaAway: number; fionaWhy: string; auto: { clients: boolean; crew: boolean }; /** Which automations you've bought (switching one off keeps it). */ autoOwned: { clients: boolean; crew: boolean };
   /** How much of each menu screen you've seen, so the menu can say when something is new. */
   seen: Dict<number>; backupNudged: boolean; intel: number;
   /** The Organization's grip on you: starts at 100 and is worn down by wins. */

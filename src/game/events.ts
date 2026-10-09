@@ -1,7 +1,7 @@
 import { S, KEEP_RATE, capFee, payClient } from "../state";
 import { clickVal, cps, heatMult } from "../calc";
 import { EVENTS } from "../data/events";
-import { AUTO_CLIENT_CUT } from "../data/automation";
+import { clientCut } from "../data/automation";
 import { chime } from "../audio";
 import { money, pick } from "../util";
 import { choiceBusy, showChoice } from "../ui/choice";
@@ -34,9 +34,9 @@ export function spawnClient(): void {
   if (choiceBusy() || S.boss) { setTimeout(spawnClient, 20000); return; }
   const reward = Math.max(500, capFee((cps() * 45 + clickVal() * 10) / KEEP_RATE));
   if (S.auto.clients && S.cred >= 2) { // auto-take clients: the case is handled without a pop-up, for a little less
-    const fee = reward * AUTO_CLIENT_CUT;
+    const cut = clientCut(S.cred), fee = reward * (1 - cut);
     payClient(fee); S.heat += 10 * heatMult();
-    say(`A client comes to the door. You take the case without breaking stride. ${money(fee)} on the books, and expenses covered.`);
+    say(`A client comes to the door. You take the case without breaking stride. ${money(fee)} on the books after the ${Math.round(cut * 100)}% it costs you to not stop, and expenses covered.`);
     checkBurn(); render(); scheduleClient();
     return;
   }

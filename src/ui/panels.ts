@@ -24,7 +24,7 @@ import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
-import { AUTOS } from "../data/automation";
+import { AUTOS, autoCut } from "../data/automation";
 import { saveStatus } from "../saveStatus";
 import { menuNew } from "./badges";
 import { narration, type NarrationEntry, type NarrationTag } from "./fx";
@@ -292,12 +292,19 @@ function medals(): string {
 
 function automation(): string {
   const rows = AUTOS.map(a => {
-    const open = S.cred >= a.need, on = !!S.auto[a.id];
-    return `<div class="box"><div class="row"><b>${a.name}</b><span class="small">${open ? (on ? "On" : "Off") : `Unlocks at Credibility ${a.need}`}</span></div>
-      <div class="small">${a.desc} <span style="color:var(--dim)">${a.cost}</span></div>
-      <div class="btns"><button data-act="auto" data-arg="${a.id}" ${open ? "" : "disabled"}>${open ? (on ? "Turn off" : "Turn on") : `Needs Credibility ${a.need} (you have ${S.cred})`}</button></div></div>`;
+    const open = S.cred >= a.need, owned = !!S.autoOwned[a.id], on = !!S.auto[a.id];
+    const cut = Math.round(autoCut(a.id, S.cred) * 100);
+    const cost = owned
+      ? `Costs you ${cut}% of the ${a.id === "clients" ? "fee" : "mission pay"} each time it works, and less with every Credibility point.`
+      : `One-time fee: ${a.fee} favors. Then ${cut}% of the ${a.id === "clients" ? "fee" : "mission pay"} each time it works, and less with every Credibility point.`;
+    const state = !open ? `Unlocks at Credibility ${a.need}` : !owned ? "Not bought yet" : on ? "On" : "Off";
+    const button = !open ? `Needs Credibility ${a.need} (you have ${S.cred})` : !owned ? `Buy for ${a.fee} favors${S.favors < a.fee ? ` (you have ${S.favors})` : ""}` : on ? "Turn off" : "Turn on";
+    const can = open && (owned || S.favors >= a.fee);
+    return `<div class="box"><div class="row"><b>${a.name}</b><span class="small">${state}</span></div>
+      <div class="small">${a.desc}</div><div class="small" style="margin-top:3px;color:var(--gold)">${cost}</div>
+      <div class="btns"><button data-act="auto" data-arg="${a.id}" ${can ? "" : "disabled"}>${button}</button></div></div>`;
   }).join("");
-  return `<div class="small" style="margin-bottom:8px">Credibility from Reinstating buys you help with the chores. Switch them on or off any time.</div>${rows}`;
+  return `<div class="small" style="margin-bottom:8px">Credibility from Reinstating unlocks help with the chores. Each one costs favors to buy, and takes a cut when it works. Switch them on or off any time once they're yours.</div>${rows}`;
 }
 
 /** "+0.42/s" or "−0.80/s". */

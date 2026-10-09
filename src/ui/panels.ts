@@ -3,7 +3,7 @@ import type { ContactId } from "../types";
 import {
   REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, cps, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
-  samSharp, inFlashback, slotOpen, wouldBeHelped, SOLO_SLOTS, HELP_SLOTS, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
+  samSharp, grossLife, inFlashback, slotOpen, wouldBeHelped, SOLO_SLOTS, HELP_SLOTS, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { REFERRAL, UPGS } from "../data/upgrades";
@@ -247,9 +247,9 @@ function favors(): string {
 }
 
 function rogues(): string {
-  return `<div class="small" style="margin-bottom:8px">Bosses turn up about every ${bossGapText()}. Outmaneuver each one once for a permanent +3% income. Next one in about ${Math.ceil(Math.max(0, S.bossCd) / 60)} min.</div>` +
+  return `<div class="small" style="margin-bottom:8px">Bosses turn up about every ${bossGapText()}. Outmaneuver each one once for a permanent +3% income. Foes turn up as your full earnings (the whole fee, not just Michael's 10%) reach their amount. Next one in about ${Math.ceil(Math.max(0, S.bossCd) / 60)} min.</div>` +
     BOSSES.map(b0 => {
-      const b = bossView(b0), open = S.life >= b.at, k = S.bossKills[b.id] || 0;
+      const b = bossView(b0), open = grossLife() >= b.at, k = S.bossKills[b.id] || 0;
       return `<div class="box" style="${open ? "" : "opacity:.5"}"><div class="who">${portrait(b.id, 56, open)}<div><div class="row"><b>${open ? b.n : "???"}</b><span class="small">${open ? "Outmaneuvered " + k + "×" : `Season ${seasonsOpen(b.at)} · at ${money(b.at)}`}</span></div>
         ${open ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">${b.mech}</div>
           ${k > 0 ? `<div class="small" style="margin-top:6px;color:var(--text)"><b>File:</b> ${b.file}</div>` : `<div class="small" style="margin-top:6px">Outmaneuver them once to open their file.</div>`}` : ""}</div></div></div>`;
@@ -301,7 +301,7 @@ function medals(): string {
   const st = S.stats, t = Math.floor(st.time / 60);
   return `<div class="grid">` + MEDALS.map(a => `<div class="medal ${S.ach.includes(a.id) ? "got" : ""}"><b>${a.n}</b>${a.d}</div>`).join("") + `</div>
     <p class="small">Each medal gives +2% income. ${S.ach.length}/${MEDALS.length} earned.</p>
-    <p class="small">Jobs ${st.clicks} · Burns ${st.burns} · Missions won ${st.mDone}/lost ${st.mFail} · Returned to clients ${money(st.returned)} · Kid cases ${st.kidMissions} · Ambushes ${st.ambush} · Gadgets ${st.crafted} · Lifetime ${money(S.life)} · Played ${t} min</p>`;
+    <p class="small">Jobs ${st.clicks} · Burns ${st.burns} · Missions won ${st.mDone}/lost ${st.mFail} · Returned to clients ${money(st.returned)} · Kid cases ${st.kidMissions} · Ambushes ${st.ambush} · Gadgets ${st.crafted} · Lifetime take ${money(S.life)} · Lifetime earnings (full fees) ${money(grossLife())} · Played ${t} min</p>`;
 }
 
 function automation(): string {
@@ -510,24 +510,25 @@ function theList(): string {
 
 /** Michael's file as the Organization keeps it. More of it fills in as their attention on you peaks. */
 /** The next thing to unlock of each kind, by lifetime earnings, with how long it takes at the current rate. */
-function nextUnlocks(): { what: string; name: string; at: number }[] {
-  const out: { what: string; name: string; at: number }[] = [];
+function nextUnlocks(): { what: string; name: string; at: number; have: number }[] {
+  const out: { what: string; name: string; at: number; have: number }[] = [];
   const season = SEASON_UNLOCK.findIndex(t => t > S.life);
-  if (season > 0) out.push({ what: "Season", name: `Season ${season + 1} cases`, at: SEASON_UNLOCK[season] });
-  const foe = BOSSES.filter(b => b.at > S.life).sort((a, b) => a.at - b.at)[0];
-  if (foe) out.push({ what: "Rogue", name: "A new foe, Season " + seasonsOpen(foe.at), at: foe.at });
+  if (season > 0) out.push({ what: "Season", name: `Season ${season + 1} cases`, at: SEASON_UNLOCK[season], have: S.life });
+  const foe = BOSSES.filter(b => b.at > grossLife()).sort((a, b) => a.at - b.at)[0];
+  if (foe) out.push({ what: "Rogue", name: "A new foe, Season " + seasonsOpen(foe.at), at: foe.at, have: grossLife() });
   const cover = COVERS.filter(c => !c.arc && c.unlock > S.life).sort((a, b) => a.unlock - b.unlock)[0];
-  if (cover) out.push({ what: "Cover", name: cover.name, at: cover.unlock });
-  if (S.story < STORY.length) out.push({ what: "Story", name: "The next Case File lead", at: STORY[S.story].at });
+  if (cover) out.push({ what: "Cover", name: cover.name, at: cover.unlock, have: S.life });
+  if (S.story < STORY.length) out.push({ what: "Story", name: "The next Case File lead", at: STORY[S.story].at, have: S.life });
   return out;
 }
 
 function file(): string {
   const t = tierDef();
   const rate = cps();
-  const lifetime = `<div class="box"><div class="row"><b>Lifetime earnings</b><span class="small" style="color:var(--gold)">${money(S.life)}</span></div>
-    ${nextUnlocks().map(u => `<div class="row small" style="padding:2px 0"><span>${u.what}: ${u.name}</span><span>${money(u.at)}${rate > 0 ? ` · about ${formatWait(Math.max(0, (u.at - S.life) / rate) * 1000)}` : ""}</span></div>`).join("")}
-    <div class="small" style="margin-top:4px;color:var(--dim)">Lifetime earnings keep counting across Reinstates. The waits assume your income stays where it is now, so they only get shorter as you grow.</div></div>`;
+  const lifetime = `<div class="box"><div class="row"><b>Lifetime earnings</b><span class="small" style="color:var(--gold)">${money(grossLife())}</span></div>
+    <div class="row small"><span>Michael's take (10%)</span><span>${money(S.life)}</span></div>
+    ${nextUnlocks().map(u => `<div class="row small" style="padding:2px 0"><span>${u.what}: ${u.name}</span><span>${money(u.at)}${rate > 0 ? ` · about ${formatWait(Math.max(0, (u.at - u.have) / rate) * 1000)}` : ""}</span></div>`).join("")}
+    <div class="small" style="margin-top:4px;color:var(--dim)">Lifetime earnings are the full fees, including what you hand back, and they open the foes on The List. Michael's take opens Seasons, covers and story leads. Both keep counting across Reinstates. The waits assume your income stays where it is now, so they only get shorter as you grow.</div></div>`;
   const rows = DOSSIER.map(d => S.attPeak >= d.peak
     ? `<div class="drow"><span class="dlabel">${d.label}</span><span class="dtext">${d.text}</span></div>`
     : `<div class="drow redacted"><span class="dlabel">██████ ████</span><span class="dtext">████████ ██████ <span class="small">(Reached at ${d.peak}% attention)</span></span></div>`).join("");

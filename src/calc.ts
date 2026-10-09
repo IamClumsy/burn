@@ -127,6 +127,9 @@ export const attNet = (): number => attGain() - attCooling();
 export const layAmt = (): number => (S.upgs.h2 ? 60 : 35);
 export const layCdMax = (): number => (S.allies.madeline ? 4 : 8);
 
+/** Everything the jobs paid, counting the 90% Michael hands back, not just his 10%. This is what opens the foes on The List. */
+export const grossLife = (): number => S.life + S.stats.returned;
+
 // ---- prices
 /** Each one costs 15% more than the last for the first 50, then only 9% more, so the late game stays within reach. */
 const R = 1.15, R_LATE = 1.09, KNEE = 50;

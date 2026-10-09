@@ -1,5 +1,5 @@
 import { S } from "../state";
-import { allyHere, perk, perkCost } from "../calc";
+import { allyHere, grossLife, perk, perkCost } from "../calc";
 import { ALLIES } from "../data/allies";
 import { PERKS, RECIPES } from "../data/perks";
 import { BOSSES } from "../data/bosses";
@@ -29,7 +29,7 @@ export function loftBadges(): { crew: Badge; gad: Badge; fav: Badge; cov: Badge 
 
 /** What counts as "everything there is to see" on each menu screen right now. A bigger number means something new. */
 function menuCounts(): Partial<Record<TabId, number>> {
-  const open = BOSSES.filter(b => S.life >= b.at).length, beaten = BOSSES.filter(b => S.bossKills[b.id]).length;
+  const open = BOSSES.filter(b => grossLife() >= b.at).length, beaten = BOSSES.filter(b => S.bossKills[b.id]).length;
   return {
     story: S.story + Object.keys(S.arcsDone).length,
     rogue: open + beaten,

@@ -1,5 +1,5 @@
 import { S, earn } from "../state";
-import { actionDmg, allyHere, bossDef, bossHP, bossView, conChance, cps, heatMult, inFlashback } from "../calc";
+import { actionDmg, allyHere, bossDef, bossHP, bossView, conChance, cps, heatMult, grossLife, inFlashback } from "../calc";
 import { CASE_ACTIONS, CREW_LINES, MAX_LEADS, TRAP_MIN_LEADS } from "../data/caseActions";
 import type { Boss, CaseAction } from "../types";
 import { seasonsOpen } from "../data/missions";
@@ -23,7 +23,7 @@ export function bossWeight(b: Boss): number {
 }
 
 export function spawnBoss(): void {
-  const pool = BOSSES.filter(b => S.life >= b.at && (!b.needs || S.allies[b.needs]));
+  const pool = BOSSES.filter(b => grossLife() >= b.at && (!b.needs || S.allies[b.needs]));
   if (!pool.length) { S.bossCd = 60; return; }
   const b = bossView(weightedPick(pool, bossWeight)), max = bossHP(b);
   S.boss = { id: b.id, hp: max, max, left: 75 };

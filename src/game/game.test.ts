@@ -38,7 +38,7 @@ import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
 import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
-import { inFlashback, samSharp } from "../calc";
+import { grossLife, inFlashback, samSharp } from "../calc";
 import { fillBoard, gatedEpReady, missionWeight, newMission, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, bossWeight, spawnBoss, tickBoss, winBoss } from "./bosses";
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
@@ -1867,6 +1867,18 @@ describe("The Fall of Sam Axe", () => {
     expect(html).toContain("Season: Season 7 cases");
     expect(html).toContain("Rogue: A new foe");
     expect(html).toMatch(/about \d/);
+  });
+
+  it("foes open on full earnings (what the jobs paid, including what's handed back), not just Michael's 10%", () => {
+    S.life = 1e8; S.stats.returned = 0;
+    const open = () => BOSSES.filter(b => grossLife() >= b.at).length;
+    const before = open();
+    S.stats.returned = 9e8;                                  // a billion paid out in full, a tenth kept
+    expect(grossLife()).toBe(1e9);
+    expect(open()).toBeGreaterThan(before);
+    expect(panelHTML("file")).toContain("Michael's take");
+    expect(panelHTML("file")).toContain("full fees");
+    S.stats.returned = 0;
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

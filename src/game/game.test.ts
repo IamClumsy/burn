@@ -33,7 +33,7 @@ import { loftBadges } from "../ui/badges";
 import { clearNarration, narration, say, toast } from "../ui/fx";
 import { dismissAllNotices, dismissNotice, initNotices, notify, noticeCount, noticeOpen, setNoticeGate } from "../ui/notice";
 import { showChoice, choiceBusy } from "../ui/choice";
-import { CONTACT_CAP, allyFree, allyHere, contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance } from "../calc";
+import { CONTACT_CAP, allyFree, allyHere, maxAfford, contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance } from "../calc";
 import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
 import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
@@ -1090,7 +1090,7 @@ describe("Operations stop at 250", () => {
   });
 
   it("Max stops at the cap too, and only pays for what it buys", () => {
-    S.cash = 1e24; S.gens = { inf: 200 }; S.buyAmt = "max";
+    S.cash = 1e16; S.gens = { inf: 200 }; S.buyAmt = "max";
     expect(buyN(inf())).toBe(50);
     const before = S.cash, price = bulkCost(inf(), 50);
     buyGen("inf");
@@ -1808,6 +1808,20 @@ describe("The Fall of Sam Axe", () => {
     expect(S.active.length).toBe(4);                          // and it's full
     expect(panelHTML("mis")).toContain("4/4");
     S.active = [];
+  });
+
+  it("operation prices bend after 50 owned, so late buys stay in reach", () => {
+    S.gens = { inf: 0 }; S.life = 1e30;
+    const g = GENS[0], first = bulkCost(g, 1);
+    S.gens = { inf: 60 };
+    const at60 = bulkCost(g, 1);
+    expect(at60 / first).toBeCloseTo(Math.pow(1.15, 50) * Math.pow(1.09, 10), 1);
+    S.gens = { inf: 147 };
+    expect(bulkCost(g, 100)).toBeLessThan(1e13);       // it was around $1e17
+    S.cash = 5e11; S.gens = { inf: 147 };
+    const n = maxAfford(g);
+    expect(bulkCost(g, n)).toBeLessThanOrEqual(5e11);
+    expect(bulkCost(g, n + 1)).toBeGreaterThan(5e11);
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

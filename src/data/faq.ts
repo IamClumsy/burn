@@ -23,7 +23,7 @@ export const FAQ: FaqSection[] = [
     {q: "Why does a mission say \"pays $50K\" but my cash goes up less?",
      a: () => "Clients pay the full fee, and Michael keeps what he needs for expenses and returns the rest to the people who needed it. The Medals pop-up tracks how much you've given back."},
     {q: "What do Buy ×1, ×10, ×100 and Max do?",
-     a: () => "They set how many of an operation you buy per click. Each purchase raises that operation's price by 15%, so the row shows the total for the batch. Max buys as many as your cash covers. You can own up to 250 of any one operation: the last boost upgrade is at 200, so every bonus is reachable, and once an operation is maxed its row says so."},
+     a: () => "They set how many of an operation you buy per click. Each purchase raises that operation's price by 15% (9% once you own 50 of it, so the late game stays within reach), so the row shows the total for the batch. Max buys as many as your cash covers. You can own up to 250 of any one operation: the last boost upgrade is at 200, so every bonus is reachable, and once an operation is maxed its row says so."},
     {q: "What do Upgrades do?",
      a: () => "Most are one-time buys: some multiply job pay, some boost all income, and a few help with heat. Every operation also has six tiers of upgrades that unlock as you own more of it (10, 25, 50, 100, 150 and 200). And \"Satisfied Clients Refer Friends\" can be bought again and again, so there's always something to spend on. They reset when you Reinstate."},
   ]},

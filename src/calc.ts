@@ -124,19 +124,29 @@ export const layAmt = (): number => (S.upgs.h2 ? 60 : 35);
 export const layCdMax = (): number => (S.allies.madeline ? 4 : 8);
 
 // ---- prices
-const R = 1.15;
+/** Each one costs 15% more than the last for the first 50, then only 9% more, so the late game stays within reach. */
+const R = 1.15, R_LATE = 1.09, KNEE = 50;
 export const discount = (): number => 1 - 0.03 * perk("friends");
-export function bulkCost(g: Gen, n: number): number {
-  return g.base * Math.pow(R, owned(g.id)) * discount() * (Math.pow(R, n) - 1) / (R - 1);
+/** What the k-th operation (counting from 0) costs, before any discount, as a multiple of its base price. */
+const priceMult = (k: number): number => k < KNEE ? Math.pow(R, k) : Math.pow(R, KNEE) * Math.pow(R_LATE, k - KNEE);
+/** The sum of priceMult over k0, k0+1, ... k0+n-1. */
+function multSum(k0: number, n: number): number {
+  const end = k0 + n;
+  let t = 0;
+  if (k0 < KNEE) { const m = Math.min(end, KNEE) - k0; t += Math.pow(R, k0) * (Math.pow(R, m) - 1) / (R - 1); }
+  if (end > KNEE) { const from = Math.max(k0, KNEE); t += priceMult(from) * (Math.pow(R_LATE, end - from) - 1) / (R_LATE - 1); }
+  return t;
 }
-/** How many of an operation the cash covers (no cap): closed-form geometric sum, then fix rounding. */
+export function bulkCost(g: Gen, n: number): number {
+  return g.base * multSum(owned(g.id), n) * discount();
+}
+/** How many of an operation the cash covers (no cap): a search over the closed-form price, since the curve has a bend in it. */
 export function maxAfford(g: Gen): number {
-  const first = g.base * Math.pow(R, owned(g.id)) * discount();
-  if (S.cash < first) return 0;
-  let n = Math.floor(Math.log(1 + (S.cash * (R - 1)) / first) / Math.log(R));
-  while (n > 0 && bulkCost(g, n) > S.cash) n--;
-  while (bulkCost(g, n + 1) <= S.cash && n < 1e6) n++;
-  return n;
+  if (S.cash < bulkCost(g, 1)) return 0;
+  let lo = 1, hi = 2;
+  while (bulkCost(g, hi) <= S.cash && hi < 1e6) { lo = hi; hi *= 2; }
+  while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (bulkCost(g, mid) <= S.cash) lo = mid; else hi = mid; }
+  return lo;
 }
 /** How many of an operation you buy per click: what you asked for, never past the cap (0 once it's maxed). */
 export function buyN(g: Gen): number {

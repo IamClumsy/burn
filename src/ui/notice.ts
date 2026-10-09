@@ -42,7 +42,7 @@ export function pumpNotices(): void {
   showing = true;
   $("nT").textContent = n.title;
   $("nM").textContent = n.msg;
-  $("ndlg").className = "ndlg " + n.kind;
+  $("ndlg").className = "ndlg " + n.kind + (document.body.classList.contains("flashback") ? " inquiry" : ""); // The Fall of Sam Axe: Navy paper notes
   paintCount();
   $("notice").style.display = "flex";
   ($("nOk") as HTMLButtonElement).focus();

@@ -167,8 +167,8 @@
   #evt .dlg.inquiry p,#evt .dlg.inquiry .evtd{color:#2b2418;font-style:italic}
   #evt .dlg.inquiry button{background:#d8cba9;color:#2b2418;border:1px solid #8a7a55;font-family:inherit}
   #evt .dlg.inquiry button:hover{background:#cdbd93}
-  body.flashback::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:40;background:radial-gradient(ellipse at center,#0000 45%,#2a160055 100%),#b8863a1f;mix-blend-mode:multiply}
-  body.flashback main,body.flashback header{filter:sepia(.45) saturate(.9) contrast(1.03)}
+  /* a cheap warm wash: one static layer, no filters or blend modes, so it never slows a click */
+  body.flashback::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:25;background:radial-gradient(ellipse at center,#0000 45%,#2a160066 100%),#c8903c26}
   #evt button.primary{background:linear-gradient(#2ee6d6,#1aa89c);color:#04201d;border:none;font-weight:700;padding:13px;font-size:16px}
   #evt button.primary:hover:not(:disabled){background-color:transparent;filter:brightness(1.1)}
   #notice{display:none;position:fixed;inset:0;background:#000d;z-index:40;align-items:center;justify-content:center;padding:20px}
@@ -183,6 +183,12 @@
   .nfoot button{padding:10px 18px}
   #nOk{background:var(--k);color:#14081c;border:none;font-weight:700;font-size:15px;min-width:120px;padding:11px 22px}
   #nOk:hover:not(:disabled){background-color:var(--k);filter:brightness(1.12)}
+  .ndlg.inquiry{--k:#5a1d14;background:#e9dfc8;color:#2b2418;border:2px solid #8a7a55;border-radius:4px;box-shadow:0 24px 70px #000d;font-family:Georgia,"Times New Roman",serif}
+  .ndlg.inquiry h3{color:#5a1d14;border-bottom:1px solid #8a7a55;padding-bottom:6px;font-size:18px}
+  .ndlg.inquiry p{color:#2b2418;font-style:italic}
+  .ndlg.inquiry #nCount{color:#6b5e3f}
+  .ndlg.inquiry #nAll{background:#d8cba9;color:#2b2418;border:1px solid #8a7a55}
+  .ndlg.inquiry #nOk{background:#5a1d14;color:#f3ead2;font-family:inherit}
   #toasts{position:fixed;bottom:96px;right:14px;z-index:30;display:flex;flex-direction:column;gap:8px;max-width:300px}
   .toast{background:var(--panel);border:1px solid var(--gold);border-radius:8px;padding:10px 12px;font-size:13px;animation:pop .3s;box-shadow:0 6px 20px #000a}
   .toast b{color:var(--gold);display:block}

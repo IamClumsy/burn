@@ -31,7 +31,7 @@ import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
 import { loftBadges } from "../ui/badges";
 import { clearNarration, narration, say, toast } from "../ui/fx";
-import { dismissAllNotices, dismissNotice, initNotices, noticeCount, noticeOpen, setNoticeGate } from "../ui/notice";
+import { dismissAllNotices, dismissNotice, initNotices, notify, noticeCount, noticeOpen, setNoticeGate } from "../ui/notice";
 import { showChoice, choiceBusy } from "../ui/choice";
 import { CONTACT_CAP, allyFree, allyHere, contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance } from "../calc";
 import { DAY_MS, FAVORS_PER_DAY } from "../data/pacing";
@@ -1578,7 +1578,7 @@ describe("The Submarine", () => {
 
 describe("The stylesheet has rules for the pieces the game builds", () => {
   it("every class the interface relies on is styled", () => {
-    const css = readFileSync("src/styles.css", "utf8");
+    const css = readFileSync(resolve(__dirname, "../styles.css"), "utf8");
     const needed = [
       "dock", "dockface", "dockbar", "dockbtn", "has-new", "newchip", "menugrid", "infobtn", "netbar", "nb-track", "nb-val",
       "narr", "nl", "nl-head", "nl-tag", "nl-ep", "nl-mission", "nl-fail", "nl-boss", "nl-crew", "nl-story", "rare", "drow", "dfile", "mishead", "portrait",
@@ -1708,6 +1708,19 @@ describe("The Fall of Sam Axe", () => {
     expect(document.getElementById("evt")!.style.display).not.toBe("flex");   // no visitors
     S.arcStep[SAM_ARC_ID] = 0;
     expect(inFlashback()).toBe(false);
+  });
+
+  it("notices wear the Navy paper look during the flashback, and the wash is cheap to paint", () => {
+    dismissAllNotices();
+    document.body.classList.add("flashback");
+    notify("Mission complete", "Paid.", "good");
+    expect(document.getElementById("ndlg")!.classList.contains("inquiry")).toBe(true);
+    dismissAllNotices(); document.body.classList.remove("flashback");
+    notify("Plain", "x", "good");
+    expect(document.getElementById("ndlg")!.classList.contains("inquiry")).toBe(false);
+    dismissAllNotices();
+    const css = readFileSync(resolve(__dirname, "../styles.css"), "utf8");
+    expect(css).not.toMatch(/body\.flashback[^{]*\{[^}]*(filter|mix-blend-mode)/); // those made every click slow (INP)
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

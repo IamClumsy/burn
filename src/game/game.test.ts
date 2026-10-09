@@ -2040,6 +2040,18 @@ describe("The Fall of Sam Axe", () => {
     S.seasonGate = false;
   });
 
+  it("Brotherly Love (Season 4, Episode 15) is only Season-gated: any time in Season 4, in any save", () => {
+    const nate = ARCS.find(a => a.id === "nateark")!;
+    S.seasonGate = false; S.episodesDone = {}; S.arcsDone = {}; S.active = [];
+    S.life = 2e7;                                          // Season 3
+    expect(arcAvailable(nate)).toBe(false);
+    S.life = 3e7;                                          // Season 4 opens
+    expect(arcAvailable(nate)).toBe(true);                 // no need to finish the other Season 4 cases first
+    S.seasonGate = true; S.seasonOpen = 4;
+    expect(arcAvailable(nate)).toBe(true);
+    S.seasonGate = false;
+  });
+
   it("while a Season is waiting, its missing episodes come up far more often", () => {
     S.seasonGate = true; S.seasonOpen = 1; S.life = 5e6; S.episodesDone = {};
     const s1 = MISSIONS.find(m => seasonOf(m.ep!) === 1)!;

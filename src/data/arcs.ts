@@ -12,7 +12,7 @@ export const ARCS: Arc[] = [
      {n:"Hit the Smugglers' Boat",      dur:55, succ:.75, heat:14, rm:2.4},
      {n:"Get Sam Home",                 dur:50, succ:.8,  heat:10, rm:2.8},
    ]},
-  {id:"nateark", ep:"415", title:"Brotherly Love", at:5e5, ally:"nate", favors:3,
+  {id:"nateark", ep:"415", title:"Brotherly Love", at:3e7, ally:"nate", favors:3,
    blurb:"Nate has a job. It involves drugs, a deal and a plan that does not sound like a plan. Naturally, he's in over his head.",
    epilogue:"Nate is safe. He says he had it under control. Madeline lets him say it.",
    steps:[

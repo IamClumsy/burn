@@ -1793,6 +1793,23 @@ describe("The Fall of Sam Axe", () => {
     S.boss = null;
   });
 
+  it("a fourth slot takes only a case an ally is helping with", () => {
+    S.life = 5e8; S.allies.sam = true; S.allies.fiona = true; S.fionaAway = 0;
+    S.board = []; S.active = [];
+    const mk = (ally: string, send: boolean) => ({ uid: S.uid++, n: "x" + S.uid, dur: 99, succ: 0.5, heat: 1, rm: 1, fav: 1, ally, kid: false, send } as any);
+    for (let i = 0; i < 3; i++) { S.board = [mk("sam", false)]; startMission(S.board[0].uid); }
+    expect(S.active.length).toBe(3);
+    S.board = [mk("fiona", false)]; startMission(S.board[0].uid);
+    expect(S.active.length).toBe(3);                          // a fourth case alone: no room
+    const helped = mk("fiona", true); S.board = [helped]; startMission(helped.uid);
+    expect(S.active.length).toBe(4);                          // with help: the fourth slot
+    expect(S.active[3].sent).toBe("fiona");
+    S.board = [mk("sam", true)]; startMission(S.board[0].uid);
+    expect(S.active.length).toBe(4);                          // and it's full
+    expect(panelHTML("mis")).toContain("4/4");
+    S.active = [];
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

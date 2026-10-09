@@ -1,5 +1,5 @@
 import { S } from "../state";
-import { allyFree, missionReward, succChance } from "../calc";
+import { allyFree, missionReward, slotOpen, succChance } from "../calc";
 import { ARCS } from "../data/arcs";
 import { seasonsOpen } from "../data/missions";
 import { beep, chime } from "../audio";
@@ -40,7 +40,7 @@ export function rememberBowling(): void {
 /** Start the next step of a case. Your ally for that case joins automatically if they're free. */
 export function startArc(id: string): void {
   const a = ARCS.find(x => x.id === id);
-  if (!a || !arcAvailable(a) || S.active.length >= 3) return;
+  if (!a || !arcAvailable(a) || !slotOpen(allyFree(a.ally))) return;
   const step = arcStep(a), st = a.steps[step];
   // The Fall of Sam Axe: each act opens with the Admiral's questions and a choice about how Sam tells it.
   if (id === SAM_ARC_ID && st.act !== undefined && S.samChoices[st.act] === undefined) {
@@ -65,7 +65,7 @@ export function startArc(id: string): void {
 
 function launchStep(a: Arc, step: number, prior?: string, priorTitle?: string): void {
   const st = a.steps[step];
-  if (S.active.length >= 3 || arcAvailable(a) === false) return;
+  if (!slotOpen(allyFree(a.ally)) || arcAvailable(a) === false) return;
   if (st.boss) { // a showdown instead of a mission
     if (S.boss) { say("Finish the case you're on first. The road will still be there."); return; }
     if (a.id === SAM_ARC_ID && !S.samChoices.bridge && prior !== undefined) { // a beat between the last answer and the fight

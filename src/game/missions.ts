@@ -1,5 +1,5 @@
 import { S, payClient } from "../state";
-import { allyFree, awayWhy, heatMult, inFlashback, missionReward, succChance } from "../calc";
+import { allyFree, awayWhy, heatMult, inFlashback, slotOpen, wouldBeHelped, missionReward, succChance } from "../calc";
 import { MISSIONS, episodeOf, missionUnlocked, seasonOf, seasonsOpen } from "../data/missions";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
@@ -51,9 +51,9 @@ export function fillBoard(): void {
 }
 
 export function startMission(uid: number): void {
-  if (S.active.length >= 3 || inFlashback()) return; // no new cases while Sam tells his story
+  if (inFlashback()) return; // no new cases while Sam tells his story
   const i = S.board.findIndex(m => m.uid === uid);
-  if (i < 0) return;
+  if (i < 0 || !slotOpen(wouldBeHelped(S.board[i]))) return;
   if (awayWhy(S.board[i].ally)) return; // a mission built around someone can't start while they're away
   const m = S.board.splice(i, 1)[0];
   const wantsHelp = m.send || (S.auto.crew && S.cred >= 3 && !!S.allies[m.ally]); // auto-send crew

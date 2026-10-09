@@ -48,6 +48,8 @@ export const FAQ: FaqSection[] = [
   {title: "Missions and your crew", items: [
     {q: "What do the numbers on a mission mean?",
      a: () => "On a running mission, the seconds are how long until it finishes and the percentage is its chance to succeed. That chance is locked in when you start. If it fails, you take extra heat and get nothing."},
+    {q: "How many missions can run at once?",
+     a: () => "Three on your own, plus a fourth slot that only takes a case an ally is helping with. So asking for help doesn't just add +25% success: it's the only way to run a fourth case at once. The Missions card shows how many slots are in use."},
     {q: "Why can't I ask an ally for help on a mission?",
      a: () => "The mission card says why. They're either not hired yet (hire them from Crew), already helping with another mission, or, for Nate, wandered off. An ally can only help with one mission at a time, and the case missions ask theirs for help automatically. A mission built around someone, like the ones about Nate or Fiona, can't be started at all while they're away: Nate has wandered off, or Fiona is still recovering from being taken. Do something else and come back. While someone is away, only one of their cases waits on the board at a time, so the board doesn't fill up with things you can't do."},
     {q: "Where do the missions come from?",

@@ -201,6 +201,16 @@ export function awayWhy(id: string): { short: string; long: string } | null {
     : { short: "is still recovering from being taken", long: "Recovering from being taken, and not happy about it" };
   return null;
 }
+/** Three cases can run on your own, and a fourth slot only takes a case an ally is helping with. */
+export const SOLO_SLOTS = 3, HELP_SLOTS = 1;
+export const slotOpen = (helped: boolean): boolean => {
+  const withHelp = S.active.filter(m => m.sent).length;
+  return S.active.length < SOLO_SLOTS + HELP_SLOTS && (helped || S.active.length - withHelp < SOLO_SLOTS);
+};
+/** Would this case go out with an ally right now (asked for, or sent by the auto-crew setting)? */
+export const wouldBeHelped = (m: { send: boolean; ally: string }): boolean =>
+  (m.send || (S.auto.crew && S.cred >= 3 && !!S.allies[m.ally])) && allyFree(m.ally);
+
 export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);
 export function succChance(m: Mission): number {
   if (m.kid) return 1; // Michael never fails when a kid is involved

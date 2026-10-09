@@ -2100,6 +2100,16 @@ describe("The Fall of Sam Axe", () => {
     expect(readFileSync(resolve(root, "vercel.json"), "utf8")).toContain("/sw.js");
   });
 
+  it("pop-ups slide in, and on a phone they become bottom sheets, using only cheap effects", () => {
+    const css = readFileSync(resolve(__dirname, "../styles.css"), "utf8");
+    expect(css).toMatch(/@keyframes sheetUp/);
+    expect(css).toMatch(/@media \(max-width:520px\)\{[\s\S]*align-items:flex-end/);
+    expect(css).toMatch(/env\(safe-area-inset-bottom\)/);
+    expect(css).toMatch(/prefers-reduced-motion:reduce/);                           // motion switches off for anyone who asks
+    const sheet = css.slice(css.indexOf("@media (max-width:520px){\n    .modal,#evt"));
+    expect(sheet).not.toMatch(/\bfilter\s*:|mix-blend-mode|backdrop-filter/);         // those made clicks slow before
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

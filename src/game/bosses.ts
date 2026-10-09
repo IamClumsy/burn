@@ -15,8 +15,9 @@ import { advanceArc } from "./arcs";
 const say = (t: string): void => sayTag(t, "boss");
 
 /**
- * Who turns up next. Someone you haven't outmaneuvered yet is far more likely than someone you have, and
- * foes from the Season you're in come first, so everyone on the List gets their turn.
+ * Who turns up next: the earliest foe on The List you haven't outmaneuvered yet, in story order, so everyone
+ * gets their turn the way the show tells it. Once you've beaten everyone who's open, rematches are random,
+ * favoring the Season you're in.
  */
 export function bossWeight(b: Boss): number {
   return (S.bossKills[b.id] ? 1 : 6) * (seasonsOpen(b.at) === seasonsOpen(S.life) ? 2 : 1);
@@ -25,7 +26,8 @@ export function bossWeight(b: Boss): number {
 export function spawnBoss(): void {
   const pool = BOSSES.filter(b => grossLife() >= b.at && (!b.needs || S.allies[b.needs]));
   if (!pool.length) { S.bossCd = 60; return; }
-  const b = bossView(weightedPick(pool, bossWeight)), max = bossHP(b);
+  const next = pool.find(x => !S.bossKills[x.id]); // the pool is in List order, which is story order
+  const b = bossView(next ?? weightedPick(pool, bossWeight)), max = bossHP(b);
   S.boss = { id: b.id, hp: max, max, left: 75 };
   shake(); beep(100, 0.5, "sawtooth", 0.08, -40);
   toast("BOSS: " + b.n, b.title, "bad", true);

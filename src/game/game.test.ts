@@ -2340,24 +2340,33 @@ describe("Rogues unlock with the seasons, in reach of a normal game", () => {
 describe("Everyone on the List gets their turn", () => {
   const spawnMany = (n: number): string[] => { const out: string[] = []; for (let i = 0; i < n; i++) { S.boss = null; spawnBoss(); out.push(S.boss!.id); } S.boss = null; return out; };
 
-  it("foes you haven't beaten are far likelier than ones you have", () => {
-    S.life = 5e8; S.allies = {};
-    const open = BOSSES.filter(b => S.life >= b.at && !b.needs); // O'Neill only comes for Fiona
-    const beaten = open[0];
-    S.bossKills[beaten.id] = 3;
-    const ids = spawnMany(1500);
-    expect(ids.filter(i => i === beaten.id).length / ids.length).toBeLessThan(1 / open.length);
-    for (const b of open) expect(ids, b.id).toContain(b.id);
+  it("foes come in story order: the earliest one on the List you haven't beaten is always next", () => {
+    S.life = 1e13; S.allies = {};
+    const open = BOSSES.filter(b => grossLife() >= b.at);
+    for (const b of open) {
+      S.boss = null; spawnBoss();
+      expect(S.boss!.id).toBe(b.id);                       // every time, in List order
+      S.bossKills[b.id] = 1;
+    }
+    S.boss = null;
+  });
+
+  it("once everyone who's open has been beaten, rematches are random", () => {
+    S.life = 1e13; S.allies = {};
+    for (const b of BOSSES) S.bossKills[b.id] = 1;
+    const ids = new Set(spawnMany(300));
+    expect(ids.size).toBeGreaterThan(5);
   });
 
   it("a ghost turns up like anyone else once the story has passed their time", () => {
-    S.life = 5e8; S.allies = {};
-    let seen = 0;
-    for (let i = 0; i < 60; i++) { S.boss = null; spawnBoss(); if (S.boss!.id === "carla") { expect(bossDef()!.n).toBe("Ghosts From the Past: Carla Baxter"); seen++; } }
-    expect(seen).toBeGreaterThan(0);
+    S.life = 5e8; S.allies = {}; S.bossKills.bly = 1;     // Carla is next in story order
+    S.boss = null; spawnBoss();
+    expect(S.boss!.id).toBe("carla");
+    expect(bossDef()!.n).toBe("Ghosts From the Past: Carla Baxter");
+    S.boss = null;
   });
 
-  it("the weight prefers the current Season, and unbeaten over beaten", () => {
+  it("for rematches, the weight still prefers the current Season", () => {
     S.life = 5e8;
     const carla = BOSSES.find(b => b.id === "carla")!, anson = BOSSES.find(b => b.id === "anson")!;
     expect(bossWeight(anson)).toBeGreaterThan(0);
@@ -3038,9 +3047,9 @@ describe("game loop (headless)", () => {
     it("turns up whether or not Fiona is on the crew, since she's in the story either way", () => {
       S.life = 1e13; S.allies = {};
       expect(BOSSES.find(b => b.id === "oneill")!.needs).toBeUndefined();
-      let seen = false;
-      for (let i = 0; i < 400 && !seen; i++) { S.boss = null; spawnBoss(); seen = S.boss!.id === "oneill"; }
-      expect(seen).toBe(true);
+      for (const id of ["bly", "carla", "cowan", "paxson", "larry", "strickler"]) S.bossKills[id] = 1;   // the ones before him on the List
+      S.boss = null; spawnBoss();
+      expect(S.boss!.id).toBe("oneill");
       S.boss = null;
     });
 

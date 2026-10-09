@@ -251,7 +251,7 @@ function favors(): string {
 }
 
 function rogues(): string {
-  return `<div class="small" style="margin-bottom:8px">Bosses turn up about every ${bossGapText()}. Outmaneuver each one once for a permanent +3% income. Foes turn up as your full earnings (the whole fee, not just Michael's 10%) reach their amount. Next one in about ${Math.ceil(Math.max(0, S.bossCd) / 60)} min.</div>` +
+  return `<div class="small" style="margin-bottom:8px">Bosses turn up about every ${bossGapText()}, in the order of The List. Outmaneuver each one once for a permanent +3% income. Foes turn up as your full earnings (the whole fee, not just Michael's 10%) reach their amount. Next one in about ${Math.ceil(Math.max(0, S.bossCd) / 60)} min.</div>` +
     BOSSES.map(b0 => {
       const b = bossView(b0), open = grossLife() >= b.at, k = S.bossKills[b.id] || 0;
       return `<div class="box" style="${open ? "" : "opacity:.5"}"><div class="who">${portrait(b.id, 56, open)}<div><div class="row"><b>${open ? b.n : "???"}</b><span class="small">${open ? "Outmaneuvered " + k + "×" : `Season ${seasonsOpen(b.at)} · at ${money(b.at)}`}</span></div>

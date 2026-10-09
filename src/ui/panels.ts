@@ -260,10 +260,13 @@ function rogues(): string {
     }).join("") + flashbackRogues();
 }
 
+/** Have you opened The Fall of Sam Axe (started it, or finished it)? Its foe stays hidden until then. */
+const samStarted = (): boolean => (S.arcStep[SAM_ARC_ID] || 0) > 0 || !!S.arcsDone[SAM_ARC_ID] || S.samReplay || !!S.active.some(m => m.arc?.id === SAM_ARC_ID);
+
 /** The one-off foes of Sam's flashback. They're not on The List and never turn up on their own, but they get a place here. */
 function flashbackRogues(): string {
-  if (!S.samOffered && !S.arcsDone[SAM_ARC_ID]) return "";
-  return `<h2 style="margin-top:14px">Once only</h2>` + FLASHBACK_BOSSES.map(b => {
+  if (!samStarted()) return ""; // hidden until you open The Fall of Sam Axe
+  return `<h2 style="margin-top:14px">The Fall of Sam Axe</h2>` + FLASHBACK_BOSSES.map(b => {
     const done = !!S.arcsDone[SAM_ARC_ID];
     return `<div class="box" style="border-color:var(--gold);${done ? "" : "opacity:.6"}"><div class="who">${portrait(b.id, 56, done)}<div><div class="row"><b>${done ? b.n : "???"}</b><span class="small">${done ? "Beaten, once and for all" : "Waiting in Sam's story"}</span></div>
       ${done ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">He never turns up again: he belongs to The Fall of Sam Axe, not to The List.</div>
@@ -500,9 +503,9 @@ function theList(): string {
     const status = done ? "Crossed off" : known ? "Known, not yet faced" + (note ? `. ${note}` : "") : "Unknown";
     return `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : known ? "color:var(--text)" : "color:var(--dim)"}"><span style="display:flex;align-items:center;gap:8px">${portrait(b.id, 30, !!(known || done))}${done ? "✓ " : "○ "}${known || done ? b.n : "??????"}</span><span>${status}</span></div>`;
   }).join("");
-  if (S.samOffered || S.arcsDone[SAM_ARC_ID]) { // the flashback's one-off foe, noted beside the List but never counted on it
+  if (samStarted()) { // the flashback's one-off foe, noted beside the List but never counted on it
     const done = !!S.arcsDone[SAM_ARC_ID];
-    h += `<div class="small" style="margin-top:10px;color:var(--dim)">Not on the List, once only:</div>` + FLASHBACK_BOSSES.map(b =>
+    h += `<div class="small" style="margin-top:10px;color:var(--dim)">The Fall of Sam Axe:</div>` + FLASHBACK_BOSSES.map(b =>
       `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : "color:var(--dim)"}"><span style="display:flex;align-items:center;gap:8px">${portrait(b.id, 30, done)}${done ? "✓ " : "○ "}${done ? b.n : "??????"}</span><span>${done ? "Beaten in Sam's story" : "Waiting in Sam's story"}</span></div>`).join("");
   }
   h += S.cleanRecord

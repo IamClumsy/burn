@@ -1775,10 +1775,10 @@ describe("The Fall of Sam Axe", () => {
   });
 
   it("Veracruz gets a one-time spot on the Rogues card once Sam's story is told", () => {
-    S.samOffered = false; S.arcsDone = {};
-    expect(panelHTML("rogue")).not.toContain("Once only");
-    S.samOffered = true;
-    expect(panelHTML("rogue")).toContain("Once only");
+    S.samOffered = true; S.arcsDone = {}; S.arcStep = {}; S.active = [];
+    expect(panelHTML("rogue")).not.toContain("The Fall of Sam Axe");      // offered, but not opened yet: hidden
+    S.arcStep[SAM_ARC_ID] = 1;
+    expect(panelHTML("rogue")).toContain("The Fall of Sam Axe");
     expect(panelHTML("rogue")).not.toContain("Commandante Veracruz");  // a ??? until you've beaten him
     S.arcsDone[SAM_ARC_ID] = true;
     const html = panelHTML("rogue");
@@ -1787,10 +1787,10 @@ describe("The Fall of Sam Axe", () => {
   });
 
   it("Veracruz is noted beside The List too, without counting toward it", () => {
-    S.samOffered = false; S.arcsDone = {};
-    expect(panelHTML("list")).not.toContain("once only");
-    S.samOffered = true;
-    expect(panelHTML("list")).toContain("once only");
+    S.samOffered = true; S.arcsDone = {}; S.arcStep = {}; S.active = [];
+    expect(panelHTML("list")).not.toContain("The Fall of Sam Axe");       // hidden until you open the case
+    S.arcStep[SAM_ARC_ID] = 1;
+    expect(panelHTML("list")).toContain("The Fall of Sam Axe:");
     expect(panelHTML("list")).not.toContain("Commandante Veracruz");
     S.arcsDone[SAM_ARC_ID] = true;
     const html = panelHTML("list");

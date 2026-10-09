@@ -106,8 +106,8 @@ function ops(): string {
   GENS.forEach((g, i) => {
     if (i > 0 && S.life < GENS[i - 1].base * 0.5 && !owned(g.id)) return;
     const n = buyN(g), c = bulkCost(g, n);
-    h += item("gen", g.id, S.cash >= c, g.name, `${g.desc} · ${fmt(g.cps * genMult(g.id) * incomeMult())}/s each`,
-      costAndOwn(`${n > 1 ? "×" + n + " · " : ""}${money(c)}`, owned(g.id)));
+    h += item("gen", g.id, n > 0 && S.cash >= c, g.name, `${g.desc} · ${fmt(g.cps * genMult(g.id) * incomeMult())}/s each`,
+      costAndOwn(n === 0 ? "Maxed" : `${n > 1 ? "×" + n + " · " : ""}${money(c)}`, n === 0 ? `${owned(g.id)} (max)` : owned(g.id)));
   });
   return h;
 }

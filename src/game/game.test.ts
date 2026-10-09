@@ -18,9 +18,12 @@ import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missi
 import { allBeaten, checkEnding, newFixer, reduceGrip, simonTip, spawnErrand, tickOrg } from "./org";
 import { FIXERS, FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
 import { bribeCost, bribeDrop } from "../calc";
-import { payOffFixer, toggleAuto } from "./actions";
+import { buyGen, payOffFixer, toggleAuto } from "./actions";
+import { GENS, OP_CAP } from "../data/ops";
+import { MEDALS } from "../data/medals";
+import { buyN, bulkCost } from "../calc";
 import { GRIP_PERKS, SEASON_GRIP, TIERS, handlerFor } from "../data/org";
-import { UPGS } from "../data/upgrades";
+import { OP_TIERS, UPGS } from "../data/upgrades";
 import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
 import { loftBadges } from "../ui/badges";
@@ -1038,6 +1041,52 @@ describe("The bottom bar, the menu and Settings", () => {
     S.run = 2e8; render();
     expect(+document.getElementById("dockpct")!.textContent!.replace("%", "")).toBeGreaterThan(0);
     expect(dockProgress().pct).toBeLessThanOrEqual(1);
+  });
+});
+
+describe("Operations stop at 250", () => {
+  const inf = () => GENS[0];
+
+  it("one click never takes you past the cap, and a maxed operation can't be bought", () => {
+    S.cash = 1e300; S.gens = { inf: 240 };
+    S.buyAmt = 100;
+    expect(buyN(inf())).toBe(10);
+    buyGen("inf");
+    expect(S.gens.inf).toBe(250);
+    expect(buyN(inf())).toBe(0);
+    const cash = S.cash;
+    buyGen("inf");
+    expect(S.gens.inf).toBe(250);
+    expect(S.cash).toBe(cash);
+  });
+
+  it("Max stops at the cap too, and only pays for what it buys", () => {
+    S.cash = 1e24; S.gens = { inf: 200 }; S.buyAmt = "max";
+    expect(buyN(inf())).toBe(50);
+    const before = S.cash, price = bulkCost(inf(), 50);
+    buyGen("inf");
+    expect(S.gens.inf).toBe(250);
+    expect(Math.abs(before - S.cash - price) / price).toBeLessThan(1e-6);
+  });
+
+  it("the row says Maxed, and a saved game that already owns more keeps what it has", () => {
+    S.life = 1e15; S.gens = { inf: 250 };
+    expect(panelHTML("ops")).toContain("Maxed");
+    S.gens = { inf: 300 };
+    expect(buyN(inf())).toBe(0);
+    expect(S.gens.inf).toBe(300);
+  });
+
+  it("every upgrade tier is reachable under the cap", () => {
+    expect(Math.max(...OP_TIERS.map(t => t.owned))).toBeLessThanOrEqual(OP_CAP);
+  });
+
+  it("the Fully Staffed medal needs every operation at the cap", () => {
+    const medal = MEDALS.find(m => m.n === "Fully Staffed")!;
+    S.gens = Object.fromEntries(GENS.map(g => [g.id, OP_CAP - 1]));
+    expect(medal.t(S)).toBe(false);
+    S.gens = Object.fromEntries(GENS.map(g => [g.id, OP_CAP]));
+    expect(medal.t(S)).toBe(true);
   });
 });
 

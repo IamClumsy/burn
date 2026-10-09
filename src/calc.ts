@@ -1,5 +1,5 @@
 import { S, KEEP_RATE, capFee, missionCap } from "./state";
-import { GENS } from "./data/ops";
+import { GENS, OP_CAP } from "./data/ops";
 import { UPGS } from "./data/upgrades";
 import { COVERS } from "./data/covers";
 import { BOSSES } from "./data/bosses";
@@ -108,7 +108,13 @@ export function maxAfford(g: Gen): number {
   while (bulkCost(g, n + 1) <= S.cash && n < 1e6) n++;
   return n;
 }
-export const buyN = (g: Gen): number => (S.buyAmt === "max" ? Math.max(1, maxAfford(g)) : S.buyAmt);
+/** How many of an operation you buy per click: what you asked for, never past the cap (0 once it's maxed). */
+export function buyN(g: Gen): number {
+  const room = Math.max(0, OP_CAP - owned(g.id));
+  if (room === 0) return 0;
+  const want = S.buyAmt === "max" ? Math.max(1, maxAfford(g)) : S.buyAmt;
+  return Math.min(want, room);
+}
 
 /**
  * What the current fixer wants. It varies with who's on offer, climbs as the Organization closes in

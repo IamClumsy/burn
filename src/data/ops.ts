@@ -1,5 +1,8 @@
 import type { Gen } from "../types";
 
+/** The most of any one operation you can own: 50 past the last boost upgrade (at 200), so every tier is reachable. */
+export const OP_CAP = 250;
+
 export const GENS: Gen[] = [
   {id:"inf",  name:"Street Informant",       desc:"Hears things. Sells them.",             base:15,     cps:0.5},
   {id:"tape", name:"Duct-Tape Gadgets",      desc:"Household items, weaponized. Also yields junk.", base:110, cps:3},

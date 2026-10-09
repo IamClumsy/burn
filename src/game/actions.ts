@@ -22,11 +22,11 @@ import { fillBoard, startMission } from "./missions";
 
 export function buyGen(id: string): void {
   const g = GENS.find(x => x.id === id)!, n = buyN(g), c = bulkCost(g, n);
-  if (S.cash < c) return;
+  if (n < 1 || S.cash < c) return;
   const before = owned(id);
   S.cash -= c; S.gens[id] = before + n;
   beep(660, 0.07, "triangle", 0.05);
-  if ([10, 25, 50, 100, 150].some(m => before < m && before + n >= m)) say(pick(LINES.big));
+  if ([10, 25, 50, 100, 150, 200].some(m => before < m && before + n >= m)) say(pick(LINES.big));
 }
 
 export function buyUpg(id: string): void {

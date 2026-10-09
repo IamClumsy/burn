@@ -1881,6 +1881,16 @@ describe("The Fall of Sam Axe", () => {
     S.stats.returned = 0;
   });
 
+  it("the Organization's view of you is a row of the file, between Status and Former Occupation", () => {
+    const html = panelHTML("file");
+    const status = html.indexOf(">Status<"), org = html.indexOf("Organization Status"), occ = html.indexOf("Former Occupation");
+    expect(status).toBeGreaterThan(-1);
+    expect(org).toBeGreaterThan(status);
+    expect(org).toBeLessThan(occ === -1 ? html.indexOf("██████ ████") : occ);
+    expect(html).not.toContain("Right now they have you as");
+    expect(html.indexOf("Lifetime earnings")).toBeGreaterThan(html.lastIndexOf("class=\"drow"));    // the money sits below the file
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

@@ -529,16 +529,17 @@ function file(): string {
     <div class="row small"><span>Michael's take (10%)</span><span>${money(S.life)}</span></div>
     ${nextUnlocks().map(u => `<div class="row small" style="padding:2px 0"><span>${u.what}: ${u.name}</span><span>${money(u.at)}${rate > 0 ? ` · about ${formatWait(Math.max(0, (u.at - u.have) / rate) * 1000)}` : ""}</span></div>`).join("")}
     <div class="small" style="margin-top:4px;color:var(--dim)">Lifetime earnings are the full fees, including what you hand back, and they open the foes on The List. Michael's take opens Seasons, covers and story leads. Both keep counting across Reinstates. The waits assume your income stays where it is now, so they only get shorter as you grow.</div></div>`;
-  const rows = DOSSIER.map(d => S.attPeak >= d.peak
+  // Where they have you right now sits in the file itself, between Status and Former Occupation.
+  const standing = `<div class="drow"><span class="dlabel">Organization Status</span><span class="dtext"><b>${t.name}</b>. ${t.note}</span></div>`;
+  const rows = DOSSIER.map(d => (S.attPeak >= d.peak
     ? `<div class="drow"><span class="dlabel">${d.label}</span><span class="dtext">${d.text}</span></div>`
-    : `<div class="drow redacted"><span class="dlabel">██████ ████</span><span class="dtext">████████ ██████ <span class="small">(Reached at ${d.peak}% attention)</span></span></div>`).join("");
+    : `<div class="drow redacted"><span class="dlabel">██████ ████</span><span class="dtext">████████ ██████ <span class="small">(Reached at ${d.peak}% attention)</span></span></div>`) + (d.label === "Status" ? standing : "")).join("");
   const learned = DOSSIER.filter(d => S.attPeak >= d.peak).length;
   return `<div class="filehead"><div class="who">${portrait("michael", 72)}<div><div class="dstamp">Burned</div>
       <div class="small">Organization file, ${learned} of ${DOSSIER.length} entries filled in</div></div></div></div>
-    ${lifetime}
-    <div class="small" style="margin:8px 0">Right now they have you as: <b style="color:var(--text)">${t.name}</b>. ${t.note}</div>
     <div class="dfile">${rows}</div>
-    <div class="small" style="margin-top:8px">The more attention you draw from the Organization, the more of this they fill in. The file doesn't shrink, even when your attention drops.</div>`;
+    <div class="small" style="margin-top:8px">The more attention you draw from the Organization, the more of this they fill in. The file doesn't shrink, even when your attention drops.</div>
+    <h2 style="margin-top:14px">Earnings</h2>${lifetime}`;
 }
 
 function faq(): string {

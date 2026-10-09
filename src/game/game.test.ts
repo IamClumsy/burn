@@ -18,7 +18,7 @@ import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missi
 import { allBeaten, checkEnding, newFixer, reduceGrip, simonTip, spawnErrand, tickOrg } from "./org";
 import { FIXERS, FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
 import { bribeCost, bribeDrop } from "../calc";
-import { buyGen, craft, payOffFixer, toggleAuto } from "./actions";
+import { buyGen, callNate, craft, payOffFixer, toggleAuto } from "./actions";
 import { FX_NAMES, RECIPES } from "../data/perks";
 import { GENS, OP_CAP } from "../data/ops";
 import { MEDALS } from "../data/medals";
@@ -1267,6 +1267,49 @@ describe("The board when someone is away", () => {
     let most = 0;
     for (let i = 0; i < 3000; i++) { S.board = []; fillBoard(); most = Math.max(most, S.board.filter(m => m.ally === "nate").length); }
     expect(most).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe("Nate's absences", () => {
+  it("he's gone twenty minutes to an hour, not hours", () => {
+    S.allies.nate = true; S.nateAway = false; S.nateTimer = 0;
+    tickNate(0.1);
+    expect(S.nateAway).toBe(true);
+    expect(S.nateTimer).toBeGreaterThanOrEqual(1200);
+    expect(S.nateTimer).toBeLessThanOrEqual(3600);
+  });
+
+  it("a save from when his trips were longer gets him home within the hour", () => {
+    expect(merge({ nateAway: true, nateTimer: 9000 }).nateTimer).toBe(3600);
+    expect(merge({ nateAway: true, nateTimer: 900 }).nateTimer).toBe(900);
+    expect(merge({ nateAway: false, nateTimer: 900 }).nateTimer).toBe(900);
+  });
+
+  it("you can call him back for a favor, once", () => {
+    S.allies.nate = true; S.nateAway = true; S.nateStage = 3; S.favors = 1;
+    callNate();
+    expect(S.nateAway).toBe(false);
+    expect(S.favors).toBe(0);
+    callNate();            // he's already here, and you're out of favors
+    expect(S.favors).toBe(0);
+  });
+
+  it("it needs a favor, and the Crew card only offers it while he's away", () => {
+    S.life = 1e12; S.allies.nate = true; S.nateStage = 3;
+    S.nateAway = false; expect(panelHTML("crew")).not.toContain("Call him back");
+    S.nateAway = true; S.favors = 0;
+    expect(panelHTML("crew")).toMatch(/data-act="callnate" disabled/);
+    S.favors = 2;
+    expect(panelHTML("crew")).toMatch(/data-act="callnate" >Call him back/);
+    callNate();
+    expect(S.nateAway).toBe(false);
+  });
+
+  it("coming back this way still tells his story the first times", () => {
+    S.allies.nate = true; S.nateAway = true; S.nateStage = 0; S.favors = 1;
+    callNate();
+    expect(S.nateStage).toBe(1);
+    expect(document.getElementById("nT")!.textContent).toBe("Nate got married");
   });
 });
 

@@ -77,24 +77,31 @@ export function tickBusy(dt: number): void {
   say(`${who} finally lets you go. You've lost an afternoon, but you've got a favor and, somehow, a new handshake.`);
 }
 
-/** Nate wanders off and wanders back on a random timer, because it's Nate. */
-export function tickNate(dt: number): void {
-  if (!S.allies.nate) return;
-  S.nateTimer -= dt;
-  if (S.nateTimer > 0) return;
-  S.nateAway = !S.nateAway;
-  S.nateTimer = S.nateAway ? 3600 + Math.random() * 7200 : 600 + Math.random() * 900;
-  if (!S.nateAway && S.nateStage < NATE_BEATS.length) {
+/** Nate comes back: his next story beat the first few times, otherwise a line about it. */
+export function nateReturns(): void {
+  S.nateAway = false;
+  S.nateTimer = 600 + Math.random() * 900;
+  if (S.nateStage < NATE_BEATS.length) {
     const beat = NATE_BEATS[S.nateStage++];
     toast(beat.title, beat.text);
     say(beat.text);
     return;
   }
-  const pool = S.nateAway
-    ? [...LINES.nateAway, ...(S.nateStage === 1 ? LINES.nateAwayVegas : []), ...(S.nateStage >= 2 ? LINES.nateAwayHome : [])]
-    : LINES.nateBack;
-  const line = pick(pool);
-  toast(S.nateAway ? "Nate wandered off" : "Nate's back", line);
+  const line = pick(LINES.nateBack);
+  toast("Nate's back", line);
+  say(line);
+}
+
+/** Nate wanders off and wanders back on a random timer (20 to 60 minutes away), because it's Nate. */
+export function tickNate(dt: number): void {
+  if (!S.allies.nate) return;
+  S.nateTimer -= dt;
+  if (S.nateTimer > 0) return;
+  if (S.nateAway) { nateReturns(); return; }
+  S.nateAway = true;
+  S.nateTimer = 1200 + Math.random() * 2400;
+  const line = pick([...LINES.nateAway, ...(S.nateStage === 1 ? LINES.nateAwayVegas : []), ...(S.nateStage >= 2 ? LINES.nateAwayHome : [])]);
+  toast("Nate wandered off", line);
   say(line);
 }
 

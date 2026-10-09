@@ -206,7 +206,8 @@ function crew(): string {
     const status = !here ? (awayWhy(a.id)?.long ?? "Away") : busy ? "On a mission" : "Available";
     return `<div class="box"${here ? "" : ' style="opacity:.6"'}><div class="who">${portrait(a.id, 64)}<div><div class="row"><b>${a.name}</b><span class="small">${status}</span></div>
       <div class="small">${a.bio}</div><div class="small">Perk: ${a.perk}</div>
-      <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd > 0 || !here ? "disabled" : ""}>${a.ab} — ${!here ? "Away" : cd > 0 ? lv("cd" + a.id, cd + "s") : "Ready"}</button></div>
+      <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd > 0 || !here ? "disabled" : ""}>${a.ab} — ${!here ? "Away" : cd > 0 ? lv("cd" + a.id, cd + "s") : "Ready"}</button>
+      ${a.id === "nate" && !here && S.nateAway ? `<button data-act="callnate" ${S.favors >= 1 ? "" : "disabled"}>Call him back — 1 favor</button>` : ""}</div>
       <div class="small" style="margin-top:4px">${a.abDesc}</div></div></div></div>`;
   }).join("");
 }

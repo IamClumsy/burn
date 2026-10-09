@@ -7,6 +7,7 @@ import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
 import { ALLIES } from "../data/allies";
 import { AUTOS } from "../data/automation";
+import { nateReturns } from "./tick";
 import { COVERS } from "../data/covers";
 import { RECIPES } from "../data/perks";
 import { LINES } from "../data/text";
@@ -67,6 +68,14 @@ export function toggleAuto(id: string): void {
   if (!a || S.cred < a.need) return;
   S.auto[a.id] = !S.auto[a.id];
   say(`${a.name}: ${S.auto[a.id] ? "on" : "off"}.`);
+}
+
+/** Nate's been gone a while: call him back for a favor. */
+export function callNate(): void {
+  if (!S.allies.nate || !S.nateAway || S.favors < 1) return;
+  S.favors--;
+  say(pick(["You call Nate. He says he's five minutes away. He is, miraculously.", "You call in a favor and Nate picks up on the first ring, which is its own kind of alarming.", "You tell Nate it's important. He's at your door before you hang up, out of breath, with a goat-shaped excuse he decides not to use."]));
+  nateReturns();
 }
 
 export function setCover(id: string): void {

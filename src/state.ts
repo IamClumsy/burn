@@ -60,6 +60,7 @@ export function merge(saved: Partial<GameState>): GameState {
   o.favorLog = Object.assign(fresh().favorLog, saved.favorLog || {});
   o.auto = Object.assign(fresh().auto, saved.auto || {});
   o.seen = saved.seen || {};
+  if (o.nateAway && o.nateTimer > 3600) o.nateTimer = 3600; // saves from when his trips were longer
   // A damaged or hand-edited save can't poison the game with NaN or Infinity.
   const d = fresh() as unknown as Record<string, unknown>, r = o as unknown as Record<string, unknown>;
   for (const k of Object.keys(d)) {

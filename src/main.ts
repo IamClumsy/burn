@@ -26,7 +26,7 @@ import * as A from "./game/actions";
 const ACT: Record<string, (arg: string) => void> = {
   amt: a => { S.buyAmt = a === "max" ? "max" : (+a as 1 | 10 | 100); },
   gen: A.buyGen, upg: A.buyUpg, referral: () => A.buyReferral(), hire: A.hireAlly, ability: A.useAbility,
-  cover: A.setCover, auto: A.toggleAuto, perk: A.buyPerk, contact: a => A.buyFavorFrom(a), hangout: () => A.buyFavorFrom("seymour", "hangout"), craft: A.craft,
+  cover: A.setCover, auto: A.toggleAuto, callnate: () => A.callNate(), perk: A.buyPerk, contact: a => A.buyFavorFrom(a), hangout: () => A.buyFavorFrom("seymour", "hangout"), craft: A.craft,
   start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
   setting: a => setting(a),
 };

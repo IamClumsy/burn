@@ -1723,6 +1723,18 @@ describe("The Fall of Sam Axe", () => {
     expect(css).not.toMatch(/body\.flashback[^{]*\{[^}]*(filter|mix-blend-mode)/); // those made every click slow (INP)
   });
 
+  it("Veracruz gets a one-time spot on the Rogues card once Sam's story is told", () => {
+    S.samOffered = false; S.arcsDone = {};
+    expect(panelHTML("rogue")).not.toContain("Once only");
+    S.samOffered = true;
+    expect(panelHTML("rogue")).toContain("Once only");
+    expect(panelHTML("rogue")).not.toContain("Commandante Veracruz");  // a ??? until you've beaten him
+    S.arcsDone[SAM_ARC_ID] = true;
+    const html = panelHTML("rogue");
+    expect(html).toContain("Commandante Veracruz");
+    expect(html).toContain("never turns up again");
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

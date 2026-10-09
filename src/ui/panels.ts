@@ -22,7 +22,7 @@ import { portrait, portraitScope } from "./portrait";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep } from "../game/arcs";
-import { SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
+import { FLASHBACK_BOSSES, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 import { AUTOS, autoCut } from "../data/automation";
@@ -253,7 +253,18 @@ function rogues(): string {
       return `<div class="box" style="${open ? "" : "opacity:.5"}"><div class="who">${portrait(b.id, 56, open)}<div><div class="row"><b>${open ? b.n : "???"}</b><span class="small">${open ? "Outmaneuvered " + k + "×" : `Season ${seasonsOpen(b.at)} · at ${money(b.at)}`}</span></div>
         ${open ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">${b.mech}</div>
           ${k > 0 ? `<div class="small" style="margin-top:6px;color:var(--text)"><b>File:</b> ${b.file}</div>` : `<div class="small" style="margin-top:6px">Outmaneuver them once to open their file.</div>`}` : ""}</div></div></div>`;
-    }).join("");
+    }).join("") + flashbackRogues();
+}
+
+/** The one-off foes of Sam's flashback. They're not on The List and never turn up on their own, but they get a place here. */
+function flashbackRogues(): string {
+  if (!S.samOffered && !S.arcsDone[SAM_ARC_ID]) return "";
+  return `<h2 style="margin-top:14px">Once only</h2>` + FLASHBACK_BOSSES.map(b => {
+    const done = !!S.arcsDone[SAM_ARC_ID];
+    return `<div class="box" style="border-color:var(--gold);${done ? "" : "opacity:.6"}"><div class="who">${portrait(b.id, 56, done)}<div><div class="row"><b>${done ? b.n : "???"}</b><span class="small">${done ? "Beaten, once and for all" : "Waiting in Sam's story"}</span></div>
+      ${done ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">He never turns up again: he belongs to The Fall of Sam Axe, not to The List.</div>
+        <div class="small" style="margin-top:6px;color:var(--text)"><b>File:</b> ${b.file}</div>` : `<div class="small" style="margin-top:6px">Someone from a story Sam hasn't finished telling yet.</div>`}</div></div></div>`;
+  }).join("");
 }
 
 function story(): string {

@@ -108,11 +108,7 @@ $("bossacts").addEventListener("click", e => {
 
 // ---- the dock: back to top, narration, and the settings that used to live in the footer
 $("dockTop").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-$("dockLog").addEventListener("click", () => {
-  const vo = $("voiceover") as HTMLDetailsElement;
-  vo.open = !vo.open;
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
+$("dockLog").addEventListener("click", () => showModal("narrator"));
 
 // ---- boot
 initNotices();

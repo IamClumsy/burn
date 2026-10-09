@@ -69,9 +69,11 @@ function paintTitle(): void {
 
 /** The bottom bar: Credibility, and how far this run is toward the next point. */
 export function dockProgress(): { label: string; pct: number } {
-  const label = `Credibility ${S.cred}`;
+  const g = credGain();
+  // "Credibility 1 → 5": what you'd have if you reinstated once this run reaches the next point
+  const label = `Credibility ${S.cred} → ${S.cred + g + 1}`;
   if (S.run < REINSTATE_MIN) return { label, pct: Math.min(1, S.run / REINSTATE_MIN) };
-  const g = credGain(), lo = g * g * 1e7, hi = (g + 1) * (g + 1) * 1e7;
+  const lo = g * g * 1e7, hi = (g + 1) * (g + 1) * 1e7;
   return { label, pct: Math.max(0, Math.min(1, (S.run - lo) / (hi - lo))) };
 }
 
@@ -142,7 +144,12 @@ export function render(): void {
   }
   if (openModal) {
     const h = panelHTML(openModal);
-    if (h !== lastModal) { $("modalBody").innerHTML = h; lastModal = h; }
+    if (h !== lastModal) {
+      // keep your place while a pop-up (the narrator, say) gets new lines
+      const dlg = document.querySelector<HTMLElement>(".mdlg"), top = dlg?.scrollTop ?? 0;
+      $("modalBody").innerHTML = h; lastModal = h;
+      if (dlg) dlg.scrollTop = top;
+    }
   }
   patchLive(document);
 }

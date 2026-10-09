@@ -25,9 +25,10 @@ import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 import { AUTOS } from "../data/automation";
 import { saveStatus } from "../saveStatus";
+import { narrationLines } from "./fx";
 import { EPILOGUE, EPILOGUE_CLOSE, EPILOGUE_TITLE } from "../data/epilogue";
 
-export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "med" | "rep";
+export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "med" | "rep";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
@@ -38,7 +39,7 @@ export const SECTIONS: [TabId, string][] = [
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"], ["gad", "Gadgets"], ["fav", "Favors"],
   ["list", "The List"], ["file", "Michael's File"], ["stats", "Stats"], ["auto", "Automation"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
-  ["options", "Menu"], ["settings", "Settings"],
+  ["options", "Menu"], ["settings", "Settings"], ["narrator", "Narrator"],
 ];
 
 /** What the menu button offers. Crew, Covers, Gadgets and Favors stay in The Loft, so they aren't here. */
@@ -293,6 +294,14 @@ function automation(): string {
   return `<div class="small" style="margin-bottom:8px">Credibility from Reinstating buys you help with the chores. Switch them on or off any time.</div>${rows}`;
 }
 
+/** The narrator's history in a pop-up, in bigger type, newest first. */
+function narrator(): string {
+  const lines = narrationLines();
+  if (!lines.length) return `<div class="small">Nothing yet. The narrator is waiting for something to happen.</div>`;
+  return `<div class="narr"><p class="now">${lines[0]}</p>${lines.slice(1).map(l => `<p>${l}</p>`).join("")}</div>
+    <div class="small" style="margin-top:8px">The last ${lines.length} things the narrator said, newest at the top.</div>`;
+}
+
 /** The menu behind the hamburger button. */
 function options(): string {
   return `<div class="menugrid">${MENU.map(id => `<button data-modal="${id}">${titleOf(id)}</button>`).join("")}</div>`;
@@ -414,7 +423,7 @@ function faq(): string {
 const VIEWS: Record<TabId, () => string> = {
   faq,
   list: theList,
-  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, story, med: medals, rep: reinstate,
+  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, narrator, story, med: medals, rep: reinstate,
 };
 
 export const panelHTML = (tab: TabId): string => { portraitScope(tab); return VIEWS[tab](); };

@@ -27,7 +27,7 @@ import { OP_TIERS, UPGS } from "../data/upgrades";
 import { FAQ } from "../data/faq";
 import { BOSS_FIRST, BOSS_GAP_MIN, BOSS_GAP_SPREAD, bossGapText, nextBossGap } from "../data/pacing";
 import { loftBadges } from "../ui/badges";
-import { say, toast } from "../ui/fx";
+import { clearNarration, say, toast } from "../ui/fx";
 import { dismissAllNotices, dismissNotice, initNotices, noticeCount, noticeOpen, setNoticeGate } from "../ui/notice";
 import { showChoice, choiceBusy } from "../ui/choice";
 import { CONTACT_CAP, allyFree, allyHere, contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance } from "../calc";
@@ -48,7 +48,7 @@ import { EVENTS } from "../data/events";
 import { MISSIONS, seasonsOpen } from "../data/missions";
 import { earn, merge } from "../state";
 import type { GameState } from "../types";
-import { dockProgress, render } from "../ui/render";
+import { dockProgress, render, showModal } from "../ui/render";
 import { MENU, MODALS, SECTIONS, buildLayout, panelHTML, titleOf } from "../ui/panels";
 
 beforeAll(() => {
@@ -61,6 +61,7 @@ beforeAll(() => {
 beforeEach(() => {
   setState(fresh()); fillBoard();
   document.getElementById("log")!.innerHTML = ""; // narration from one test shouldn't leak into the next
+  clearNarration();
   dismissAllNotices(); // nor should a notification left on screen
   document.getElementById("toasts")!.innerHTML = "";
 });
@@ -1036,9 +1037,10 @@ describe("The bottom bar, the menu and Settings", () => {
 
   it("the bar shows Credibility and progress toward the next point", () => {
     S.cred = 3; S.run = 5e7; render();
-    expect(document.getElementById("docklv")!.textContent).toBe("Credibility 3");
+    expect(document.getElementById("docklv")!.textContent).toBe("Credibility 3 → 4");
     expect(document.getElementById("dockpct")!.textContent).toBe("50%");
-    S.run = 2e8; render();
+    S.run = 2e8; render(); // worth 4 points now, so the next point would make 3 + 4 + 1
+    expect(document.getElementById("docklv")!.textContent).toBe("Credibility 3 → 8");
     expect(+document.getElementById("dockpct")!.textContent!.replace("%", "")).toBeGreaterThan(0);
     expect(dockProgress().pct).toBeLessThanOrEqual(1);
   });
@@ -1087,6 +1089,26 @@ describe("Operations stop at 250", () => {
     expect(medal.t(S)).toBe(false);
     S.gens = Object.fromEntries(GENS.map(g => [g.id, OP_CAP]));
     expect(medal.t(S)).toBe(true);
+  });
+});
+
+describe("The Narrator pop-up", () => {
+  it("shows what the narrator has said, newest first and bigger", () => {
+    say("First thing."); say("Second thing."); say("Third thing.");
+    const html = panelHTML("narrator");
+    expect(html).toMatch(/class="now">Third thing\./);
+    expect(html.indexOf("Second thing.")).toBeLessThan(html.indexOf("First thing."));
+    expect(html).toContain("The last 3 things");
+  });
+
+  it("says so when there's nothing to read yet", () => {
+    expect(panelHTML("narrator")).toMatch(/Nothing yet/);
+  });
+
+  it("opens as a pop-up titled Narrator", () => {
+    showModal("narrator");
+    expect(document.getElementById("modalTitle")!.textContent).toBe("Narrator");
+    showModal(null);
   });
 });
 

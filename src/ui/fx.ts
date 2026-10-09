@@ -4,6 +4,11 @@ import { notify, type NoticeKind } from "./notice";
 
 let freshTimer: ReturnType<typeof setTimeout> | undefined;
 
+/** Everything the narrator has said, newest first, for the Narrator pop-up. */
+const history: string[] = [];
+export const narrationLines = (): readonly string[] => history;
+export const clearNarration = (): void => { history.length = 0; };
+
 /** Narrate a line: it goes to the top of the history and into the strip under the header. */
 export function say(t: string): void {
   const log = $("log");
@@ -11,6 +16,8 @@ export function say(t: string): void {
   p.textContent = t;
   log.prepend(p);
   while (log.children.length > 40) log.lastChild!.remove();
+  history.unshift(t);
+  if (history.length > 150) history.length = 150;
 
   $("vo-latest").textContent = t;
   const summary = $("voiceover").querySelector("summary")!;

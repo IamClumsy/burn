@@ -217,11 +217,13 @@ describe("data integrity", () => {
     expect(MISSIONS.filter(m => m.ally === "jesse").length).toBeGreaterThanOrEqual(10);
   });
 
-  it("Madeline joins in Season 3, later than Nate and the rest of the early crew", () => {
+  it("Madeline is in the story from the pilot, but only joins your crew in Season 3, later and pricier than Nate", () => {
     const m = ALLIES.find(a => a.id === "madeline")!, n = ALLIES.find(a => a.id === "nate")!;
-    expect([m.debut, m.debutEp]).toEqual([3, "302"]);
+    expect([m.debut, m.debutEp]).toEqual([3, "101"]);
     expect(m.cost).toBeGreaterThan(n.cost);
-    expect(MISSIONS.filter(x => x.ally === "madeline").every(x => +x.ep! >= 302)).toBe(true);
+    const early = MISSIONS.filter(x => x.ally === "madeline" && +x.ep! < 302);
+    expect(early.length).toBeGreaterThan(0);               // she turns up in early cases...
+    expect(early.every(x => x.kid || x.elder)).toBe(true);  // ...the kid and older-neighbor ones she's known for
   });
 
   it("Madeline costs more than Barry, who helps from the start", () => {

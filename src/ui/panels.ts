@@ -3,7 +3,7 @@ import type { ContactId } from "../types";
 import {
   REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, cps, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
-  samSharp, grossLife, inFlashback, slotOpen, wouldBeHelped, SOLO_SLOTS, HELP_SLOTS, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
+  samSharp, grossLife, helpsOn, inFlashback, slotOpen, wouldBeHelped, SOLO_SLOTS, HELP_SLOTS, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { REFERRAL, UPGS } from "../data/upgrades";
@@ -167,13 +167,13 @@ function missions(): string {
     const al = ALLIES.find(a => a.id === m.ally)!, free = allyFree(m.ally), first = al.name.split(" ")[0];
     const out = S.active.find(a => a.sent === m.ally);
     // Say exactly why the ally can't go, so a greyed-out button is never a mystery.
-    const why = !S.allies[m.ally] ? `Hire ${first} in Crew to ask ${al.she ? "her" : "him"} for help (${m.kid ? "+1 favor" : "+25%"})`
+    const why = !helpsOn(m) ? `${first} is in this one, but ${al.she ? "she" : "he"} wasn't helping Michael yet. No help from ${al.she ? "her" : "him"} until Season ${al.debut}, Episode 2` : !S.allies[m.ally] ? (!allyAvailable(al) ? `${first} is in this one, but can't help until ${al.she ? "she" : "he"} joins your crew in Season ${al.debut}` : `Hire ${first} in Crew to ask ${al.she ? "her" : "him"} for help (${m.kid ? "+1 favor" : "+25%"})`)
       : out ? `${first} is helping with "${out.n}", free in ${lv("w" + m.uid, Math.ceil(out.left) + "s")}`
       : !allyHere(m.ally) ? `${first} ${awayWhy(m.ally)?.short ?? "is away"}. This one can't start without ${al.she ? "her" : "him"}.` : "";
     const blocked = !!awayWhy(m.ally);
     return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}${m.ep && S.episodesDone[m.ep] ? ' <span class="chip">Seen</span>' : ""}</b>${m.ep ? `<div class="small" style="margin-bottom:2px">${epLabel(m.ep, m.epTitle || "")}</div>` : ""}${castLine(m.ep)}<div class="small" style="margin-top:2px">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
       ${why ? `<div class="small" style="margin-top:4px;color:var(--gold)">${why}</div>` : ""}
-      <div class="btns">${S.allies[m.ally] ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Ask ${first} for help (${m.kid ? "+1 favor" : "+25%"})</button>` : ""}
+      <div class="btns">${S.allies[m.ally] && helpsOn(m) ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Ask ${first} for help (${m.kid ? "+1 favor" : "+25%"})</button>` : ""}
       <button data-act="start" data-arg="${m.uid}" ${!slotOpen(wouldBeHelped(m)) || blocked || inFlashback() ? "disabled" : ""}>Start mission</button></div></div>`;
   }).join("");
   return h;

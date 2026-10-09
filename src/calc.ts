@@ -1,3 +1,4 @@
+import { ALLIES } from "./data/allies";
 import { S, KEEP_RATE, capFee, missionCap } from "./state";
 import { GENS, OP_CAP } from "./data/ops";
 import { UPGS } from "./data/upgrades";
@@ -225,14 +226,19 @@ export const slotOpen = (helped: boolean): boolean => {
   const withHelp = S.active.filter(m => m.sent).length;
   return S.active.length < SOLO_SLOTS + HELP_SLOTS && (helped || S.active.length - withHelp < SOLO_SLOTS);
 };
+/** Can this ally lend a hand in this episode? Madeline is in the early cases, but doesn't help until Season 3, Episode 2. */
+export const helpsOn = (m: { ally: string; ep?: string }): boolean => {
+  const from = ALLIES.find(a => a.id === m.ally)?.helpsFrom;
+  return !from || !m.ep || +m.ep >= +from;
+};
 /** Would this case go out with an ally right now (asked for, or sent by the auto-crew setting)? */
 export const wouldBeHelped = (m: { send: boolean; ally: string }): boolean =>
-  (m.send || (S.auto.crew && S.cred >= 3 && !!S.allies[m.ally])) && allyFree(m.ally);
+  (m.send || (S.auto.crew && S.cred >= 3 && !!S.allies[m.ally])) && allyFree(m.ally) && helpsOn(m);
 
 export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);
 export function succChance(m: Mission): number {
   if (m.kid) return 1; // Michael never fails when a kid is involved
-  const c = m.succ + tierDef().succ + choiceSucc() + (m.arc?.id === SAM_ARC_ID && m.arc.step === 0 && S.samChoices.bowling ? BOWLING.succ : 0) + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
+  const c = m.succ + tierDef().succ + choiceSucc() + (m.arc?.id === SAM_ARC_ID && m.arc.step === 0 && S.samChoices.bowling ? BOWLING.succ : 0) + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) && helpsOn(m) ? 0.25 : 0);
   return Math.min(0.97, c);
 }
 /** What the client pays in total. Michael keeps KEEP_RATE of it. */

@@ -132,8 +132,8 @@ export const layCdMax = (): number => (S.allies.madeline ? 4 : 8);
 export const grossLife = (): number => S.life + S.stats.returned;
 
 // ---- prices
-/** Each one costs 15% more than the last for the first 50, then only 9% more, so the late game stays within reach. */
-const R = 1.15, R_LATE = 1.09, KNEE = 50;
+/** Each one costs 15% more than the last for the first 50, then only 6% more, so the late game stays within reach. */
+const R = 1.15, R_LATE = 1.06, KNEE = 50;
 export const discount = (): number => 1 - 0.03 * perk("friends");
 /** What the k-th operation (counting from 0) costs, before any discount, as a multiple of its base price. */
 const priceMult = (k: number): number => k < KNEE ? Math.pow(R, k) : Math.pow(R, KNEE) * Math.pow(R_LATE, k - KNEE);

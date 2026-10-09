@@ -21,7 +21,7 @@ export const ALLIES: Ally[] = [
    bio:"Michael's mother. Sharp, chain-smoking, and not part of the spy business, but she'll always come through for a child or an older neighbor in need.",
    perk:"On missions she only helps with kids and older folks. Lay Low cools down twice as fast; auto Lay Low at 95% heat.",
    ab:"Family Dinner", abDesc:"−50 heat, −30 Organization attention", cd:100},
-  {id:"jesse", name:"Jesse Porter", cost:3e6, debut: 4, debutEp: "402", gateEp: true,
+  {id:"jesse", name:"Jesse Porter", cost:3e7, debut: 4, debutEp: "402", gateEp: true,
    bio:"A former counterintelligence agent who got burned himself and now works with Michael.",
    perk:"+10% mission success", ab:"Fast Talk", abDesc:"Missions run 2× faster for 4 minutes", cd:150},
 ];

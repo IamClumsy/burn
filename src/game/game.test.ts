@@ -1855,7 +1855,7 @@ describe("The Fall of Sam Axe", () => {
     const g = GENS[0], first = bulkCost(g, 1);
     S.gens = { inf: 60 };
     const at60 = bulkCost(g, 1);
-    expect(at60 / first).toBeCloseTo(Math.pow(1.15, 50) * Math.pow(1.09, 10), 1);
+    expect(at60 / first).toBeCloseTo(Math.pow(1.15, 50) * Math.pow(1.06, 10), 1);
     S.gens = { inf: 147 };
     expect(bulkCost(g, 100)).toBeLessThan(1e13);       // it was around $1e17
     S.cash = 5e11; S.gens = { inf: 147 };
@@ -1915,6 +1915,13 @@ describe("The Fall of Sam Axe", () => {
     S.episodesDone[m.ep!] = true;
     expect(panelHTML("mis")).toMatch(/In Progress[\s\S]*>Seen</);
     S.active = [];
+  });
+
+  it("long waits read in days", () => {
+    expect(formatWait(5 * 3600e3)).toBe("5h");
+    expect(formatWait(50 * 3600e3)).toBe("2d 2h");
+    expect(formatWait(72 * 3600e3)).toBe("3d");
+    expect(formatWait(9000 * 3600e3)).toBe("over a year");
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

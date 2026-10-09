@@ -36,5 +36,10 @@ export function formatWait(ms: number): string {
   const m = Math.ceil(s / 60);
   if (m < 60) return `${m}m`;
   const h = Math.floor(m / 60), rem = m % 60;
+  if (h >= 48) { // long waits read better in days
+    const d = Math.floor(h / 24);
+    if (d >= 365) return "over a year";
+    return h % 24 ? `${d}d ${h % 24}h` : `${d}d`;
+  }
   return rem ? `${h}h ${rem}m` : `${h}h`;
 }

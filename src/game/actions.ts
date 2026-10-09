@@ -1,7 +1,7 @@
 import { S } from "../state";
 import { fresh, setState } from "../state";
 import {
-  recipeCash, referralCost, allyHere, bribeCost, bribeDrop, bulkCost, buyN, contactPrice, credGain, favorsLeft, hangOutPrice, owned, perk, perkCost, recentFavors,
+  recipeCash, samSharp, referralCost, allyHere, bribeCost, bribeDrop, bulkCost, buyN, contactPrice, credGain, favorsLeft, hangOutPrice, owned, perk, perkCost, recentFavors,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { UPGS } from "../data/upgrades";
@@ -59,7 +59,7 @@ export function useAbility(id: string): void {
   const a = ALLIES.find(x => x.id === id)!;
   if (!allyHere(id) || (S.allyCd[id] || 0) > 0) return;
   ABILITIES[id]();
-  S.allyCd[id] = a.cd;
+  S.allyCd[id] = id === "sam" && samSharp() ? Math.round(a.cd * 0.67) : a.cd; // La Barbilla: Sam is quicker once his story is told
   chime(); checkBurn();
 }
 
@@ -88,7 +88,7 @@ export function callNate(): void {
 
 export function setCover(id: string): void {
   const c = COVERS.find(x => x.id === id)!;
-  if (S.cover === id || S.life < c.unlock || S.coverCd > 0) return;
+  if (S.cover === id || S.life < c.unlock || (c.arc && !S.arcsDone[c.arc]) || S.coverCd > 0) return;
   S.cover = id; S.coverCd = 20;
   say("New name, new wardrobe. You're " + c.name.toLowerCase() + " now.");
 }
@@ -212,7 +212,7 @@ export function prestige(): void {
   const hadFiona = !!S.allies.fiona;
   const keep = {
     cred: S.cred + gain, life: S.life, favors: S.favors + gain, perks: S.perks, allies: keptAllies(), ach: S.ach,
-    stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, sci: S.sci, auto: S.auto, autoOwned: S.autoOwned, seen: S.seen, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
+    stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, sci: S.sci, auto: S.auto, autoOwned: S.autoOwned, seen: S.seen, samChoices: S.samChoices, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
     choices: S.choices, arcStep: S.arcStep, arcsDone: S.arcsDone,
     grip: S.grip, listKnown: S.listKnown, attPeak: S.attPeak, cleanRecord: S.cleanRecord,
     episodesDone: S.episodesDone, seasonOpen: S.seasonOpen, favorLog: S.favorLog, backupNudged: S.backupNudged, intel: S.intel, nateAway: S.nateAway, nateTimer: S.nateTimer, nateStage: S.nateStage,

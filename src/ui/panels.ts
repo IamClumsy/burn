@@ -3,7 +3,7 @@ import type { ContactId } from "../types";
 import {
   REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, cps, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
-  recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
+  samSharp, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { REFERRAL, UPGS } from "../data/upgrades";
@@ -208,6 +208,7 @@ function crew(): string {
     return `<div class="box"${here ? "" : ' style="opacity:.6"'}><div class="who">${portrait(a.id, 64)}<div><div class="row"><b>${a.name}</b><span class="small">${status}</span></div>
       <div class="small">${a.bio}</div><div class="small">Perk: ${a.perk}</div>
       <div class="btns"><button data-act="ability" data-arg="${a.id}" ${cd > 0 || !here ? "disabled" : ""}>${a.ab} — ${!here ? "Away" : cd > 0 ? lv("cd" + a.id, cd + "s") : "Ready"}</button>
+      ${a.id === "sam" && samSharp() ? `<div class="small" style="margin-top:4px;color:var(--gold)">La Barbilla: heat −25%, and his ability pays 50% more and comes back a third sooner.</div>` : ""}
       ${a.id === "nate" && !here && S.nateAway ? `<button data-act="callnate" ${S.favors >= 1 ? "" : "disabled"}>Call him back — 1 favor</button>` : ""}</div>
       <div class="small" style="margin-top:4px">${a.abDesc}</div></div></div></div>`;
   }).join("");
@@ -229,9 +230,9 @@ function gadgets(): string {
 function covers(): string {
   return `<div class="small" style="margin-bottom:8px">Change cover anytime (20s between changes${S.coverCd > 0 ? `, ${lv("cvcd", Math.ceil(S.coverCd) + "s")} left` : ""}).</div>` +
     COVERS.map(c => {
-      const locked = S.life < c.unlock;
+      const locked = S.life < c.unlock || !!(c.arc && !S.arcsDone[c.arc]);
       return item("cover", c.id, !locked && cover().id !== c.id && S.coverCd <= 0, c.name, c.desc,
-        locked ? `<span class="small">Unlocks at ${money(c.unlock)}</span>` : (S.cover === c.id ? '<span class="cost">Active</span>' : ""),
+        locked ? `<span class="small">${c.arc ? "Close The Fall of Sam Axe" : "Unlocks at " + money(c.unlock)}</span>` : (S.cover === c.id ? '<span class="cost">Active</span>' : ""),
         S.cover === c.id ? "on" : "");
     }).join("");
 }

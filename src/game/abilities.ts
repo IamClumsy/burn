@@ -1,5 +1,5 @@
 import { S, earn } from "../state";
-import { cps } from "../calc";
+import { cps, samSharp } from "../calc";
 import { say as sayTag } from "../ui/fx";
 import { beep } from "../audio";
 import { shake } from "../ui/fx";
@@ -8,7 +8,7 @@ const say = (t: string): void => sayTag(t, "crew");
 
 /** Ally ability effects, keyed by ally id. */
 export const ABILITIES: Record<string, () => void> = {
-  sam: () => earn(cps() * 240 + 200),
+  sam: () => earn((cps() * 240 + 200) * (samSharp() ? 1.5 : 1)),
   fiona: () => { earn(cps() * 420 + 350); S.heat += 15; shake(); beep(90, 0.4, "sawtooth", 0.08, -50); },
   madeline: () => { S.heat = Math.max(0, S.heat - 50); S.att = Math.max(0, S.att - 30); },
   jesse: () => { S.fx.fast = 240; },

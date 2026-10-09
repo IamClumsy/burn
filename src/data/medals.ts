@@ -40,5 +40,6 @@ export const MEDALS: Medal[] = [
   {id:"a31",n:"Marathon",         d:"Complete missions from 60 different episodes", t:s=>Object.keys(s.episodesDone).length>=60},
   {id:"a32",n:"Series Finale",    d:"Complete a mission from every episode", t:s=>Object.keys(s.episodesDone).length>=MISSIONS.length},
   {id:"a33",n:"Fully Staffed",    d:"Max out every operation",  t:s=>GENS.every(g=>(s.gens[g.id]||0)>=OP_CAP)},
+  {id:"a34",n:"La Barbilla",      d:"Close The Fall of Sam Axe",  t:s=>!!s.arcsDone.samfall},
   {id:"a21",n:"Case Files",       d:"Take on 25 missions",        t:s=>s.stats.mDone+s.stats.mFail>=25},
 ];

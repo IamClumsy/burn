@@ -3,6 +3,7 @@ import { GENS, OP_CAP } from "./data/ops";
 import { UPGS } from "./data/upgrades";
 import { COVERS } from "./data/covers";
 import { BOSSES } from "./data/bosses";
+import { FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC_ID } from "./data/samAxe";
 import { STORY } from "./data/story";
 import { seasonsOpen } from "./data/missions";
 import { DAY_MS, FAVORS_PER_DAY } from "./data/pacing";
@@ -16,6 +17,10 @@ function chosenFx(): ChoiceFx[] {
   STORY.forEach((b, i) => {
     const k = S.choices[i];
     if (b.choice && k !== undefined && b.choice.options[k]) out.push(b.choice.options[k].fx);
+  });
+  SAM_ACTS.forEach((a, i) => { // how Sam told his story
+    const k = S.samChoices[i];
+    if (k !== undefined && a.options[k]) out.push(a.options[k].fx);
   });
   return out;
 }
@@ -85,7 +90,7 @@ export function clickVal(): number {
 export function heatFactors(): { label: string; v: number }[] {
   const f: { label: string; v: number }[] = [{ label: `Cover: ${cover().name}`, v: cover().heat }];
   if (S.upgs.h1) f.push({ label: "Quiet Methods upgrade", v: 0.6 });
-  if (S.allies.sam) f.push({ label: "Sam's perk", v: 0.85 });
+  if (S.allies.sam) f.push({ label: samSharp() ? "Sam's perk (La Barbilla)" : "Sam's perk", v: samSharp() ? 0.75 : 0.85 });
   if (perk("head") > 0) f.push({ label: `Cooler Head perk (level ${perk("head")})`, v: Math.max(0.3, 1 - 0.05 * perk("head")) });
   const c = choiceMult("heat");
   if (c !== 1) f.push({ label: "Your story choices", v: c });
@@ -230,7 +235,10 @@ export const bossView = (b: Boss): Boss => {
     listNote: "Gone, but not finished.",
   };
 };
-export const bossDef = (): Boss | null => { const b = S.boss ? BOSSES.find(x => x.id === S.boss!.id) : undefined; return b ? bossView(b) : null; };
+export const bossDef = (): Boss | null => { const b = S.boss ? [...BOSSES, ...FLASHBACK_BOSSES].find(x => x.id === S.boss!.id) : undefined; return b ? bossView(b) : null; };
+
+/** Has Sam told the whole story? It sharpens him: a quieter Sam, and a better ability. */
+export const samSharp = (): boolean => !!S.arcsDone[SAM_ARC_ID];
 export const bossHP = (b: Boss): number => (cps() * 400 + clickVal() * 200 + 500) * b.hpm;
 /**
  * Progress an action makes against a boss's cover, as a fraction of it (pct). Tougher bosses

@@ -59,6 +59,8 @@ export const LOOKS: Record<string, Look> = {
   sonya: { skin: "#f0cfae", hair: "long", hairColor: "#d9b970", jaw: "narrow", outfit: "leather", outfitColor: "#1b1a22", accent: "#7a1d2a", bg: ["#ff4d5e", "#150c20"], mood: "stern" },
   // Kendrick: swept gray-brown hair, a close salt-and-pepper beard, a dark jacket over a gray shirt
   kendrick: { skin: "#d9a98a", hair: "swept", hairColor: "#6a625c", facial: "beard", facialColor: "#8a847e", jaw: "square", face: 1.04, age: 2, outfit: "blazer", outfitColor: "#22232d", accent: "#9aa0ac", bg: ["#7b5cff", "#150c20"], mood: "calm" },
+  // Veracruz: slicked dark hair, a full mustache and stubble, a hard stare, an olive military jacket
+  veracruz: { skin: "#cc9f7a", hair: "swept", hairColor: "#251a14", facial: "mustache", facialColor: "#251a14", jaw: "square", age: 1, outfit: "tactical", outfitColor: "#56633f", accent: "#2d3524", bg: ["#5b7a3d", "#150c20"], mood: "stern" },
   // Gilroy: short tousled dark hair, a self-satisfied smirk, a cream blazer over a white shirt
   gilroy: { skin: "#ecc6a2", hair: "tousled", hairColor: "#3b2a22", jaw: "square", outfit: "blazer", outfitColor: "#dcc79c", accent: "#f4eef8", bg: ["#ff4d5e", "#150c20"], mood: "sly" },
   // Barrett: combed dark-gray hair, a ruddy weathered face, a dark suit with a red tie

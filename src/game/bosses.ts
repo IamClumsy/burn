@@ -10,6 +10,8 @@ import { floatText, hitBoss, say as sayTag, shake, toast } from "../ui/fx";
 import { checkBurn } from "./heat";
 import { learnName, reduceGrip } from "./org";
 import { nextBossGap } from "../data/pacing";
+import { FLASHBACK_BOSSES } from "../data/samAxe";
+import { advanceArc } from "./arcs";
 const say = (t: string): void => sayTag(t, "boss");
 
 /**
@@ -30,8 +32,29 @@ export function spawnBoss(): void {
   say(b.intro);
 }
 
+/** A showdown that's a step of an Open Case (Veracruz in the flashback). It never turns up on its own. */
+export function startFlashbackBoss(id: string, arc: string, step: number): void {
+  const b = FLASHBACK_BOSSES.find(x => x.id === id);
+  if (!b || S.boss) return;
+  const max = bossHP(b);
+  S.boss = { id: b.id, hp: max, max, left: 90, arc: { id: arc, step } };
+  shake(); beep(100, 0.5, "sawtooth", 0.08, -40);
+  toast("SHOWDOWN: " + b.n, b.title, "bad", true);
+  say(b.intro);
+}
+
 export function winBoss(): void {
-  const b = bossDef()!;
+  const b = bossDef()!, arc = S.boss?.arc;
+  if (b.flashback) { // not on the List: pay out, and the case moves on
+    const reward = cps() * 200 * b.hpm + 500, fav = Math.ceil(2 * b.hpm);
+    earn(reward); S.favors += fav;
+    S.boss = null; S.bossCd = nextBossGap();
+    chime();
+    toast(b.n + " outmaneuvered", `+${money(reward)}, +${fav} favors`, "good");
+    say(b.win ?? b.n + " is beaten.");
+    if (arc) advanceArc(arc.id, arc.step);
+    return;
+  }
   const reward = cps() * 200 * b.hpm + 500, fav = Math.ceil(2 * b.hpm);
   const first = !S.bossKills[b.id];
   earn(reward); S.favors += fav; S.bossKills[b.id] = (S.bossKills[b.id] || 0) + 1;

@@ -39,7 +39,7 @@ export interface Mission {
 }
 export interface ActiveMission extends Mission { sent: string | null; left: number; chance: number; reward: number; /** Sent by Auto-send crew, so the crew takes a cut. */ auto?: boolean }
 
-export interface Cover { id: string; name: string; desc: string; job: number; inc: number; heat: number; mis: number; unlock: number }
+export interface Cover { id: string; name: string; desc: string; job: number; inc: number; heat: number; mis: number; unlock: number; /** A case that has to be closed to unlock this one. */ arc?: string }
 
 export type BossTag = "heat" | "att" | "steal" | "heal" | "fx" | "freeze" | "weak" | "rush" | "nolay" | "snatch";
 /**
@@ -53,6 +53,8 @@ export interface Boss {
   needs?: string;
   /** Once they're gone from the story, the fight becomes a Ghost From the Past. */
   ghost?: BossGhost;
+  /** A one-off from a flashback: never on the regular List, only met inside the case that stars them. */
+  flashback?: boolean;
   /** Set on the merged view: lines for winning and losing, and narration during the fight. */
   win?: string; lose?: string; lines?: string[]; listNote?: string;
   /** Character file, unlocked by beating them once. */
@@ -61,6 +63,8 @@ export interface Boss {
 /** An encounter in progress. hp is how much of their cover is still intact. */
 export interface ActiveBoss {
   id: string; hp: number; max: number; left: number;
+  /** Set when the fight is a step of an Open Case (the flashback showdown). */
+  arc?: { id: string; step: number };
   /** Leads gathered by investigating; spent when you spring the trap. */
   leads?: number;
   /** Seconds until each action is ready again. */
@@ -99,7 +103,7 @@ export interface StoryBeat { at: number; t: string; fav: number; x: string; choi
 /** A multi-step case built from a story-heavy episode. Finish every step to close it. */
 export interface Arc {
   id: string; title: string; at: number; ally: string; blurb: string; epilogue: string; favors: number;
-  steps: { n: string; dur: number; succ: number; heat: number; rm: number }[];
+  steps: { n: string; dur: number; succ: number; heat: number; rm: number; /** Starting this step tells the next act of a flashback. */ act?: number; /** This step is a showdown with a flashback boss. */ boss?: string }[];
 }
 export interface Medal { id: string; n: string; d: string; t: (s: GameState) => boolean }
 /** An event option; `needs` is an ally who has to be on the crew for it to be offered. */
@@ -130,7 +134,9 @@ export interface GameState {
   /** Nate wanders off and returns on a random timer. */
   nateAway: boolean; nateTimer: number; nateStage: number; fionaAway: number; fionaWhy: string; auto: { clients: boolean; crew: boolean }; /** Which automations you've bought (switching one off keeps it). */ autoOwned: { clients: boolean; crew: boolean };
   /** How much of each menu screen you've seen, so the menu can say when something is new. */
-  seen: Dict<number>; backupNudged: boolean; intel: number;
+  seen: Dict<number>;
+  /** How you told each act of The Fall of Sam Axe (act number to the option you picked). */
+  samChoices: Dict<number>; backupNudged: boolean; intel: number;
   /** The Organization's grip on you: starts at 100 and is worn down by wins. */
   grip: number;
   /** Names of people on the List that you know about (from wins or Simon's tips). */

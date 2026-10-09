@@ -6,6 +6,7 @@ import type { Cover } from "../types";
  */
 export const COVERS: Cover[] = [
   {id:"con",   name:"Contractor",         desc:"Jobs ×1.3",                          job:1.3,inc:1,   heat:1,   mis:1,   unlock:0},
+  {id:"chuck", name:"Chuck Finley",       desc:"Sam's old alias. Jobs ×1.4, income ×1.2, mission rewards ×1.2, heat −10%", job:1.4,inc:1.2, heat:.9,  mis:1.2, unlock:0, arc:"samfall"},
   {id:"tour",  name:"Tourist",            desc:"Heat −30%, income ×0.9",             job:1,  inc:.9,  heat:.7,  mis:1,   unlock:1e4},
   {id:"limo",  name:"Limo Driver",        desc:"Jobs ×1.6, heat +10%",               job:1.6,inc:1,   heat:1.1, mis:1,   unlock:5e4},
   {id:"jour",  name:"Journalist",         desc:"Mission rewards ×1.5, income ×0.9",  job:1,  inc:.9,  heat:1,   mis:1.5, unlock:1e5},

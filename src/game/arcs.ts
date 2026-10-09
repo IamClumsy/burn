@@ -5,6 +5,9 @@ import { beep, chime } from "../audio";
 import { say as sayTag, toast } from "../ui/fx";
 import { reduceGrip } from "./org";
 import type { Arc, Mission } from "../types";
+import { SAM_ACTS, SAM_ARC_ID } from "../data/samAxe";
+import { choiceBusy, showChoice } from "../ui/choice";
+import { startFlashbackBoss } from "./bosses";
 const say = (t: string): void => sayTag(t, "mission");
 
 export const arcStep = (a: Arc): number => S.arcStep[a.id] || 0;
@@ -17,6 +20,28 @@ export function startArc(id: string): void {
   const a = ARCS.find(x => x.id === id);
   if (!a || !arcAvailable(a) || S.active.length >= 3) return;
   const step = arcStep(a), st = a.steps[step];
+  // The Fall of Sam Axe: each act opens with the Admiral's questions and a choice about how Sam tells it.
+  if (id === SAM_ARC_ID && st.act !== undefined && S.samChoices[st.act] === undefined) {
+    if (choiceBusy()) return; // one decision at a time
+    const act = SAM_ACTS[st.act];
+    showChoice(`The Fall of Sam Axe · ${act.title}`, `${act.inquiry} ${act.prompt}`, act.options.map((o, k): [string, () => string] => [o.label, () => {
+      S.samChoices[st.act!] = k;
+      if (o.fx.favors) S.favors += o.fx.favors;
+      return o.result;
+    }]), () => launchStep(a, step));
+    return;
+  }
+  launchStep(a, step);
+}
+
+function launchStep(a: Arc, step: number): void {
+  const st = a.steps[step];
+  if (S.active.length >= 3 || arcAvailable(a) === false) return;
+  if (st.boss) { // a showdown instead of a mission
+    if (S.boss) { say("Finish the case you're on first. The road will still be there."); return; }
+    startFlashbackBoss(st.boss, a.id, step);
+    return;
+  }
   const base: Mission = {
     uid: S.uid++, n: `${a.title}: ${st.n}`, dur: st.dur, succ: st.succ, heat: st.heat, rm: st.rm, fav: 1,
     ally: a.ally, kid: false, send: allyFree(a.ally), arc: { id: a.id, step },

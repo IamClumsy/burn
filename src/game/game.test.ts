@@ -50,6 +50,7 @@ import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
 import { MISSIONS, seasonsOpen } from "../data/missions";
 import { clientCut, crewCut } from "../data/automation";
+import { SAM_ACTS, SAM_ARC } from "../data/samAxe";
 import { earn, merge } from "../state";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
@@ -1582,6 +1583,135 @@ describe("The stylesheet has rules for the pieces the game builds", () => {
       "narr", "nl", "nl-head", "nl-tag", "nl-ep", "nl-mission", "nl-fail", "nl-boss", "nl-crew", "nl-story", "rare", "drow", "dfile", "mishead", "portrait",
     ];
     for (const c of needed) expect(css, `.${c}`).toMatch(new RegExp(`\\.${c}[^a-zA-Z0-9_-]`));
+  });
+});
+
+describe("The Fall of Sam Axe", () => {
+  const answer = (k = 0) => { document.querySelectorAll<HTMLButtonElement>("#evtO button")[k].click(); dismissAllNotices(); };
+  const closeDialog = () => { const ok = document.querySelectorAll<HTMLButtonElement>("#evtO button"); if (ok.length) ok[0].click(); };
+
+  /** Run the whole case: tell each act, win each step, win the showdown. */
+  const playIt = () => {
+    S.life = 5e8; S.allies.sam = true; S.gens.inf = 30; S.favors = 0;
+    for (let step = 0; step < SAM_ARC.steps.length; step++) {
+      dismissAllNotices(); // a pop-up on screen means you're not starting anything yet
+      startArc("samfall");
+      const st = SAM_ARC.steps[step];
+      if (st.act !== undefined) { expect(document.getElementById("evtT")!.textContent, `act ${st.act}`).toContain("The Fall of Sam Axe"); answer(0); }
+      if (st.boss) {
+        expect(S.boss!.id).toBe("veracruz");
+        S.boss!.hp = 0; tickBoss(0.1);
+        expect(S.boss).toBeNull();
+      } else {
+        const m = S.active.find(x => x.arc?.id === "samfall")!;
+        expect(m.arc!.step).toBe(step);
+        m.chance = 1; resolveMission(m);
+      }
+    }
+  };
+
+  it("is a seven-step Open Case in four acts that opens with Season 5", () => {
+    expect(SAM_ARC.steps.length).toBe(7);
+    expect(SAM_ARC.steps.filter(s => s.act !== undefined).map(s => s.act)).toEqual([0, 1, 2, 3]);
+    expect(SAM_ARC.steps[SAM_ARC.steps.length - 1].boss).toBe("veracruz");
+    expect(seasonsOpen(SAM_ARC.at)).toBe(5);
+    expect(SAM_ACTS.length).toBe(4);
+    for (const act of SAM_ACTS) expect(act.options.length).toBe(2);
+    S.life = 4e8; expect(arcAvailable(SAM_ARC)).toBe(false);
+    S.life = 5e8; expect(arcAvailable(SAM_ARC)).toBe(true);
+  });
+
+  it("each act opens with the Admiral's questions and a choice, and the mission starts after you answer", () => {
+    S.life = 5e8;
+    dismissAllNotices();
+    startArc("samfall");
+    expect(document.getElementById("evtT")!.textContent).toBe("The Fall of Sam Axe · Act One: The Window");
+    expect(document.getElementById("evtD")!.textContent).toMatch(/Admiral Lawrence/);
+    expect(S.active.length).toBe(0);               // not yet
+    answer(1);
+    expect(S.samChoices[0]).toBe(1);
+    expect(S.active.length).toBe(1);
+    expect(S.active[0].n).toContain("Make a Hasty Exit From Virginia");
+  });
+
+  it("how Sam tells it counts: it's remembered and changes your numbers", () => {
+    S.life = 5e8; S.allies.sam = true;
+    const inc = incomeMult();
+    S.samChoices[2] = 1;                              // the show of force: +4% income
+    expect(incomeMult()).toBeGreaterThan(inc * 1.03);
+    S.favors = 0; S.arcStep.samfall = 6; S.samChoices = { 0: 0, 1: 0, 2: 1 };
+    dismissAllNotices();
+    startArc("samfall");
+    answer(0);                                        // Beatriz's photographs: +8 favors
+    expect(S.favors).toBeGreaterThanOrEqual(8);
+  });
+
+  it("the last step is a showdown with Commandante Veracruz, who never appears on his own", () => {
+    S.life = 1e13; S.allies = {}; S.story = 99;
+    for (let i = 0; i < 300; i++) { S.boss = null; spawnBoss(); expect(S.boss!.id).not.toBe("veracruz"); }
+    S.boss = null;
+    S.life = 5e8; S.arcStep.samfall = 6; S.samChoices = { 0: 0, 1: 0, 2: 0 };
+    dismissAllNotices();
+    startArc("samfall");
+    answer(0);
+    expect(S.boss!.id).toBe("veracruz");
+    expect(S.boss!.arc).toEqual({ id: "samfall", step: 6 });
+    expect(bossDef()!.flashback).toBe(true);
+    expect(BOSSES.some(b => b.id === "veracruz")).toBe(false); // not on The List
+  });
+
+  it("losing the showdown leaves the case open to try again", () => {
+    S.life = 5e8; S.arcStep.samfall = 6; S.samChoices = { 0: 0, 1: 0, 2: 0, 3: 0 };
+    dismissAllNotices();
+    startArc("samfall");
+    S.boss!.left = 0; tickBoss(0.1);
+    expect(S.boss).toBeNull();
+    expect(S.arcsDone.samfall).toBeFalsy();
+    expect(S.arcStep.samfall).toBe(6);
+    dismissAllNotices();
+    startArc("samfall");
+    expect(S.boss!.id).toBe("veracruz");
+  });
+
+  it("closing it unlocks Chuck Finley, the La Barbilla medal and a sharper Sam", () => {
+    const covers = () => COVERS.find(c => c.id === "chuck")!;
+    S.life = 5e8; S.coverCd = 0; S.cover = "con";
+    setCover("chuck");
+    expect(S.cover).toBe("con");                      // locked until the case is closed
+    expect(panelHTML("cov")).toContain("Close The Fall of Sam Axe");
+    const heatBefore = heatMult(), medal = MEDALS.find(m => m.n === "La Barbilla")!;
+    S.allies.sam = true;
+    const sam0 = heatMult();
+    expect(medal.t(S)).toBe(false);
+    playIt();
+    closeDialog();
+    expect(S.arcsDone.samfall).toBe(true);
+    expect(S.favors).toBeGreaterThanOrEqual(12);
+    expect(medal.t(S)).toBe(true);
+    setCover("chuck");
+    expect(S.cover).toBe("chuck");
+    expect(covers().heat).toBeLessThan(1);
+    expect(heatMult()).toBeLessThan(sam0 * 0.95);       // Sam's perk went from -15% to -25%, plus the new cover
+    expect(heatBefore).toBeGreaterThan(0);
+    expect(panelHTML("crew")).toContain("La Barbilla");
+  });
+
+  it("Sam's ability pays 50% more and returns sooner once his story is told", () => {
+    S.allies.sam = true; S.gens = { inf: 60, tape: 30 };
+    S.cash = 0; S.allyCd = {}; useAbility("sam");
+    const plain = S.cash, cdPlain = S.allyCd.sam;
+    S.arcsDone.samfall = true; S.cash = 0; S.allyCd = {}; useAbility("sam");
+    expect(S.cash).toBeGreaterThan(plain * 1.45);
+    expect(S.allyCd.sam).toBeLessThan(cdPlain);
+  });
+
+  it("it stays through a Reinstate", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    S.run = 2e8; S.arcsDone.samfall = true; S.samChoices = { 0: 1, 1: 0 };
+    prestige();
+    expect(S.arcsDone.samfall).toBe(true);
+    expect(S.samChoices).toEqual({ 0: 1, 1: 0 });
+    vi.restoreAllMocks();
   });
 });
 

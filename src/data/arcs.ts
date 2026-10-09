@@ -1,4 +1,5 @@
 import type { Arc } from "../types";
+import { SAM_ARC } from "./samAxe";
 
 // Multi-step cases adapted from the show's bigger story episodes. Each step is a mission;
 // closing the last one writes a Case File epilogue and pays a favor bonus.
@@ -43,4 +44,5 @@ export const ARCS: Arc[] = [
      {n:"Hold the Line",              dur:75, succ:.65, heat:26, rm:5.6},
      {n:"Make It Out Alive",          dur:80, succ:.6,  heat:30, rm:7.0},
    ]},
+  SAM_ARC,
 ];

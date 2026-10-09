@@ -502,7 +502,8 @@ describe("Jesse joins in Season 4", () => {
     S.episodesDone = {};
     hireAlly("jesse");
     expect(S.allies.jesse).toBeUndefined();            // the season alone isn't enough
-    expect(panelHTML("crew")).toContain("Fast Friends");
+    expect(panelHTML("crew")).not.toContain("Jesse");     // hidden: a ????? card, no name, no story
+    expect(panelHTML("crew")).toContain("?????");
     S.episodesDone["402"] = true;
     hireAlly("jesse");
     expect(S.allies.jesse).toBe(true);
@@ -520,7 +521,7 @@ describe("Jesse joins in Season 4", () => {
   it("the crew list says when he joins, and doesn't offer to hire him early", () => {
     S.cash = 1e12; S.life = 1e6; S.episodesDone = {};
     const html = panelHTML("crew");
-    expect(html).toContain("until Season 4");
+    expect(html).not.toContain("Jesse");                  // not met yet, so not even his name
     expect(html).not.toContain("Hire Jesse Porter");
     S.life = 3e7;
     expect(panelHTML("crew")).not.toContain("Hire Jesse Porter");   // Season 4 is open, but his episode isn't done

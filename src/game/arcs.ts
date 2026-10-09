@@ -6,7 +6,7 @@ import { beep, chime } from "../audio";
 import { say as sayTag, toast } from "../ui/fx";
 import { reduceGrip } from "./org";
 import type { Arc, Mission } from "../types";
-import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
+import { BOWLING, SAM_ACTS, SAM_BEATS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
 import { choiceBusy, showChoice } from "../ui/choice";
 import { startFlashbackBoss } from "./bosses";
 const say = (t: string): void => sayTag(t, "mission");
@@ -47,6 +47,13 @@ export function startArc(id: string): void {
       if (o.fx.favors) S.favors += o.fx.favors;
       return o.result;
     }]), () => launchStep(a, step), { inquiry: true });
+    return;
+  }
+  // The steps between acts get the Admiral cutting in too, once each, with nothing to decide.
+  if (id === SAM_ARC_ID && SAM_BEATS[step] && !S.samChoices["beat" + step]) {
+    if (choiceBusy()) return;
+    const beat = SAM_BEATS[step];
+    showChoice(`The Fall of Sam Axe · ${beat.title}`, beat.inquiry, [[beat.go, () => { S.samChoices["beat" + step] = 1; return "Sam carries on."; }]], () => launchStep(a, step), { inquiry: true });
     return;
   }
   launchStep(a, step);

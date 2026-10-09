@@ -51,7 +51,7 @@ import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
 import { MISSIONS, seasonsOpen } from "../data/missions";
 import { clientCut, crewCut } from "../data/automation";
-import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
+import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS } from "../data/samAxe";
 import { earn, merge } from "../state";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
@@ -1600,6 +1600,7 @@ describe("The Fall of Sam Axe", () => {
       startArc("samfall");
       const st = SAM_ARC.steps[step];
       if (st.act !== undefined) { expect(document.getElementById("evtT")!.textContent, `act ${st.act}`).toContain("The Fall of Sam Axe"); answer(0); }
+      else if (SAM_BEATS[step]) { expect(document.getElementById("evtT")!.textContent, `beat ${step}`).toContain("Continued"); answer(0); }
       if (st.boss) {
         expect(S.boss!.id).toBe("veracruz");
         S.boss!.hp = 0; tickBoss(0.1);
@@ -1745,6 +1746,20 @@ describe("The Fall of Sam Axe", () => {
     const html = panelHTML("list");
     expect(html).toContain("Commandante Veracruz");
     expect(html).toContain(`(0/${BOSSES.length} crossed off)`);
+  });
+
+  it("the steps between acts get the Admiral's interruption too, once each", () => {
+    expect(Object.keys(SAM_BEATS).map(Number)).toEqual(SAM_ARC.steps.map((st, i) => st.act === undefined ? i : -1).filter(i => i >= 0));
+    S.life = 5e8; S.allies.sam = true; dismissAllNotices();
+    S.arcStep[SAM_ARC_ID] = 1; S.samChoices[0] = 0;
+    startArc("samfall");
+    expect(document.getElementById("evtT")!.textContent).toContain("Continued");
+    expect(S.active.length).toBe(0);
+    answer(0);
+    expect(S.active.length).toBe(1);
+    S.active = []; dismissAllNotices();
+    startArc("samfall");                              // retrying the step doesn't repeat the pop-up
+    expect(S.active.length).toBe(1);
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

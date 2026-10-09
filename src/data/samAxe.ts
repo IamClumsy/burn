@@ -55,6 +55,25 @@ export const SAM_ACTS: SamAct[] = [
   },
 ];
 
+/** The steps between acts: the Admiral cuts in, Sam carries on. No choice to make, just the story. */
+export const SAM_BEATS: Record<number, { title: string; inquiry: string; go: string }> = {
+  1: {
+    title: "Act One, Continued: The Clinic",
+    inquiry: "The Admiral says the report mentions a clinic in a small town with a good deal of fear and very little help. He asks what Sam thought he could do about it.",
+    go: "\"Warn them,\" Sam says. \"Politely.\"",
+  },
+  2: {
+    title: "Act One, Continued: The Clinic Again",
+    inquiry: "The Admiral puts down his pen. Nobody would leave the clinic, he says, so how did Sam make sure the patients were safe?",
+    go: "\"A bomb, Admiral. I said it was a long story.\"",
+  },
+  4: {
+    title: "Act Two, Continued: The Satellite Phone",
+    inquiry: "The Admiral says there is a note in the file about a stolen satellite phone, and he would very much like Sam to account for it.",
+    go: "\"Borrowed,\" says Sam. \"With intent to return.\"",
+  },
+};
+
 /** The Open Case. The acts start at steps 0, 3, 5 and 6; the last step is the showdown. */
 export const SAM_ARC: Arc = {
   id: SAM_ARC_ID, title: "The Fall of Sam Axe", at: 0, ally: "sam", favors: 12,

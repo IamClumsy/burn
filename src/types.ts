@@ -107,6 +107,8 @@ export interface Arc {
   id: string; title: string; at: number; ally: string; blurb: string; epilogue: string; favors: number;
   /** Only offered once you've finished this episode (or, as a fallback so nobody is locked out, once `orSeason` has opened). */
   needsEp?: string; orSeason?: number;
+  /** The show episode this case is adapted from: closing the case counts that episode as seen. */
+  ep?: string;
   steps: { n: string; dur: number; succ: number; heat: number; rm: number; /** Starting this step tells the next act of a flashback. */ act?: number; /** This step is a showdown with a flashback boss. */ boss?: string }[];
 }
 export interface Medal { id: string; n: string; d: string; t: (s: GameState) => boolean }

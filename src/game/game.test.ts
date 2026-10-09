@@ -11,7 +11,7 @@ import { portrait, portraitScope } from "../ui/portrait";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { tabTitle } from "../ui/render";
 import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
-import { arcAvailable, rememberBowling, replaySamStory, startArc, stepDur } from "./arcs";
+import { advanceArc, arcAvailable, rememberBowling, replaySamStory, startArc, stepDur } from "./arcs";
 import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
 import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missionReward } from "../calc";
@@ -53,7 +53,7 @@ import { MISSIONS, seasonsOpen } from "../data/missions";
 import { clientCut, crewCut } from "../data/automation";
 import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from "../data/samAxe";
 import { earn, merge } from "../state";
-import { readSave, save } from "../persist";
+import { loadGame, readSave, save } from "../persist";
 import { openSeasons, seasonOneLeft } from "../calc";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
@@ -1975,6 +1975,22 @@ describe("The Fall of Sam Axe", () => {
   it("anyone who already reached Season 2 keeps it, whatever their record says", () => {
     S.life = 5e6; S.seasonOpen = 2; S.seasonGate = true; S.episodesDone = {};
     expect(openSeasons()).toBeGreaterThanOrEqual(2);
+  });
+
+  it("closing an Open Case counts its episode as seen, and cases closed earlier are counted when a save loads", () => {
+    for (const a of ARCS.filter(x => x.id !== "samfall")) expect(MISSIONS.some(m => m.ep === a.ep), a.title).toBe(true);
+    S.episodesDone = {}; S.arcsDone = {};
+    const arc = ARCS.find(x => x.id === "looseends")!;
+    advanceArc(arc.id, 0); advanceArc(arc.id, 1); advanceArc(arc.id, 2);
+    expect(S.arcsDone.looseends).toBe(true);
+    expect(S.episodesDone["112"]).toBe(true);              // Loose Ends is Season 1, Episode 12
+    dismissAllNotices();
+    // an older save: the case was closed but the episode was never recorded
+    S.episodesDone = {}; S.arcsDone = { lesserevil: true };
+    save();
+    loadGame();
+    expect(S.episodesDone["216"]).toBe(true);              // Lesser Evil is Season 2, Episode 16
+    dismissAllNotices();
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

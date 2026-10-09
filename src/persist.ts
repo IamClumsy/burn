@@ -1,5 +1,6 @@
 import { S, SAVE_KEY, fresh, merge, setState } from "./state";
 import { returnFromAway } from "./game/offline";
+import { ARCS } from "./data/arcs";
 import { setSaveStatus } from "./saveStatus";
 import type { GameState } from "./types";
 
@@ -46,6 +47,7 @@ export function loadGame(): void {
   const saved = readSave();
   if (!saved) { setState(fresh()); return; }
   setState(merge(saved));
+  for (const a of ARCS) if (a.ep && S.arcsDone[a.id]) S.episodesDone[a.ep] = true; // cases closed before this was tracked
   const away = (Date.now() - S.last) / 1000;
   if (away > 30) returnFromAway(away);
 }

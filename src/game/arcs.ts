@@ -96,6 +96,7 @@ export function advanceArc(id: string, step: number): void {
   if (!a) return;
   S.arcStep[id] = step + 1;
   if (step + 1 >= a.steps.length) {
+    if (a.ep) S.episodesDone[a.ep] = true; // closing the case counts as seeing its episode
     const again = id === SAM_ARC_ID && S.samReplay; // told a second time: no more favors or grip
     S.arcsDone[id] = true; S.samReplay = again ? false : S.samReplay;
     if (!again) { S.favors += a.favors; reduceGrip(8); }

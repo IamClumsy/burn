@@ -47,7 +47,7 @@ export const FAQ: FaqSection[] = [
   ]},
   {title: "Missions and your crew", items: [
     {q: "When do new Seasons open?",
-     a: () => "As your lifetime earnings grow, the next Season's cases start turning up on the board. Each Season also waits until you have done every case of the one before it, so you see every episode. While one is waiting, the missing cases turn up more often, and once you have done them they fall back into the normal rotation. Michael's File shows what opens next and how long it should take at your current income."},
+     a: () => "As your lifetime earnings grow, the next Season's cases start turning up on the board. Each Season also waits until you have done every case of the one before it, so you see every episode. While one is waiting, the missing cases turn up more often, and once you have done them they fall back into the normal rotation. A Season's finale, the big cliffhanger, only turns up once the rest of that Season is done. Michael's File shows what opens next and how long it should take at your current income."},
     {q: "What do the numbers on a mission mean?",
      a: () => "On a running mission, the seconds are how long until it finishes and the percentage is its chance to succeed. That chance is locked in when you start. If it fails, you take extra heat and get nothing."},
     {q: "How many missions can run at once?",

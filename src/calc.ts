@@ -207,6 +207,11 @@ export const REINSTATE_MIN = 1e8;
 export const credGain = (): number => (S.run < REINSTATE_MIN ? 0 : Math.floor(Math.sqrt(S.run / 1e7)));
 
 // ---- missions
+/** The last episode of a Season: the big one, a cliffhanger. */
+export const finaleEp = (season: number): string => MISSIONS.filter(t => t.ep && seasonOf(t.ep) === season).map(t => t.ep!).sort().pop() ?? "";
+/** In a new game, a Season's finale holds back until every other case of that Season has been done. */
+export const finaleHeldBack = (ep: string): boolean =>
+  S.seasonGate && ep === finaleEp(seasonOf(ep)) && MISSIONS.some(t => t.ep && t.ep !== ep && seasonOf(t.ep) === seasonOf(ep) && !S.episodesDone[t.ep]);
 /** How many episodes of a Season you haven't done yet. */
 export const seasonLeft = (season: number): number => MISSIONS.filter(t => t.ep && seasonOf(t.ep) === season && !S.episodesDone[t.ep]).length;
 /**

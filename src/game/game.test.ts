@@ -39,7 +39,7 @@ import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
 import { grossLife, inFlashback, samSharp } from "../calc";
-import { fillBoard, gatedEpReady, missionWeight, newMission, resolveMission, startMission } from "./missions";
+import { eligibleMissions, fillBoard, gatedEpReady, missionWeight, newMission, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, bossWeight, loseBoss, spawnBoss, tickBoss, winBoss } from "./bosses";
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
 import { spawnClient, spawnEvent } from "./events";
@@ -54,7 +54,7 @@ import { clientCut, crewCut } from "../data/automation";
 import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from "../data/samAxe";
 import { earn, merge } from "../state";
 import { loadGame, readSave, save } from "../persist";
-import { openSeasons, seasonLeft, waitingOn } from "../calc";
+import { finaleEp, openSeasons, seasonLeft, waitingOn } from "../calc";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
 import { menuNew } from "../ui/badges";
@@ -1998,7 +1998,36 @@ describe("The Fall of Sam Axe", () => {
     const lesser = ARCS.find(a => a.id === "lesserevil")!;       // Season 2, Episode 16
     expect(arcAvailable(lesser)).toBe(false);                    // Season 2 is waiting on Season 1
     for (const m of MISSIONS) if (seasonOf(m.ep!) === 1) S.episodesDone[m.ep!] = true;
+    expect(arcAvailable(lesser)).toBe(false);                    // Season 2 is open now, but this is its finale
+    for (const m of MISSIONS) if (seasonOf(m.ep!) === 2 && m.ep !== "216") S.episodesDone[m.ep!] = true;
     expect(arcAvailable(lesser)).toBe(true);
+    S.seasonGate = false;
+  });
+
+  it("each Season's finale holds back until the rest of that Season is done, and a whole new game can still be finished", () => {
+    S.seasonGate = true; S.seasonOpen = 1; S.life = 1e13; S.episodesDone = {}; S.board = []; S.active = [];
+    const finales = [1, 2, 3, 4, 5, 6, 7].map(n => finaleEp(n));
+    expect(finales).toEqual(["112", "216", "316", "418", "518", "618", "713"]);
+    let guard = 0;
+    while (Object.keys(S.episodesDone).length < MISSIONS.length && guard++ < 500) {
+      const eligible = eligibleMissions().filter(m => !S.episodesDone[m.ep!]);
+      expect(eligible.length, `stuck after ${Object.keys(S.episodesDone).length} episodes`).toBeGreaterThan(0);   // never a dead end
+      for (const f of finales) {
+        const season = seasonOf(f), restDone = MISSIONS.every(m => seasonOf(m.ep!) !== season || m.ep === f || S.episodesDone[m.ep!]);
+        if (!restDone) expect(eligible.some(m => m.ep === f), `finale ${f} too early`).toBe(false);
+      }
+      S.episodesDone[eligible[0].ep!] = true;                  // do the first open case
+    }
+    expect(Object.keys(S.episodesDone).length).toBe(MISSIONS.length);
+    S.seasonGate = false;
+  });
+
+  it("an Open Case that is a Season finale waits too (Loose Ends, the Season 1 finale)", () => {
+    S.seasonGate = true; S.seasonOpen = 1; S.episodesDone = {}; S.life = 1e6;
+    const loose = ARCS.find(a => a.id === "looseends")!;
+    expect(arcAvailable(loose)).toBe(false);
+    for (const m of MISSIONS) if (seasonOf(m.ep!) === 1 && m.ep !== "112") S.episodesDone[m.ep!] = true;
+    expect(arcAvailable(loose)).toBe(true);
     S.seasonGate = false;
   });
 

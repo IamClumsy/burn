@@ -1,5 +1,5 @@
 import { S, payClient } from "../state";
-import { allyFree, awayWhy, heatMult, inFlashback, openSeasons, slotOpen, waitingOn, wouldBeHelped, missionReward, succChance } from "../calc";
+import { allyFree, awayWhy, finaleEp, finaleHeldBack, heatMult, inFlashback, openSeasons, slotOpen, waitingOn, wouldBeHelped, missionReward, succChance } from "../calc";
 import { MISSIONS, episodeOf, missionUnlocked, seasonOf } from "../data/missions";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
@@ -25,11 +25,15 @@ export function missionWeight(t: { ep?: string }): number {
 
 /** Depth Perception (Beatriz) is the Season 5 finale of sorts: it holds back until every other Season 5 case is done. */
 export const GATED_EP = "516";
-export const gatedEpReady = (): boolean => MISSIONS.every(t => !t.ep || seasonOf(t.ep) !== 5 || t.ep === GATED_EP || !!S.episodesDone[t.ep]);
+export const gatedEpReady = (): boolean => MISSIONS.every(t => !t.ep || seasonOf(t.ep) !== 5 || t.ep === GATED_EP || t.ep === finaleEp(5) || !!S.episodesDone[t.ep]); // the finale waits on this one too
+
+/** Every case that could be on the board right now: open Seasons only, and nothing held back as a finale or cliffhanger. */
+export const eligibleMissions = () =>
+  MISSIONS.filter(t => missionUnlocked(t, S.life) && (!t.ep || seasonOf(t.ep) <= openSeasons()) && (t.ep !== GATED_EP || gatedEpReady()) && (!t.ep || !finaleHeldBack(t.ep)));
 
 export function newMission(): Mission {
   // Only seasons you've unlocked, and nothing that's already on the board or running.
-  const open = MISSIONS.filter(t => missionUnlocked(t, S.life) && (!t.ep || seasonOf(t.ep) <= openSeasons()) && (t.ep !== GATED_EP || gatedEpReady()));
+  const open = eligibleMissions();
   // someone who's away (Nate wandered off, Fiona taken) can't help, so at most one of their cases waits on the board
   const blocked = (ally: string) => !!awayWhy(ally) && S.board.some(m => m.ally === ally);
   const fresh = open.filter(t => !S.board.some(m => m.n === t.n) && !S.active.some(m => m.n === t.n) && !blocked(t.ally));

@@ -40,7 +40,7 @@ import { formatWait } from "../util";
 import { tickBusy } from "./tick";
 import { grossLife, inFlashback, samSharp } from "../calc";
 import { fillBoard, gatedEpReady, missionWeight, newMission, resolveMission, startMission } from "./missions";
-import { actionBlock, bossAction, bossWeight, spawnBoss, tickBoss, winBoss } from "./bosses";
+import { actionBlock, bossAction, bossWeight, loseBoss, spawnBoss, tickBoss, winBoss } from "./bosses";
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
 import { spawnClient, spawnEvent } from "./events";
 import { seasonOf } from "../data/missions";
@@ -2935,12 +2935,25 @@ describe("game loop (headless)", () => {
   });
 
   describe("Thomas O'Neill takes Fiona", () => {
-    it("only shows up if Fiona is on the crew", () => {
-      S.life = 1e13;
-      const only = BOSSES.filter(b => b.needs);
-      expect(only.map(b => b.id)).toEqual(["oneill"]);
-      S.allies = {};
-      for (let i = 0; i < 200; i++) { S.boss = null; spawnBoss(); expect(S.boss!.id).not.toBe("oneill"); }
+    it("turns up whether or not Fiona is on the crew, since she's in the story either way", () => {
+      S.life = 1e13; S.allies = {};
+      expect(BOSSES.find(b => b.id === "oneill")!.needs).toBeUndefined();
+      let seen = false;
+      for (let i = 0; i < 400 && !seen; i++) { S.boss = null; spawnBoss(); seen = S.boss!.id === "oneill"; }
+      expect(seen).toBe(true);
+      S.boss = null;
+    });
+
+    it("losing to him only takes a hired Fiona away", () => {
+      S.life = 1e13; S.allies = {}; S.fionaAway = 0;
+      S.boss = { id: "oneill", hp: 1e9, max: 1e9, left: 0 } as any;
+      loseBoss();
+      expect(S.fionaAway).toBe(0);
+      S.allies.fiona = true;
+      S.boss = { id: "oneill", hp: 1e9, max: 1e9, left: 0 } as any;
+      loseBoss();
+      expect(S.fionaAway).toBeGreaterThan(0);
+      dismissAllNotices();
     });
 
     it("while he has her, her perks and abilities are gone; losing keeps her away a while", () => {

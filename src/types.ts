@@ -42,20 +42,17 @@ export interface ActiveMission extends Mission { sent: string | null; left: numb
 export interface Cover { id: string; name: string; desc: string; job: number; inc: number; heat: number; mis: number; unlock: number }
 
 export type BossTag = "heat" | "att" | "steal" | "heal" | "fx" | "freeze" | "weak" | "rush" | "nolay" | "snatch";
-export interface BossAfter {
-  /** The story beat (by title) that has to have happened. */
-  beat: string;
-  n: string; title?: string; mech: string; intro: string; file: string;
-  win: string; lose: string; lines: string[];
-  /** A short note on The List while they're not crossed off. */
-  listNote: string;
-}
+/**
+ * Someone the story has taken off the board. From then on their fights become "Ghosts From the Past":
+ * what they left behind keeps turning up. `from` is a Season that has to be open, or a story beat that has to have passed.
+ */
+export interface BossGhost { from: { season?: number; beat?: string }; legacy: string }
 export interface Boss {
   id: string; n: string; title: string; at: number; hpm: number; m: BossTag[]; mech: string; intro: string;
   /** An ally who has to be hired for this boss to show up (they're the one at stake). */
   needs?: string;
-  /** How the encounter changes once a story beat has passed (a character who's died, say). */
-  after?: BossAfter;
+  /** Once they're gone from the story, the fight becomes a Ghost From the Past. */
+  ghost?: BossGhost;
   /** Set on the merged view: lines for winning and losing, and narration during the fight. */
   win?: string; lose?: string; lines?: string[]; listNote?: string;
   /** Character file, unlocked by beating them once. */

@@ -207,10 +207,29 @@ export const missionReward = (m: Mission): number => Math.floor(capFee((cps() * 
 export const missionKeep = (m: Mission): number => missionReward(m) * KEEP_RATE;
 
 // ---- bosses
-/** Has the story moved past the beat that changes this boss? */
-const afterBeat = (b: Boss): boolean => !!b.after && S.story > STORY.findIndex(s => s.t === b.after!.beat);
-/** The boss as the game should show them now: after their story beat, the rewritten version. */
-export const bossView = (b: Boss): Boss => (b.after && afterBeat(b) ? { ...b, ...b.after, listNote: b.after.listNote } : b);
+/** Has the story taken this boss off the board (their Season has opened, or their story beat has passed)? */
+const isGhost = (b: Boss): boolean => {
+  const g = b.ghost;
+  if (!g) return false;
+  if (g.from.beat) return S.story > STORY.findIndex(s => s.t === g.from.beat);
+  return seasonsOpen(S.life) >= (g.from.season ?? 99);
+};
+/** The boss as the game should show them now: once they're gone from the story, a Ghost From the Past. */
+export const bossView = (b: Boss): Boss => {
+  if (!b.ghost || !isGhost(b)) return b;
+  const last = b.n.split(" ").slice(-1)[0];
+  return {
+    ...b,
+    n: `Ghosts From the Past: ${b.n}`,
+    mech: `Their old playbook still runs: ${b.mech}`,
+    intro: b.ghost.legacy,
+    file: `${b.file} They're gone now, but what they set in motion keeps turning up.`,
+    win: `You close the file on ${b.n} for good. A ghost only stays as long as someone keeps feeding it.`,
+    lose: `The file ${last} left behind does its work. A dead man gets the last word again.`,
+    lines: [`${last} isn't here. Their paperwork is, and it's thorough.`, "Another old arrangement surfaces, with nobody left to ask about it.", "Some plans outlive the people who made them."],
+    listNote: "Gone, but not finished.",
+  };
+};
 export const bossDef = (): Boss | null => { const b = S.boss ? BOSSES.find(x => x.id === S.boss!.id) : undefined; return b ? bossView(b) : null; };
 export const bossHP = (b: Boss): number => (cps() * 400 + clickVal() * 200 + 500) * b.hpm;
 /**

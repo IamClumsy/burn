@@ -901,45 +901,65 @@ describe("Event options that need an ally", () => {
   });
 });
 
-describe("Carla's Last Orders", () => {
-  const carla = () => BOSSES.find(b => b.id === "carla")!;
-  const lesser = () => STORY.findIndex(b => b.t === "Lesser Evil");
+describe("Ghosts From the Past", () => {
+  const boss = (id: string) => BOSSES.find(b => b.id === id)!;
 
-  it("is the plain Carla until the story passes her death, then her Last Orders", () => {
-    S.story = lesser();
-    expect(bossView(carla()).n).toBe("Carla Baxter");
-    S.story = lesser() + 1;
-    const v = bossView(carla());
-    expect(v.n).toBe("Carla's Last Orders");
-    expect(v.m).toContain("rush");
-    expect(v.hpm).toBe(carla().hpm); // same fight
-    expect(v.intro).toMatch(/recording/);
+  it("Carla stays Carla until Season 3, then her fights are Ghosts From the Past", () => {
+    S.life = 1e6;                       // Season 2
+    expect(bossView(boss("carla")).n).toBe("Carla Baxter");
+    expect(bossView(boss("carla")).intro).toMatch(/errand/i);
+    S.life = 2e6;                       // Season 3 opens
+    const v = bossView(boss("carla"));
+    expect(v.n).toBe("Ghosts From the Past: Carla Baxter");
+    expect(v.intro).toMatch(/recording of Carla/);
+    expect(v.m).toEqual(boss("carla").m);   // same fight underneath
+    expect(v.hpm).toBe(boss("carla").hpm);
+    expect(v.mech).toContain(boss("carla").mech);
   });
 
-  it("uses the new voice for arrival, the card, the fight, the file and The List", () => {
-    S.story = lesser() + 1; S.life = 1e12;
+  it("anyone the story has taken off the board turns into a ghost once their time has passed", () => {
+    S.story = 0;
+    const gone: [string, number][] = [["strickler", 4], ["gilroy", 4], ["brennen", 5], ["barrett", 5], ["anson", 6], ["vaughn", 6], ["card", 7], ["gray", 7], ["riley", 7], ["bly", 7]];
+    const seasonStart = [0, 0, 1e5, 2e6, 3e7, 5e8, 8e9, 1e11];
+    for (const [id, season] of gone) {
+      S.life = seasonStart[season - 1] + 1;
+      expect(bossView(boss(id)).n, `${id} before`).not.toContain("Ghosts From the Past");
+      S.life = seasonStart[season];
+      expect(bossView(boss(id)).n, `${id} after`).toBe(`Ghosts From the Past: ${boss(id).n}`);
+    }
+  });
+
+  it("people who are still around are never ghosts", () => {
+    S.life = 1e13; S.story = 99;
+    for (const id of ["paxson", "larry", "oneill", "burke", "sonya", "kendrick"]) expect(bossView(boss(id)).n, id).toBe(boss(id).n);
+  });
+
+  it("Cowan, who dies in the first Season's story, is a ghost once that beat has passed", () => {
+    S.life = 1e4; S.story = 0;
+    expect(bossView(boss("cowan")).n).toBe("Phillip Cowan");
+    S.story = STORY.findIndex(b => b.t === "The Man Who Burned You") + 1;
+    expect(bossView(boss("cowan")).n).toBe("Ghosts From the Past: Phillip Cowan");
+    expect(bossView(boss("cowan")).m).toContain("freeze");
+  });
+
+  it("the card, tab title, Rogues file and The List all use the ghost version", () => {
+    S.life = 1e12;
     S.boss = { id: "carla", hp: 1e15, max: 1e15, left: 60 };
-    expect(bossDef()!.n).toBe("Carla's Last Orders");
-    expect(tabTitle()).toContain("Carla's Last Orders");
+    expect(bossDef()!.n).toBe("Ghosts From the Past: Carla Baxter");
+    expect(tabTitle()).toContain("Ghosts From the Past: Carla Baxter");
     S.bossKills.carla = 1;
-    expect(panelHTML("rogue")).toContain("Carla's Last Orders");
-    expect(panelHTML("rogue")).toContain("shot by Fiona");
+    expect(panelHTML("rogue")).toContain("Ghosts From the Past: Carla Baxter");
+    expect(panelHTML("rogue")).toContain("what they set in motion keeps turning up");
     S.bossKills.carla = 0; S.listKnown.carla = true;
     expect(panelHTML("list")).toContain("Carla Baxter");
-    expect(panelHTML("list")).toContain("Dead, but not finished.");
+    expect(panelHTML("list")).toContain("Gone, but not finished.");
   });
 
-  it("winning and losing use her lines", () => {
-    S.story = lesser() + 1; S.life = 1e12;
+  it("winning uses ghost lines", () => {
+    S.life = 1e12;
     S.boss = { id: "carla", hp: 0, max: 1e6, left: 60 };
     tickBoss(1);
-    expect(document.getElementById("log")!.textContent).toMatch(/Carla isn't in the room/);
-  });
-
-  it("before her death she's the same Carla as ever", () => {
-    S.story = 0; S.life = 1e12;
-    S.boss = { id: "carla", hp: 1e15, max: 1e15, left: 60 };
-    expect(bossDef()!.n).toBe("Carla Baxter");
+    expect(document.getElementById("log")!.textContent).toMatch(/close the file on Carla Baxter for good/);
   });
 });
 
@@ -1733,10 +1753,10 @@ describe("Everyone on the List gets their turn", () => {
     for (const b of open) expect(ids, b.id).toContain(b.id);
   });
 
-  it("Carla's Last Orders turns up once her story has passed, within a normal number of cases", () => {
-    S.life = 5e8; S.allies = {}; S.story = STORY.findIndex(b => b.t === "Lesser Evil") + 1;
+  it("a ghost turns up like anyone else once the story has passed their time", () => {
+    S.life = 5e8; S.allies = {};
     let seen = 0;
-    for (let i = 0; i < 40; i++) { S.boss = null; spawnBoss(); if (S.boss!.id === "carla") { expect(bossDef()!.n).toBe("Carla's Last Orders"); seen++; } }
+    for (let i = 0; i < 60; i++) { S.boss = null; spawnBoss(); if (S.boss!.id === "carla") { expect(bossDef()!.n).toBe("Ghosts From the Past: Carla Baxter"); seen++; } }
     expect(seen).toBeGreaterThan(0);
   });
 
@@ -1750,20 +1770,6 @@ describe("Everyone on the List gets their turn", () => {
 });
 
 describe("Late-story changes to bosses and the ending", () => {
-  it("Cowan and Anson turn into what they left behind after their story beats", () => {
-    const cowan = BOSSES.find(b => b.id === "cowan")!, anson = BOSSES.find(b => b.id === "anson")!;
-    S.story = 0;
-    expect(bossView(cowan).n).toBe("Phillip Cowan");
-    S.story = STORY.findIndex(b => b.t === "The Man Who Burned You") + 1;
-    expect(bossView(cowan).n).toBe("Cowan's Unfinished Sentence");
-    expect(bossView(cowan).m).toContain("freeze");
-    S.story = STORY.findIndex(b => b.t === "Brothers and Strings");
-    expect(bossView(anson).n).toBe("Anson Fullerton");
-    S.story = STORY.findIndex(b => b.t === "Brothers and Strings") + 1;
-    expect(bossView(anson).n).toBe("Anson's Contingencies");
-    expect(bossView(anson).m).toContain("att");
-  });
-
   it("completing the List gives an epilogue pop-up with the crew, and it stays in the Case File", () => {
     for (const b of BOSSES) S.bossKills[b.id] = 1;
     checkEnding();

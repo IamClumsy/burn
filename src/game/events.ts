@@ -1,5 +1,5 @@
 import { S, KEEP_RATE, capFee, payClient } from "../state";
-import { clickVal, cps, heatMult } from "../calc";
+import { clickVal, cps, heatMult, inFlashback } from "../calc";
 import { EVENTS } from "../data/events";
 import { clientCut } from "../data/automation";
 import { chime } from "../audio";
@@ -11,7 +11,7 @@ import { checkBurn } from "./heat";
 const say = (t: string): void => sayTag(t, "client");
 
 export function spawnEvent(): void {
-  if (choiceBusy() || S.boss) { setTimeout(spawnEvent, 15000); return; }
+  if (choiceBusy() || S.boss || inFlashback()) { setTimeout(spawnEvent, 15000); return; }
   const ev = pick(EVENTS.filter(e => !e.needs || S.allies[e.needs]));
   const options = ev.o.filter(([, , needs]) => !needs || S.allies[needs]).map(([label, run]) => [label, run] as [string, () => string]);
   showChoice(ev.t, ev.d, options, () => { checkBurn(); render(); scheduleEvent(); });
@@ -31,7 +31,7 @@ const CLIENTS = [
 export function scheduleClient(): void { setTimeout(spawnClient, 45000 + Math.random() * 60000); }
 
 export function spawnClient(): void {
-  if (choiceBusy() || S.boss) { setTimeout(spawnClient, 20000); return; }
+  if (choiceBusy() || S.boss || inFlashback()) { setTimeout(spawnClient, 20000); return; }
   const reward = Math.max(500, capFee((cps() * 45 + clickVal() * 10) / KEEP_RATE));
   if (S.auto.clients && S.cred >= 2) { // auto-take clients: the case is handled without a pop-up, for a little less
     const cut = clientCut(S.cred), fee = reward * (1 - cut);

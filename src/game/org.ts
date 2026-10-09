@@ -1,5 +1,5 @@
 import { S, KEEP_RATE, capFee, payClient } from "../state";
-import { attTier, cps } from "../calc";
+import { attTier, cps, inFlashback } from "../calc";
 import { BOSSES } from "../data/bosses";
 import { EPILOGUE_TITLE, epilogueText } from "../data/epilogue";
 import { ERRANDS, GRIP_PERKS, TIERS, TIER_DOWN, TIER_UP, handlerFor, rollFixer } from "../data/org";
@@ -89,7 +89,7 @@ export function scheduleErrand(ms?: number): void {
 
 export function spawnErrand(): void {
   // Only once they're watching, and never over another decision.
-  if (S.att < TIERS[1].min || choiceBusy() || S.boss) { scheduleErrand(S.boss ? 20000 : 45000); return; }
+  if (S.att < TIERS[1].min || choiceBusy() || S.boss || inFlashback()) { scheduleErrand(S.boss || inFlashback() ? 20000 : 45000); return; }
   const e = pick(ERRANDS), who = handlerFor(S.life);
   const fee = capFee((cps() * 200 + 500) / KEEP_RATE);
   showChoice(

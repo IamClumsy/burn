@@ -1,5 +1,5 @@
 import { S, earn } from "../state";
-import { attNet, cps, heatNet, owned } from "../calc";
+import { attNet, cps, heatNet, inFlashback, owned } from "../calc";
 import { checkEnding, tickOrg } from "./org";
 import { STORY } from "../data/story";
 import { SEASON_GRIP } from "../data/org";
@@ -127,14 +127,15 @@ export function tick(dt: number): void {
   for (const k in S.fx) if (S.fx[k] > 0) S.fx[k] = Math.max(0, S.fx[k] - dt);
   for (const k in S.allyCd) if (S.allyCd[k] > 0) S.allyCd[k] = Math.max(0, S.allyCd[k] - dt);
 
+  const flash = inFlashback(); // while Sam tells his story, everything else waits
   const speed = S.fx.fast > 0 ? 2 : 1;
-  if (!S.boss) for (const m of [...S.active]) { m.left -= dt * speed; if (m.left <= 0) resolveMission(m); } // missions wait while a case encounter is on
+  if (!S.boss) for (const m of [...S.active]) { if (!m.arc && flash) continue;  m.left -= dt * speed; if (m.left <= 0) resolveMission(m); } // missions wait while a case encounter is on
 
   if (Math.random() < Math.min(0.02, owned("tape") * 0.0004)) S.junk[pick(Object.keys(S.junk))]++;
 
   tickBoss(dt);
-  if (!S.boss) { tickNate(dt); tickBusy(dt); } // Nate, and afternoons with Seymour, wait too
-  tickOrg(S.boss ? 0 : dt);
+  if (!S.boss && !flash) { tickNate(dt); tickBusy(dt); } // Nate, and afternoons with Seymour, wait too
+  tickOrg(S.boss || flash ? 0 : dt);
 
   if (S.upgs.h3 && S.heat >= 90) layLow();
   if (S.allies.madeline && S.heat >= 95) layLow();

@@ -1,5 +1,5 @@
 import { S, earn } from "../state";
-import { actionDmg, allyHere, bossDef, bossHP, bossView, conChance, cps, heatMult } from "../calc";
+import { actionDmg, allyHere, bossDef, bossHP, bossView, conChance, cps, heatMult, inFlashback } from "../calc";
 import { CASE_ACTIONS, CREW_LINES, MAX_LEADS, TRAP_MIN_LEADS } from "../data/caseActions";
 import type { Boss, CaseAction } from "../types";
 import { seasonsOpen } from "../data/missions";
@@ -157,6 +157,7 @@ export function bossAction(kind: CaseAction, x?: number, y?: number): void {
 export function tickBoss(dt: number): void {
   if (S.fionaAway > 0) S.fionaAway = Math.max(0, S.fionaAway - dt);
   if (!S.boss) {
+    if (inFlashback()) return; // no one else turns up while Sam is telling his story
     S.bossCd -= dt;
     if (S.bossCd <= 0) spawnBoss();
     return;

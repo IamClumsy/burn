@@ -3,7 +3,7 @@ import type { ContactId } from "../types";
 import {
   REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, cps, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
-  samSharp, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
+  samSharp, inFlashback, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { REFERRAL, UPGS } from "../data/upgrades";
@@ -146,6 +146,7 @@ function missions(): string {
   let h = `<div class="small mishead">Case files: <b style="color:var(--text)">${done} of ${MISSIONS.length}</b> episodes · Season ${seasonsOpen(S.life)} cases open</div>
     <div class="small" style="margin-bottom:8px">Up to 3 missions at once (${S.active.length}/3). Clients pay well. Michael keeps what he needs for expenses and hands the rest back. Ask an ally for help for +25% success (or +1 favor on cases that can't fail). They're busy until it ends.</div>`;
   const open = ARCS.filter(arcAvailable);
+  if (inFlashback()) h += `<div class="box"><b>Sam is telling his story.</b> <div class="small">Everything else waits: no new cases, no clients, no visitors, and your other jobs and the Organization hold still until he finishes.</div></div>`;
   if (open.length) {
     h += `<h2>Open Cases</h2>` + open.map(a => {
       const k = arcStep(a), st = a.steps[k];
@@ -173,7 +174,7 @@ function missions(): string {
     return `<div class="box"><b>${m.n}${m.kid ? ' <span class="chip">Never fails</span>' : ""}${m.ep && S.episodesDone[m.ep] ? ' <span class="chip">Seen</span>' : ""}</b>${m.ep ? `<div class="small" style="margin-bottom:2px">${epLabel(m.ep, m.epTitle || "")}</div>` : ""}${castLine(m.ep)}<div class="small" style="margin-top:2px">${Math.round(succChance(m) * 100)}% success · ${m.dur}s · pays ${money(missionReward(m))} · +${m.fav} favor · +${m.heat} heat</div>
       ${why ? `<div class="small" style="margin-top:4px;color:var(--gold)">${why}</div>` : ""}
       <div class="btns">${S.allies[m.ally] ? `<button class="${m.send && free ? "on" : ""}" data-act="send" data-arg="${m.uid}" ${free ? "" : "disabled"}>${m.send && free ? "☑" : "☐"} Ask ${first} for help (${m.kid ? "+1 favor" : "+25%"})</button>` : ""}
-      <button data-act="start" data-arg="${m.uid}" ${S.active.length >= 3 || blocked ? "disabled" : ""}>Start mission</button></div></div>`;
+      <button data-act="start" data-arg="${m.uid}" ${S.active.length >= 3 || blocked || inFlashback() ? "disabled" : ""}>Start mission</button></div></div>`;
   }).join("");
   return h;
 }

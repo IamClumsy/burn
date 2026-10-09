@@ -1693,6 +1693,23 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
   });
 
+  it("everything else waits while Sam tells his story: no new cases, clients, events, bosses or Nate", () => {
+    S.life = 5e8; S.samOffered = true; dismissAllNotices(); S.arcStep[SAM_ARC_ID] = 1; // the case is underway
+    expect(inFlashback()).toBe(true);
+    S.board = []; fillBoard(); const uid = S.board[0].uid;
+    startMission(uid);
+    expect(S.active.length).toBe(0);                 // can't start an ordinary case
+    expect(panelHTML("mis")).toMatch(/Sam is telling his story/);
+    S.bossCd = 5; tick(10);
+    expect(S.boss).toBe(null); expect(S.bossCd).toBe(5);
+    S.allies.nate = true; S.nateAway = false; S.nateTimer = 1; tick(5);
+    expect(S.nateAway).toBe(false);
+    spawnClient(); spawnEvent();
+    expect(document.getElementById("evt")!.style.display).not.toBe("flex");   // no visitors
+    S.arcStep[SAM_ARC_ID] = 0;
+    expect(inFlashback()).toBe(false);
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

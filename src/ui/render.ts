@@ -1,5 +1,5 @@
 import { S } from "../state";
-import { bossDef, bribeCost, bribeDrop, clickVal, cover, cps, layAmt, tierDef } from "../calc";
+import { REINSTATE_MIN, bossDef, bribeCost, bribeDrop, clickVal, cover, cps, credGain, layAmt, tierDef } from "../calc";
 import { FX_NAMES } from "../data/perks";
 import { money } from "../util";
 import type { CaseAction } from "../types";
@@ -67,8 +67,24 @@ function paintTitle(): void {
   }
 }
 
+/** The bottom bar: Credibility, and how far this run is toward the next point. */
+export function dockProgress(): { label: string; pct: number } {
+  const label = `Credibility ${S.cred}`;
+  if (S.run < REINSTATE_MIN) return { label, pct: Math.min(1, S.run / REINSTATE_MIN) };
+  const g = credGain(), lo = g * g * 1e7, hi = (g + 1) * (g + 1) * 1e7;
+  return { label, pct: Math.max(0, Math.min(1, (S.run - lo) / (hi - lo))) };
+}
+
+function paintDock(): void {
+  const d = dockProgress(), pct = Math.round(d.pct * 100);
+  setText($("docklv"), d.label);
+  setText($("dockpct"), pct + "%");
+  $("dockfill").style.width = pct + "%";
+}
+
 export function render(): void {
   paintTitle();
+  paintDock();
   setText($("cash"), money(S.cash));
   setText($("rate"), "+" + money(cps()) + "/s  ·  job: " + money(clickVal()));
   setText($("cred"), S.cred ? `Credibility ${S.cred} · ${cover().name} cover` : `${cover().name} cover`);

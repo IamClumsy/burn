@@ -24,28 +24,32 @@ import { arcAvailable, arcStep } from "../game/arcs";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 import { AUTOS } from "../data/automation";
+import { saveStatus } from "../saveStatus";
 import { EPILOGUE, EPILOGUE_CLOSE, EPILOGUE_TITLE } from "../data/epilogue";
 
-export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "med" | "rep";
+export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "med" | "rep";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
   ["mis", "Missions"], ["upg", "Upgrades"], ["ops", "Operations"],
 ];
 
-/** Reference and rare screens: opened as pop-ups from the toolbar. */
+/** Reference and rare screens: opened as pop-ups from the menu. */
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"], ["gad", "Gadgets"], ["fav", "Favors"],
   ["list", "The List"], ["file", "Michael's File"], ["stats", "Stats"], ["auto", "Automation"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
+  ["options", "Menu"], ["settings", "Settings"],
 ];
 
-/** These open from buttons in The Loft card, so they're left off the toolbar. */
-const LOFT_ONLY: TabId[] = ["crew", "cov", "gad", "fav"];
+/** What the menu button offers. Crew, Covers, Gadgets and Favors stay in The Loft, so they aren't here. */
+export const MENU: TabId[] = ["list", "file", "stats", "auto", "story", "rogue", "med", "rep", "faq", "settings"];
+
+
 
 export const titleOf = (id: TabId): string => [...SECTIONS, ...MODALS].find(([i]) => i === id)![1];
 
-/** Build the static card shells, the toolbar and the case-action buttons once at startup. */
-export function buildLayout(host: HTMLElement, toolbar: HTMLElement, actions?: HTMLElement | null): void {
+/** Build the static card shells and the case-action buttons once at startup. */
+export function buildLayout(host: HTMLElement, _toolbar?: HTMLElement | null, actions?: HTMLElement | null): void {
   if (actions) {
     const tile = (a: (typeof CASE_ACTIONS)[number], extra = "") =>
       `<button data-case="${a.id}"${extra}><b>${a.name}</b><span class="sub">${a.hint}</span></button>`;
@@ -54,8 +58,6 @@ export function buildLayout(host: HTMLElement, toolbar: HTMLElement, actions?: H
   }
   host.innerHTML = SECTIONS.map(([id, t]) =>
     `<div class="card sec sec-${id}"><h2>${t}</h2><div class="secbody" id="sec-${id}"></div></div>`).join("");
-  toolbar.innerHTML = MODALS.filter(([id]) => !LOFT_ONLY.includes(id))
-    .map(([id, t]) => `<button data-modal="${id}">${t}</button>`).join("");
 }
 
 // ---- live values ----
@@ -291,6 +293,26 @@ function automation(): string {
   return `<div class="small" style="margin-bottom:8px">Credibility from Reinstating buys you help with the chores. Switch them on or off any time.</div>${rows}`;
 }
 
+/** The menu behind the hamburger button. */
+function options(): string {
+  return `<div class="menugrid">${MENU.map(id => `<button data-modal="${id}">${titleOf(id)}</button>`).join("")}</div>`;
+}
+
+/** Sound, saves and the other switches that used to live in the footer. */
+function settings(): string {
+  const row = (label: string, state: string, act: string) => `<div class="drow"><span class="dlabel">${label}</span><span class="dtext"><button data-act="setting" data-arg="${act}">${state}</button></span></div>`;
+  const st = saveStatus();
+  return `<div class="dfile">
+    ${row("Sound", S.mute ? "Off" : "On", "mute")}
+    ${row("Pop-ups", S.popups ? "On, in the middle of the screen" : "Off, small corner notes instead", "popups")}
+    ${row("Big numbers", S.sci ? "Scientific (1.23e9)" : "Letters (1.23B)", "numfmt")}
+  </div>
+  <h2 style="margin-top:14px">Your save</h2>
+  <div class="small" id="saveinfo" style="margin-bottom:8px${st.warn ? ";color:var(--gold)" : ""}">${st.text}</div>
+  <div class="btns"><button data-act="setting" data-arg="export">Export save</button><button data-act="setting" data-arg="import">Import save</button><button data-act="setting" data-arg="wipe">Wipe save</button></div>
+  <div class="small" style="margin-top:8px">The game saves itself every couple of seconds, in this browser. Export gives you a code to move it somewhere else.</div>`;
+}
+
 function reinstate(): string {
   const g = credGain(), c = cps();
   const keep = `You reset cash, ops, upgrades and missions. You keep perks, medals, story and covers, and your allies too, except anyone who joined late in the story (like Madeline and Jesse), who you hire again.`;
@@ -392,7 +414,7 @@ function faq(): string {
 const VIEWS: Record<TabId, () => string> = {
   faq,
   list: theList,
-  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, story, med: medals, rep: reinstate,
+  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, story, med: medals, rep: reinstate,
 };
 
 export const panelHTML = (tab: TabId): string => { portraitScope(tab); return VIEWS[tab](); };

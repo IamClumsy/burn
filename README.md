@@ -28,4 +28,4 @@ Adding content is mostly editing files in `src/data/`. `src/data/data.test.ts` c
 ## Deploy
 Import the repo on Vercel. The preset is detected as **Vite** (`vercel.json` sets the build and output directory). Every push to `main` redeploys.
 
-Progress is saved in the browser. Use *export save* / *import save* in the footer to move it between browsers.
+Progress is saved in the browser. Use *Export save* / *Import save* in Settings (the menu button at the bottom right) to move it between browsers.

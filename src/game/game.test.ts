@@ -45,8 +45,8 @@ import { EVENTS } from "../data/events";
 import { MISSIONS, seasonsOpen } from "../data/missions";
 import { earn, merge } from "../state";
 import type { GameState } from "../types";
-import { render } from "../ui/render";
-import { MODALS, SECTIONS, buildLayout, panelHTML } from "../ui/panels";
+import { dockProgress, render } from "../ui/render";
+import { MENU, MODALS, SECTIONS, buildLayout, panelHTML, titleOf } from "../ui/panels";
 
 beforeAll(() => {
   const html = readFileSync(resolve(__dirname, "../../index.html"), "utf8");
@@ -696,10 +696,10 @@ describe("sketches around the game", () => {
 });
 
 describe("narration strip", () => {
-  it("sits right under the toolbar, above the game, where it can't be scrolled past", () => {
-    const toolbar = document.getElementById("toolbar")!, strip = document.getElementById("voiceover")!, main = document.querySelector("main")!;
+  it("sits right under the header, above the game, where it can't be scrolled past", () => {
+    const header = document.querySelector("header")!, strip = document.getElementById("voiceover")!, main = document.querySelector("main")!;
     const follows = (a: Node, b: Node) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(follows(toolbar, strip)).toBe(true);
+    expect(follows(header, strip)).toBe(true);
     expect(follows(strip, main)).toBe(true);
     expect([...document.querySelectorAll(".card h2")].map(h => h.textContent)).not.toContain("Narration");
   });
@@ -1002,6 +1002,42 @@ describe("Reinstating: preview, stats and Fiona's time off", () => {
     expect(html).toContain("$5.00B");
     expect(html).toContain("Longest away");
     expect(html).toContain("2h");
+  });
+});
+
+describe("The bottom bar, the menu and Settings", () => {
+  it("the old toolbar and footer are gone, and the bar is there", () => {
+    expect(document.getElementById("toolbar")).toBeNull();
+    expect(document.querySelector(".foot")).toBeNull();
+    for (const id of ["dock", "dockface", "docklv", "dockfill", "dockTop", "dockLog"]) expect(document.getElementById(id), id).not.toBeNull();
+    expect(document.querySelector('.dock [data-modal="options"]')).not.toBeNull();
+  });
+
+  it("the menu lists the reference screens, and nothing from The Loft", () => {
+    const html = panelHTML("options");
+    for (const id of ["list", "file", "stats", "auto", "story", "rogue", "med", "rep", "faq", "settings"]) expect(html, id).toContain(`data-modal="${id}"`);
+    for (const id of ["crew", "cov", "gad", "fav"]) expect(html, id).not.toContain(`data-modal="${id}"`);
+    expect(MENU.every(id => titleOf(id).length > 0)).toBe(true);
+  });
+
+  it("Settings holds sound, pop-ups, number style and the save controls", () => {
+    S.mute = false; S.popups = true; S.sci = false;
+    const html = panelHTML("settings");
+    for (const k of ["mute", "popups", "numfmt", "export", "import", "wipe"]) expect(html, k).toContain(`data-arg="${k}"`);
+    expect(html).toContain('id="saveinfo"');
+    S.mute = true; S.sci = true;
+    const html2 = panelHTML("settings");
+    expect(html2).toMatch(/Sound[\s\S]*Off/);
+    expect(html2).toContain("Scientific");
+  });
+
+  it("the bar shows Credibility and progress toward the next point", () => {
+    S.cred = 3; S.run = 5e7; render();
+    expect(document.getElementById("docklv")!.textContent).toBe("Credibility 3");
+    expect(document.getElementById("dockpct")!.textContent).toBe("50%");
+    S.run = 2e8; render();
+    expect(+document.getElementById("dockpct")!.textContent!.replace("%", "")).toBeGreaterThan(0);
+    expect(dockProgress().pct).toBeLessThanOrEqual(1);
   });
 });
 

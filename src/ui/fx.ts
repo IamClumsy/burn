@@ -4,7 +4,7 @@ import { notify, type NoticeKind } from "./notice";
 
 let freshTimer: ReturnType<typeof setTimeout> | undefined;
 
-/** Narrate a line: it goes to the top of the history and into the strip under the toolbar. */
+/** Narrate a line: it goes to the top of the history and into the strip under the header. */
 export function say(t: string): void {
   const log = $("log");
   const p = document.createElement("p");

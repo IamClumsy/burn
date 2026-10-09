@@ -1,6 +1,6 @@
 import { S, SAVE_KEY, fresh, merge, setState } from "./state";
 import { returnFromAway } from "./game/offline";
-import { $ } from "./ui/dom";
+import { setSaveStatus } from "./saveStatus";
 import type { GameState } from "./types";
 
 // Saves to localStorage, sessionStorage and window.name; the newest copy wins on load.
@@ -17,14 +17,12 @@ export function save(): void {
   try { localStorage.setItem(SAVE_KEY, j); ls = localStorage.getItem(SAVE_KEY) === j; } catch { /* blocked */ }
   try { sessionStorage.setItem(SAVE_KEY, j); ss = true; } catch { /* blocked */ }
   try { window.name = WN + j; wn = true; } catch { /* blocked */ }
-  const el = document.getElementById("saveinfo");
-  if (el) {
-    const t = new Date().toLocaleTimeString();
-    el.textContent = ls ? `Saved ${t}`
+  const t = new Date().toLocaleTimeString();
+  setSaveStatus(
+    ls ? `Saved ${t}`
       : ss || wn ? `Saved ${t} (temporary only: open the game in a normal browser tab for a permanent save, or use export)`
-      : "Could not save: use export save";
-    el.style.color = ls ? "" : "var(--gold)";
-  }
+      : "Could not save: use export save",
+    !ls);
 }
 
 export function readSave(): Partial<GameState> | null {
@@ -64,7 +62,7 @@ export function exportSave(): void {
   save();
   const code = btoa(unescape(encodeURIComponent(JSON.stringify(S))));
   const copy = navigator.clipboard ? navigator.clipboard.writeText(code) : Promise.reject();
-  copy.then(() => $("saveinfo").textContent = "Save copied to clipboard").catch(() => prompt("Copy your save code:", code));
+  copy.then(() => setSaveStatus("Save copied to clipboard")).catch(() => prompt("Copy your save code:", code));
 }
 
 export function importSave(code: string): boolean {

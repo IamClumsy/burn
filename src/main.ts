@@ -28,7 +28,23 @@ const ACT: Record<string, (arg: string) => void> = {
   gen: A.buyGen, upg: A.buyUpg, referral: () => A.buyReferral(), hire: A.hireAlly, ability: A.useAbility,
   cover: A.setCover, auto: A.toggleAuto, perk: A.buyPerk, contact: a => A.buyFavorFrom(a), hangout: () => A.buyFavorFrom("seymour", "hangout"), craft: A.craft,
   start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
+  setting: a => setting(a),
 };
+
+/** The switches in Settings: sound, pop-ups, number style, and saves. */
+function setting(what: string): void {
+  if (what === "mute") S.mute = !S.mute;
+  else if (what === "popups") S.popups = !S.popups;
+  else if (what === "numfmt") { S.sci = !S.sci; setScientific(S.sci); }
+  else if (what === "export") exportSave();
+  else if (what === "wipe") { if (confirm("Wipe your save and start over?")) wipeSave(); }
+  else if (what === "import") {
+    const c = prompt("Paste your save code:");
+    if (!c) return;
+    if (importSave(c)) { fillBoard(); setScientific(S.sci); toast("Save imported", "Your game is loaded.", "good"); }
+    else alert("That code didn't work.");
+  }
+}
 const onAct = (e: MouseEvent) => {
   const t = (e.target as HTMLElement).closest<HTMLElement>("[data-act]");
   if (!t || t.classList.contains("no") || (t as HTMLButtonElement).disabled) return;
@@ -36,12 +52,12 @@ const onAct = (e: MouseEvent) => {
   ACT[t.dataset.act!](t.dataset.arg!);
   render();
 };
-buildLayout($("sections"), $("toolbar"), $("bossacts"));
+buildLayout($("sections"), null, $("bossacts"));
 $("sections").addEventListener("mousedown", onAct);
 $("modalBody").addEventListener("mousedown", onAct);
 
 // ---- pop-ups
-// Pop-ups open from the toolbar and from the buttons inside The Loft.
+// Pop-ups open from the menu button and from the buttons inside The Loft.
 document.addEventListener("click", e => {
   const b = (e.target as HTMLElement).closest<HTMLElement>("[data-modal]");
   if (b) showModal(b.dataset.modal as TabId);
@@ -90,20 +106,12 @@ $("bossacts").addEventListener("click", e => {
   render();
 });
 
-// ---- footer
-const syncMute = () => { $("mute").textContent = "sound: " + (S.mute ? "off" : "on"); };
-const syncNumbers = () => { setScientific(S.sci); $("numfmt").textContent = "numbers: " + (S.sci ? "scientific" : "letters"); };
-$("numfmt").addEventListener("click", () => { S.sci = !S.sci; syncNumbers(); render(); });
-const syncPopups = () => { $("popups").textContent = "pop-ups: " + (S.popups ? "on" : "off"); };
-$("mute").addEventListener("click", () => { S.mute = !S.mute; syncMute(); });
-$("popups").addEventListener("click", () => { S.popups = !S.popups; syncPopups(); });
-$("wipe").addEventListener("click", () => { if (confirm("Wipe your save and start over?")) wipeSave(); });
-$("export").addEventListener("click", exportSave);
-$("import").addEventListener("click", () => {
-  const c = prompt("Paste your save code:");
-  if (!c) return;
-  if (importSave(c)) { fillBoard(); toast("Save imported", "Your game is loaded.", "good"); syncMute(); syncPopups(); syncNumbers(); render(); }
-  else alert("That code didn't work.");
+// ---- the dock: back to top, narration, and the settings that used to live in the footer
+$("dockTop").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+$("dockLog").addEventListener("click", () => {
+  const vo = $("voiceover") as HTMLDetailsElement;
+  vo.open = !vo.open;
+  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 // ---- boot
@@ -112,9 +120,8 @@ setNoticeGate(() => !!S.boss); // nothing else interrupts a case encounter
 portraitScope("loft"); $("loftface").innerHTML = portrait("michael", 54);
 loadGame();
 fillBoard();
-syncMute();
-syncPopups();
-syncNumbers();
+setScientific(S.sci);
+portraitScope("dock"); $("dockface").innerHTML = portrait("michael", 56);
 say("Burned. No cash, no credit, no agency. Time to take a job.");
 scheduleClient();
 scheduleEvent();

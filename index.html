@@ -36,7 +36,6 @@
   </svg>
 </header>
 
-<nav class="toolbar" id="toolbar" aria-label="More"></nav>
 <details class="voiceover" id="voiceover">
   <summary><span class="vo-tag">Narrator</span><span id="vo-latest"></span><span class="vo-more">history</span></summary>
   <div id="log"></div>
@@ -83,10 +82,13 @@
   <section id="sections" class="sections"></section>
 </main>
 
-<div class="foot">
-  <span id="saveinfo">Autosaves every 2s</span> ·
-  <a id="mute">sound: on</a> · <a id="popups">pop-ups: on</a> · <a id="numfmt">numbers: letters</a> · <a id="export">export save</a> · <a id="import">import save</a> · <a id="wipe">wipe save</a>
-</div>
+<nav class="dock" id="dock" aria-label="Game bar">
+  <button class="dockface" id="dockface" data-modal="file" aria-label="Michael's File"></button>
+  <div class="dockbar"><div class="dockrow"><b id="docklv">Credibility 0</b><span id="dockpct">0%</span></div><div class="dockfill"><i id="dockfill"></i></div></div>
+  <button class="dockbtn" id="dockTop" aria-label="Back to the top" title="Back to the top">&#8593;</button>
+  <button class="dockbtn" id="dockLog" aria-label="Narration" title="Narration">&#128172;</button>
+  <button class="dockbtn menu" data-modal="options" aria-label="Menu" title="Menu">&#9776;</button>
+</nav>
 <div id="burned"><div id="burnedTxt">BURNED<small>Half your cash is gone. Heat reset. Walk it off.</small></div></div>
 <div id="evt"><div class="dlg" id="evtDlg"><h3 id="evtT"></h3><div class="evtbig" id="evtBig"></div><p id="evtD"></p><div id="evtO"></div></div></div>
 <div id="modal" class="modal"><div class="mdlg"><div class="mhead"><h3 id="modalTitle"></h3><button id="modalClose" aria-label="Close">✕</button></div><div id="modalBody"></div></div></div>

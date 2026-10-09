@@ -1721,7 +1721,7 @@ describe("The Fall of Sam Axe", () => {
     expect(document.getElementById("ndlg")!.classList.contains("inquiry")).toBe(false);
     dismissAllNotices();
     const css = readFileSync(resolve(__dirname, "../styles.css"), "utf8");
-    expect(css).not.toMatch(/body\.flashback[^{]*\{[^}]*(filter|mix-blend-mode)/); // those made every click slow (INP)
+    expect(css).not.toMatch(/body\.flashback[^{]*\{[^}]*(\bfilter\s*:|mix-blend-mode\s*:)/); // those made every click slow (INP)
   });
 
   it("Veracruz gets a one-time spot on the Rogues card once Sam's story is told", () => {

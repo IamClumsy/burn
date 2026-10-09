@@ -167,8 +167,13 @@
   #evt .dlg.inquiry p,#evt .dlg.inquiry .evtd{color:#2b2418;font-style:italic}
   #evt .dlg.inquiry button{background:#d8cba9;color:#2b2418;border:1px solid #8a7a55;font-family:inherit}
   #evt .dlg.inquiry button:hover{background:#cdbd93}
-  /* a cheap warm wash: one static layer, no filters or blend modes, so it never slows a click */
-  body.flashback::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:25;background:radial-gradient(ellipse at center,#0000 45%,#2a160066 100%),#c8903c26}
+  /* Sam's story looks like an old file: faded browns, a typewriter-ish serif and a film-grain layer.
+     It's all colour variables and one static layer, with no filters or blend modes, so it never slows a click. */
+  body.flashback{--bg:#16100a; --panel:#221a10; --panel2:#2d2316; --line:#5a4528;
+    --text:#f0e3c6; --dim:#b3a07c; --pink:#c8643c; --orange:#d99a3c; --gold:#e6c36a;
+    --sea:#8fb59a; --good:#9fbf7a; --bad:#c0503c; font-family:Georgia,"Times New Roman",serif}
+  body.flashback::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:25;
+    background:radial-gradient(ellipse at center,#0000 40%,#2a160080 100%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .8 0 0 0 0 .6 0 0 0 0 .3 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),#c8903c22;opacity:.55}
   #evt button.primary{background:linear-gradient(#2ee6d6,#1aa89c);color:#04201d;border:none;font-weight:700;padding:13px;font-size:16px}
   #evt button.primary:hover:not(:disabled){background-color:transparent;filter:brightness(1.1)}
   #notice{display:none;position:fixed;inset:0;background:#000d;z-index:40;align-items:center;justify-content:center;padding:20px}

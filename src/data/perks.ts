@@ -8,9 +8,12 @@ export const PERKS: Perk[] = [
 ];
 export const JUNK: Dict<string> = {tape:"Duct tape", wire:"Wire", bleach:"Bleach", micro:"Microwave"};
 export const RECIPES: Recipe[] = [
-  {id:"smoke", name:"Smoke Bomb",       desc:"Instantly −30 heat",              need:{bleach:1,tape:1}},
-  {id:"jam",   name:"Door-Cam Jammer",  desc:"No heat gain for 45s",            need:{wire:2,tape:1}},
-  {id:"boost", name:"Signal Booster",   desc:"Income ×2 for 30s",               need:{wire:2,micro:1}},
-  {id:"jobs",  name:"Fake ID Kit",      desc:"Jobs ×4 for 30s",                 need:{tape:2,wire:1}},
+  {id:"smoke",  name:"Smoke Bomb",          desc:"Instantly −30 heat and −10 attention",              need:{bleach:1,tape:1}},
+  {id:"sweep",  name:"Bug Sweeper",         desc:"Instantly −30 Organization attention",              need:{micro:2,bleach:1}},
+  {id:"jam",    name:"Door-Cam Jammer",     desc:"No heat gain for 3 minutes",                        need:{wire:2,tape:1}},
+  {id:"boost",  name:"Signal Booster",      desc:"Income ×3 for 2 minutes",                           need:{wire:2,micro:1}},
+  {id:"jobs",   name:"Fake ID Kit",         desc:"Jobs ×6 for 2 minutes",                             need:{tape:2,wire:1}},
+  {id:"fast",   name:"Burner Phone Bundle", desc:"Missions run twice as fast for 3 minutes",          need:{wire:1,micro:1,tape:1}},
+  {id:"pay",    name:"Forged Paper Trail",  desc:"Missions pay ×2 for 3 minutes",                     need:{tape:2,bleach:1,micro:1}},
 ];
-export const FX_NAMES: Dict<string> = {jam:"Jammer",boost:"Booster ×2",jobs:"Fake IDs ×4",fast:"Fast Talk"};
+export const FX_NAMES: Dict<string> = {jam:"Jammer",boost:"Booster ×3",jobs:"Fake IDs ×6",fast:"Fast Talk",pay:"Paper Trail ×2"};

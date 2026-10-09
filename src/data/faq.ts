@@ -68,7 +68,7 @@ export const FAQ: FaqSection[] = [
     {q: "What are favors for?",
      a: () => "Spend them on permanent perks in the Favors pop-up (a button in The Loft), or call one in during a boss encounter. You earn favors from missions, cases, story beats and boss wins, and you can buy them from Seymour, your intel contact and Barry. Barry gets you a discount on those, and he sells favors himself, whether or not you've hired him: cheaper than the frienemies, with a little heat scrubbed off, and four a day."},
     {q: "What are Gadgets and junk?",
-     a: () => "Taking jobs and owning Duct-Tape Gadgets drops junk: tape, wire, bleach and microwaves. Spend it to craft one-off boosts such as a smoke bomb or a jammer, or on a gadget during a boss encounter."},
+     a: () => "Taking jobs and owning Duct-Tape Gadgets drops junk: tape, wire, bleach and microwaves. Spend it to craft one-off gadgets: a smoke bomb or a bug sweeper for instant relief, a jammer, signal booster, fake ID kit, burner phones or a forged paper trail for a few minutes of a big boost, or spend it on a gadget during a boss encounter. Two or three gadgets in a row can change a whole stretch of play."},
     {q: "What do Covers do?",
      a: () => `Your cover changes how you earn. ${covers()}. Open Covers from The Loft; you can switch every 20 seconds once a cover is unlocked.`},
   ]},

@@ -5,7 +5,7 @@ import { money } from "../util";
 import type { CaseAction } from "../types";
 import { CASE_ACTIONS, MAX_LEADS, ROTATING } from "../data/caseActions";
 import { actionBlock } from "../game/bosses";
-import { loftBadges } from "./badges";
+import { loftBadges, markSeen, menuNew } from "./badges";
 import { noticeOpen } from "./notice";
 import { choiceOpen } from "./choice";
 import { portrait, portraitScope } from "./portrait";
@@ -18,7 +18,7 @@ let openModal: TabId | null = null;
 export function showModal(id: TabId | null): void {
   openModal = id;
   $("modal").classList.toggle("open", id !== null);
-  if (id) $("modalTitle").textContent = titleOf(id);
+  if (id) { $("modalTitle").textContent = titleOf(id); markSeen(id); }
   lastModal = "";
   render();
 }
@@ -77,7 +77,15 @@ export function dockProgress(): { label: string; pct: number } {
   return { label, pct: Math.max(0, Math.min(1, (S.run - lo) / (hi - lo))) };
 }
 
+/** The dot on the menu button, and a NEW chip on each menu entry that has something new. */
+function paintMenuNew(): void {
+  const n = menuNew(), any = Object.keys(n).length > 0;
+  $("dockMenu").classList.toggle("has-new", any);
+  $("dockMenu").setAttribute("aria-label", any ? "Menu: something new" : "Menu");
+}
+
 function paintDock(): void {
+  paintMenuNew();
   const d = dockProgress(), pct = Math.round(d.pct * 100);
   setText($("docklv"), d.label);
   setText($("dockpct"), pct + "%");
@@ -85,6 +93,7 @@ function paintDock(): void {
 }
 
 export function render(): void {
+  if (openModal) markSeen(openModal); // anything that turns up while you're looking at a screen is already seen
   paintTitle();
   paintDock();
   setText($("cash"), money(S.cash));

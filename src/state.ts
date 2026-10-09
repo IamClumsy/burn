@@ -8,7 +8,7 @@ export const fresh = (): GameState => ({
   favors: 0, perks: {}, allies: {}, allyCd: {}, fx: {}, junk: { tape: 0, wire: 0, bleach: 0, micro: 0 },
   cover: "con", coverCd: 0, board: [], active: [], uid: 1, story: 0, ach: [],
   stats: { clicks: 0, burns: 0, mDone: 0, mFail: 0, crafted: 0, ambush: 0, reinstated: 0, time: 0, kidMissions: 0, returned: 0, bestRun: 0, longestAway: 0, seymourFavors: 0, simonFavors: 0, barryFavors: 0, errands: 0 },
-  buyAmt: 1, mute: false, sci: false, popups: true, seymourBought: 0, simonBought: 0, barryBought: 0, nateAway: false, nateTimer: 90, nateStage: 0, fionaAway: 0, fionaWhy: "taken", auto: { clients: false, crew: false }, backupNudged: false, intel: 0, choices: {}, arcStep: {}, arcsDone: {}, grip: 100, listKnown: {}, attPeak: 0, cleanRecord: false, fixer: null, referrals: 0, favorLog: { seymour: [], simon: [], barry: [] }, episodesDone: {}, seasonOpen: 1, busy: null, boss: null, bossCd: BOSS_FIRST, bossKills: {},
+  buyAmt: 1, mute: false, sci: false, popups: true, seymourBought: 0, simonBought: 0, barryBought: 0, nateAway: false, nateTimer: 90, nateStage: 0, fionaAway: 0, fionaWhy: "taken", auto: { clients: false, crew: false }, seen: {}, backupNudged: false, intel: 0, choices: {}, arcStep: {}, arcsDone: {}, grip: 100, listKnown: {}, attPeak: 0, cleanRecord: false, fixer: null, referrals: 0, favorLog: { seymour: [], simon: [], barry: [] }, episodesDone: {}, seasonOpen: 1, busy: null, boss: null, bossCd: BOSS_FIRST, bossKills: {},
 });
 
 // Live binding: importers always see the current state object.
@@ -59,6 +59,7 @@ export function merge(saved: Partial<GameState>): GameState {
   o.junk = Object.assign(fresh().junk, saved.junk || {});
   o.favorLog = Object.assign(fresh().favorLog, saved.favorLog || {});
   o.auto = Object.assign(fresh().auto, saved.auto || {});
+  o.seen = saved.seen || {};
   // A damaged or hand-edited save can't poison the game with NaN or Infinity.
   const d = fresh() as unknown as Record<string, unknown>, r = o as unknown as Record<string, unknown>;
   for (const k of Object.keys(d)) {

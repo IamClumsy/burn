@@ -56,7 +56,9 @@
   .dockface .portrait{width:100%!important;height:100%!important;border-radius:50%;box-shadow:none}
   .dockbar{flex:1;min-width:0}
   .dockrow{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-bottom:4px}
-  .dockrow b{color:var(--text);font-weight:600}
+  .dockrow b{color:var(--text);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dockrow span{flex:none;margin-left:8px}
+  @media(max-width:430px){.dock{gap:8px;padding-left:10px;padding-right:10px}.dockface{width:50px;height:50px}.dockbtn{width:38px;height:38px;font-size:16px}.dockbtn.menu{width:44px;height:44px;font-size:20px}.dockrow{font-size:11px}}
   .dockfill{height:12px;border-radius:7px;background:#0b0610;border:1px solid var(--line);overflow:hidden}
   .dockfill i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ff8a3c);border-radius:6px}
   .dockbtn{flex:none;width:44px;height:44px;padding:0;border-radius:50%;font-size:18px;background:var(--panel);border:1px solid var(--line);line-height:1}
@@ -64,6 +66,10 @@
   .narr p{margin:0;padding:11px 2px;font-size:16px;line-height:1.6;color:var(--text);border-bottom:1px solid var(--line)}
   .narr p.now{font-size:18px;color:#fff;border-left:3px solid var(--pink);padding-left:12px;background:#ff4fa30d}
   .narr p:last-child{border-bottom:0}
+  .dockbtn.menu{position:relative}
+  .dockbtn.menu.has-new::after{content:"";position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:var(--pink);border:2px solid #150c20;box-shadow:0 0 8px var(--pink)}
+  .menugrid button{position:relative}
+  .menugrid button .newchip{position:absolute;top:6px;right:8px;font-size:10px;letter-spacing:1px;padding:1px 6px;border-radius:8px;background:var(--pink);color:#150c20;font-weight:700}
   .menugrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
   .menugrid button{padding:14px 10px;font-size:14px;letter-spacing:.5px;text-align:center}
   .modal{display:none;position:fixed;inset:0;background:#000b;z-index:25;align-items:center;justify-content:center;padding:20px}

@@ -18,7 +18,8 @@ import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missi
 import { allBeaten, checkEnding, newFixer, reduceGrip, simonTip, spawnErrand, tickOrg } from "./org";
 import { FIXERS, FIXER_MAX_MULT, FIXER_MIN_MULT, rollFixer } from "../data/org";
 import { bribeCost, bribeDrop } from "../calc";
-import { buyGen, payOffFixer, toggleAuto } from "./actions";
+import { buyGen, craft, payOffFixer, toggleAuto } from "./actions";
+import { FX_NAMES, RECIPES } from "../data/perks";
 import { GENS, OP_CAP } from "../data/ops";
 import { MEDALS } from "../data/medals";
 import { buyN, bulkCost } from "../calc";
@@ -49,6 +50,7 @@ import { MISSIONS, seasonsOpen } from "../data/missions";
 import { earn, merge } from "../state";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
+import { menuNew } from "../ui/badges";
 import { MENU, MODALS, SECTIONS, buildLayout, panelHTML, titleOf } from "../ui/panels";
 
 beforeAll(() => {
@@ -1109,6 +1111,101 @@ describe("The Narrator pop-up", () => {
     showModal("narrator");
     expect(document.getElementById("modalTitle")!.textContent).toBe("Narrator");
     showModal(null);
+  });
+});
+
+describe("Something new in the menu", () => {
+  it("a save you're already playing starts with nothing marked new", () => {
+    S.life = 1e12; S.story = 5; S.ach = ["a1", "a2"];
+    expect(menuNew()).toEqual({});
+    expect(S.seen.med).toBe(2);
+  });
+
+  it("a new medal, story beat or unlock lights up its screen, and opening it clears it", () => {
+    menuNew();                       // sets the baseline
+    S.ach = ["a1"]; S.story = 2;
+    const n = menuNew();
+    expect(n.med).toBe(1);
+    expect(n.story).toBe(2);
+    showModal("med");
+    expect(menuNew().med).toBeUndefined();
+    expect(menuNew().story).toBe(2); // the other one is still new
+    showModal(null);
+  });
+
+  it("the menu button gets a dot, and the menu entries get NEW chips", () => {
+    render();
+    expect(document.getElementById("dockMenu")!.classList.contains("has-new")).toBe(false);
+    S.ach = ["a1", "a2", "a3"];
+    render();
+    expect(document.getElementById("dockMenu")!.classList.contains("has-new")).toBe(true);
+    expect(panelHTML("options")).toMatch(/Medals<span class="newchip">NEW/);
+    showModal("med"); showModal(null); render();
+    expect(document.getElementById("dockMenu")!.classList.contains("has-new")).toBe(false);
+  });
+
+  it("Reinstate lights up once when it first becomes possible", () => {
+    S.run = 1e7; menuNew();
+    S.run = 2e8;
+    expect(menuNew().rep).toBe(1);
+    showModal("rep"); showModal(null);
+    expect(menuNew().rep).toBeUndefined();
+    S.run = 0; menuNew();            // after a reset
+    S.run = 3e8;
+    expect(menuNew().rep).toBe(1);
+  });
+});
+
+describe("Gadgets are worth making", () => {
+  const stock = () => { S.junk = { tape: 20, wire: 20, bleach: 20, micro: 20 }; };
+
+  it("the timed gadgets last minutes, not seconds", () => {
+    stock();
+    craft("jam"); craft("boost"); craft("jobs"); craft("fast"); craft("pay");
+    expect(S.fx.jam).toBeGreaterThanOrEqual(180);
+    expect(S.fx.boost).toBeGreaterThanOrEqual(120);
+    expect(S.fx.jobs).toBeGreaterThanOrEqual(120);
+    expect(S.fx.fast).toBeGreaterThanOrEqual(180);
+    expect(S.fx.pay).toBeGreaterThanOrEqual(180);
+  });
+
+  it("Signal Booster triples income, Fake IDs multiply jobs by six, and the Paper Trail doubles mission pay", () => {
+    S.gens.inf = 20;
+    const income = cps(), job = clickVal(), pay = missionReward(S.board[0]);
+    stock();
+    craft("boost"); craft("jobs"); craft("pay");
+    expect(cps()).toBeGreaterThan(income * 2.9);
+    expect(clickVal()).toBeGreaterThan(job * 5.5);
+    expect(missionReward(S.board[0])).toBeGreaterThan(pay * 1.9);
+  });
+
+  it("the Smoke Bomb also cools attention, and the Bug Sweeper takes 30 attention off", () => {
+    stock(); S.heat = 60; S.att = 50;
+    craft("smoke");
+    expect(S.heat).toBe(30);
+    expect(S.att).toBe(40);
+    craft("sweep");
+    expect(S.att).toBe(10);
+  });
+
+  it("every gadget has a name, a description and a price in junk", () => {
+    expect(RECIPES.length).toBeGreaterThanOrEqual(7);
+    for (const r of RECIPES) { expect(r.name.length).toBeGreaterThan(3); expect(r.desc.length).toBeGreaterThan(10); expect(Object.keys(r.need).length).toBeGreaterThan(0); }
+  });
+
+  it("a boss that strips boosts also strips the new ones", () => {
+    stock(); craft("pay"); craft("fast");
+    S.life = 1e13; S.boss = { id: "burke", hp: 1e15, max: 1e15, left: 60 };
+    tickBoss(0.1);
+    expect(S.fx.pay).toBe(0);
+    expect(S.fx.fast).toBe(0);
+  });
+
+  it("the timers count down and the chips show their names", () => {
+    stock(); craft("boost");
+    expect(FX_NAMES.boost).toBe("Booster ×3");
+    tick(10);
+    expect(S.fx.boost).toBeLessThan(120);
   });
 });
 

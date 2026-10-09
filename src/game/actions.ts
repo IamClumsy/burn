@@ -87,10 +87,13 @@ export function craft(id: string): void {
   const r = RECIPES.find(x => x.id === id)!;
   if (!Object.entries(r.need).every(([k, v]) => S.junk[k] >= v)) return;
   for (const [k, v] of Object.entries(r.need)) S.junk[k] -= v;
-  if (id === "smoke") S.heat = Math.max(0, S.heat - 30);
-  if (id === "jam") S.fx.jam = 45;
-  if (id === "boost") S.fx.boost = 30;
-  if (id === "jobs") S.fx.jobs = 30;
+  if (id === "smoke") { S.heat = Math.max(0, S.heat - 30); S.att = Math.max(0, S.att - 10); }
+  if (id === "sweep") S.att = Math.max(0, S.att - 30);
+  if (id === "jam") S.fx.jam = 180;
+  if (id === "boost") S.fx.boost = 120;
+  if (id === "jobs") S.fx.jobs = 120;
+  if (id === "fast") S.fx.fast = 180;
+  if (id === "pay") S.fx.pay = 180;
   S.stats.crafted++;
   chime(); say("Held together with tape and optimism. It works.");
 }
@@ -187,7 +190,7 @@ export function prestige(): void {
   const hadFiona = !!S.allies.fiona;
   const keep = {
     cred: S.cred + gain, life: S.life, favors: S.favors + gain, perks: S.perks, allies: keptAllies(), ach: S.ach,
-    stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, sci: S.sci, auto: S.auto, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
+    stats: S.stats, story: S.story, cover: S.cover, mute: S.mute, sci: S.sci, auto: S.auto, seen: S.seen, popups: S.popups, buyAmt: S.buyAmt, bossKills: S.bossKills,
     choices: S.choices, arcStep: S.arcStep, arcsDone: S.arcsDone,
     grip: S.grip, listKnown: S.listKnown, attPeak: S.attPeak, cleanRecord: S.cleanRecord,
     episodesDone: S.episodesDone, seasonOpen: S.seasonOpen, favorLog: S.favorLog, backupNudged: S.backupNudged, intel: S.intel, nateAway: S.nateAway, nateTimer: S.nateTimer, nateStage: S.nateStage,

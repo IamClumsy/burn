@@ -25,6 +25,7 @@ import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 import { AUTOS } from "../data/automation";
 import { saveStatus } from "../saveStatus";
+import { menuNew } from "./badges";
 import { narrationLines } from "./fx";
 import { EPILOGUE, EPILOGUE_CLOSE, EPILOGUE_TITLE } from "../data/epilogue";
 
@@ -304,7 +305,8 @@ function narrator(): string {
 
 /** The menu behind the hamburger button. */
 function options(): string {
-  return `<div class="menugrid">${MENU.map(id => `<button data-modal="${id}">${titleOf(id)}</button>`).join("")}</div>`;
+  const fresh = menuNew();
+  return `<div class="menugrid">${MENU.map(id => `<button data-modal="${id}">${titleOf(id)}${fresh[id] ? `<span class="newchip">NEW</span>` : ""}</button>`).join("")}</div>`;
 }
 
 /** Sound, saves and the other switches that used to live in the footer. */

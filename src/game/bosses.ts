@@ -139,7 +139,7 @@ export function tickBoss(dt: number): void {
   if (has("att")) S.att = Math.min(100, S.att + 1.2 * mult * dt);
   if (has("steal")) S.cash = Math.max(0, S.cash - S.cash * 0.008 * dt);
   if (has("heal")) b.hp = Math.min(b.max, b.hp + b.max * 0.015 * dt);
-  if (has("fx")) { S.fx.boost = 0; S.fx.jobs = 0; S.fx.jam = 0; }
+  if (has("fx")) { S.fx.boost = 0; S.fx.jobs = 0; S.fx.jam = 0; S.fx.pay = 0; S.fx.fast = 0; }
   if (has("freeze")) for (const k in S.allyCd) if (S.allyCd[k] > 0) S.allyCd[k] += dt;
   if (b.hp <= 0) winBoss();
   else if (b.left <= 0) loseBoss();

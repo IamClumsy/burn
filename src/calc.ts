@@ -56,7 +56,7 @@ export const perk = (id: string): number => S.perks[id] || 0;
 export function incomeMult(): number {
   let m = (1 + S.cred * 0.1) * (1 + 0.02 * S.ach.length) * (1 + 0.03 * Object.keys(S.bossKills).length) * cover().inc;
   for (const u of UPGS) if (S.upgs[u.id] && u.kind === "all") m *= u.m!;
-  if (S.fx.boost > 0) m *= 2;
+  if (S.fx.boost > 0) m *= 3;
   if (allyHere("nate")) m *= 1.15;
   return m * choiceMult("inc") * gripInc() * (S.cleanRecord ? 1.25 : 1) * referralMult();
 }
@@ -77,7 +77,7 @@ export function clickVal(): number {
   const m = UPGS.filter(u => S.upgs[u.id] && u.kind === "click").reduce((a, u) => a * u.m!, 1);
   let v = (1 + cps() * 0.05) * m * cover().job * (1 + 0.25 * perk("cars"));
   if (allyHere("fiona")) v *= 1.5;
-  if (S.fx.jobs > 0) v *= 4;
+  if (S.fx.jobs > 0) v *= 6;
   return v * (1 + S.cred * 0.1) * (1 + 0.02 * S.ach.length);
 }
 
@@ -178,7 +178,7 @@ export function succChance(m: Mission): number {
   return Math.min(0.97, c);
 }
 /** What the client pays in total. Michael keeps KEEP_RATE of it. */
-export const missionReward = (m: Mission): number => Math.floor(capFee((cps() * 60 + 150) * m.rm * cover().mis * choiceMult("mis") / KEEP_RATE, missionCap(m.rm) * cover().mis * choiceMult("mis")));
+export const missionReward = (m: Mission): number => Math.floor(capFee((cps() * 60 + 150) * m.rm * cover().mis * choiceMult("mis") / KEEP_RATE, missionCap(m.rm) * cover().mis * choiceMult("mis")) * (S.fx.pay > 0 ? 2 : 1));
 export const missionKeep = (m: Mission): number => missionReward(m) * KEEP_RATE;
 
 // ---- bosses

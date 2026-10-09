@@ -941,7 +941,7 @@ describe("Ghosts From the Past", () => {
 
   it("anyone the story has taken off the board turns into a ghost once their time has passed", () => {
     S.story = 0;
-    const gone: [string, number][] = [["strickler", 4], ["gilroy", 4], ["brennen", 5], ["barrett", 5], ["anson", 6], ["card", 7], ["gray", 7], ["bly", 7]];
+    const gone: [string, number][] = [["strickler", 4], ["gilroy", 4], ["brennen", 5], ["barrett", 5], ["anson", 7], ["card", 7], ["gray", 7], ["bly", 7]];
     const seasonStart = [0, 0, 1e5, 2e6, 3e7, 5e8, 8e9, 1e11];
     for (const [id, season] of gone) {
       S.life = seasonStart[season - 1] + 1;
@@ -954,6 +954,11 @@ describe("Ghosts From the Past", () => {
   it("only characters who die in the show can be ghosts (checked against the Burn Notice wiki)", () => {
     const dies = ["bly", "carla", "cowan", "strickler", "gilroy", "brennen", "barrett", "anson", "card", "gray"].sort();
     expect(BOSSES.filter(b => b.ghost).map(b => b.id).sort()).toEqual(dies);
+  });
+
+  it("a ghost starts the Season AFTER the one where they die in the show", () => {
+    const diesIn: Record<string, number> = { carla: 2, strickler: 3, gilroy: 3, barrett: 4, brennen: 4, anson: 6, gray: 6, card: 6, bly: 6 };
+    for (const [id, season] of Object.entries(diesIn)) expect(boss(id).ghost!.from.season, id).toBe(season + 1);
   });
 
   it("people who are still around are never ghosts", () => {

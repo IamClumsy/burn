@@ -53,7 +53,7 @@ export const BOSSES: Boss[] = [
    intro:"John Barrett brings an army to a negotiation. He wants Simon's Bible, and he doesn't plan to leave empty-handed.",
    file:"John Barrett ran Drake Technologies, a telecom giant with government contracts, and was Simon's unofficial partner in a plan to take down the Organization. He wanted Simon's Bible, brought an army to a harbor to get it, and was interrupted by the very people he wanted to destroy."},
   {id:"anson",  n:"Anson Fullerton", title:"The original founder of the Organization, hiding in plain sight as a psychiatrist", at:3e9, hpm:4.2, m:["att"],
-   ghost:{from:{season:6}, legacy:"Anson Fullerton's contingencies are still unfolding. For every plan he made there was a plan behind it, and one behind that."},
+   ghost:{from:{season:7}, legacy:"Anson Fullerton's contingencies are still unfolding. For every plan he made there was a plan behind it, and one behind that."},
    mech:"Surveillance: the Organization's attention climbs fast.",
    intro:"Anson Fullerton sits in your loft like a guest. He's already framed Fiona. Now he wants a favor.",
    file:"Anson Fullerton was the founder of the Organization, passing himself off as a psychiatrist and a hostage. He framed Fiona, forced Michael to work for him, and had Michael's father killed for being curious. He was shot at an airport by a sniper."},

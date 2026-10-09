@@ -64,7 +64,8 @@ export function winBoss(): void {
   toast(b.n + " outmaneuvered", `+${money(reward)}, +${fav} favors${first ? " · first win: +3% income forever" : ""}`, "good");
   if (b.m.includes("snatch")) {
     S.favors += 2;
-    toast("Fiona's free", "She's furious, grateful, and has a few things to say to him first. +2 favors.", "good");
+    if (S.allies.fiona) { S.fionaAway = 600; S.fionaWhy = "taken"; } // winning doesn't undo it: she needs ten minutes
+    toast("Fiona's safe", `She's furious, grateful, and has a few things to say to him first.${S.allies.fiona ? " Being taken stays with a person, though: she needs ten minutes alone." : ""} +2 favors.`, "good");
     say("Fiona walks out on her own two feet and takes a moment with Thomas O'Neill. Then she asks what took so long.");
   } else say(b.win ?? b.n + " walks away with nothing, which is the best outcome you can ask for.");
 }

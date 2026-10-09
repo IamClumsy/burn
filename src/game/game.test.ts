@@ -2974,13 +2974,23 @@ describe("game loop (headless)", () => {
       expect(allyHere("fiona")).toBe(true);
     });
 
-    it("beating him frees her right away and pays two bonus favors", () => {
-      S.life = 1e13; S.allies.fiona = true; S.favors = 0;
+    it("beating him gets her back and pays two bonus favors, but she still needs ten minutes: it's traumatic", () => {
+      S.life = 1e13; S.allies.fiona = true; S.favors = 0; S.fionaAway = 0;
       S.boss = { id: "oneill", hp: 0, max: 1e6, left: 75 };
       tickBoss(1);
       expect(S.boss).toBeNull();
-      expect(S.fionaAway).toBe(0);
+      expect(S.fionaAway).toBe(600);
+      expect(allyHere("fiona")).toBe(false);
+      expect(S.favors).toBeGreaterThanOrEqual(2);
+      S.fionaAway = 0;
       expect(allyHere("fiona")).toBe(true);
+    });
+
+    it("if Fiona isn't hired, winning gives the favors and there is nobody to send away", () => {
+      S.life = 1e13; S.allies = {}; S.favors = 0; S.fionaAway = 0;
+      S.boss = { id: "oneill", hp: 0, max: 1e6, left: 75 };
+      tickBoss(1);
+      expect(S.fionaAway).toBe(0);
       expect(S.favors).toBeGreaterThanOrEqual(2);
     });
   });

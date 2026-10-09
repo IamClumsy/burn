@@ -30,7 +30,7 @@ export const BOSSES: Boss[] = [
    intro:"Tom Strickler offers his services. It's a good price. It's always a good price, until the bill comes.",
    file:"Tom Strickler called himself an agent for spies, selling contacts for money and favors. Michael went to him to find a way back to the CIA, then learned Strickler had helped a terrorist track down Fiona. Michael shot him."},
   {id:"oneill", n:"Thomas O'Neill", title:"An Irish terrorist with a grudge, who snatches Fiona and plans to take her back to Ireland", at:1e7, hpm:2.4, m:["snatch","heat","rush"],
-   mech:"Kidnapper: he grabs Fiona. If she's on your crew, her perks and abilities are gone while he has her. He makes noise either way (heat climbs, the clock runs 50% faster). Lose, and she stays away for 10 minutes.",
+   mech:"Kidnapper: he grabs Fiona. If she's on your crew, her perks and abilities are gone while he has her. He makes noise either way (heat climbs, the clock runs 50% faster). Win or lose, being taken stays with her: she is gone for 10 minutes afterward.",
    intro:"Thomas O'Neill has Fiona. He's come a long way, and he's brought a long memory. Make it quick.",
    file:"Thomas O'Neill is an Irish terrorist from Dublin with a long-held grudge against Fiona. He was sent to capture her and carry her back to Ireland, and he nearly managed it. He is dark-haired, stubbled and usually in sunglasses, and nobody has ever described him as easygoing. Fiona has her own opinion about how it went."},
   {id:"brennen",n:"Tyler Brennen", title:"A rogue ex-CIA officer turned arms dealer, and he's good at hostages", at:1.5e7, hpm:2.6, m:["weak"],

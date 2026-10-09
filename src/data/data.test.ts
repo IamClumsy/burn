@@ -194,7 +194,7 @@ describe("data integrity", () => {
   it("the crew is listed in order of cost", () => {
     const costs = ALLIES.map(a => a.cost);
     expect(costs).toEqual([...costs].sort((a, b) => a - b));
-    expect(ALLIES.map(a => a.id)).toEqual(["sam", "fiona", "barry", "madeline", "nate", "jesse"]);
+    expect(ALLIES.map(a => a.id)).toEqual(["sam", "fiona", "barry", "nate", "madeline", "jesse"]);
   });
 
   it("no ally appears in an episode before they joined the show", () => {

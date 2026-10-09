@@ -1374,7 +1374,7 @@ describe("Crew pop-up order", () => {
     S.life = 1e12;
     const html = panelHTML("crew");
     const at = (name: string) => html.indexOf(name);
-    const order = ["Seymour Talbot", "Victor Stecker-Epps", "Barry Burkowski</b>", "Hire Sam Axe", "Hire Fiona Glenanne", "Hire Barry Burkowski", "Hire Madeline Westen", "Hire Nate Westen", "Hire Jesse Porter"].map(at);
+    const order = ["Seymour Talbot", "Victor Stecker-Epps", "Barry Burkowski</b>", "Hire Sam Axe", "Hire Fiona Glenanne", "Hire Barry Burkowski", "Hire Nate Westen", "Hire Madeline Westen", "Hire Jesse Porter"].map(at);
     expect(order.every(i => i >= 0)).toBe(true);
     expect(order).toEqual([...order].sort((a, b) => a - b));
   });

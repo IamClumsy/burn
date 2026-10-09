@@ -21,7 +21,7 @@ import { FAQ } from "../data/faq";
 import { portrait, portraitScope } from "./portrait";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
-import { arcAvailable, arcStep } from "../game/arcs";
+import { arcAvailable, arcStep, stepDur } from "../game/arcs";
 import { FLASHBACK_BOSSES, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
@@ -152,7 +152,7 @@ function missions(): string {
       const k = arcStep(a), st = a.steps[k];
       return `<div class="box"><b>${a.title}</b> <span class="chip">Step ${k + 1} of ${a.steps.length}</span>
         <div class="small">${a.blurb}</div>
-        <div class="small" style="color:var(--text)">Next: ${st.n} · ${st.dur}s · +${st.heat} heat${S.allies[a.ally] ? "" : ""}</div>
+        <div class="small" style="color:var(--text)">Next: ${st.n} · ${stepDur(a, st.dur)}s · +${st.heat} heat${S.allies[a.ally] ? "" : ""}</div>
         <div class="btns"><button data-act="arc" data-arg="${a.id}" ${S.active.length >= 3 ? "disabled" : ""}>Start this step</button>${a.id === SAM_ARC_ID && k === 0 && !S.samChoices.bowling ? `<span class="small" style="display:inline-flex;align-items:center;gap:6px">${portrait("michaelpre", 28)}<button data-act="bowling">Remember Mike at the bowling alley</button></span>` : ""}</div></div>`;
     }).join("");
   }

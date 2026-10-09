@@ -11,6 +11,9 @@ import { choiceBusy, showChoice } from "../ui/choice";
 import { startFlashbackBoss } from "./bosses";
 const say = (t: string): void => sayTag(t, "mission");
 
+/** How long a step takes. Sam's story runs at double speed: everything else is paused while he tells it. */
+export const stepDur = (a: Arc, dur: number): number => a.id === SAM_ARC_ID ? Math.round(dur / 2) : dur;
+
 export const arcStep = (a: Arc): number => S.arcStep[a.id] || 0;
 
 export const arcAvailable = (a: Arc): boolean =>
@@ -68,11 +71,11 @@ function launchStep(a: Arc, step: number): void {
     return;
   }
   const base: Mission = {
-    uid: S.uid++, n: `${a.title}: ${st.n}`, dur: st.dur, succ: st.succ, heat: st.heat, rm: st.rm, fav: 1,
+    uid: S.uid++, n: `${a.title}: ${st.n}`, dur: stepDur(a, st.dur), succ: st.succ, heat: st.heat, rm: st.rm, fav: 1,
     ally: a.ally, kid: false, send: allyFree(a.ally), arc: { id: a.id, step },
   };
   const sent = base.send ? a.ally : null;
-  S.active.push({ ...base, sent, left: st.dur, chance: succChance(base), reward: missionReward(base) });
+  S.active.push({ ...base, sent, left: base.dur, chance: succChance(base), reward: missionReward(base) });
   beep(400, 0.08, "triangle", 0.05);
 }
 

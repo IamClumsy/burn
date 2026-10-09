@@ -11,7 +11,7 @@ import { portrait, portraitScope } from "../ui/portrait";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { tabTitle } from "../ui/render";
 import { buyFavorFrom, buyReferral, buyUpg, hireAlly, prestige, useAbility } from "./actions";
-import { arcAvailable, askSamForStory, rememberBowling, startArc } from "./arcs";
+import { arcAvailable, askSamForStory, rememberBowling, startArc, stepDur } from "./arcs";
 import { ARCS } from "../data/arcs";
 import { STORY } from "../data/story";
 import { attTier, choiceMult, choiceSucc, gripFixer, heatMult, incomeMult, missionReward } from "../calc";
@@ -1760,6 +1760,16 @@ describe("The Fall of Sam Axe", () => {
     S.active = []; dismissAllNotices();
     startArc("samfall");                              // retrying the step doesn't repeat the pop-up
     expect(S.active.length).toBe(1);
+  });
+
+  it("Sam's steps run at double speed, since everything else is paused", () => {
+    S.life = 5e8; S.samOffered = true; S.allies.sam = false; dismissAllNotices();
+    S.arcStep[SAM_ARC_ID] = 1; S.samChoices["beat1"] = 1;
+    expect(panelHTML("mis")).toContain(`${stepDur(SAM_ARC, SAM_ARC.steps[1].dur)}s`);
+    startArc("samfall");
+    expect(S.active[0].dur).toBe(Math.round(SAM_ARC.steps[1].dur / 2));
+    expect(S.active[0].left).toBe(S.active[0].dur);
+    S.active = []; S.arcStep[SAM_ARC_ID] = 0;
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

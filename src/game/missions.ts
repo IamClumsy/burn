@@ -1,5 +1,5 @@
 import { S, payClient } from "../state";
-import { allyFree, awayWhy, finaleEp, finaleHeldBack, heatMult, inFlashback, openSeasons, slotOpen, waitingOn, wouldBeHelped, missionReward, succChance } from "../calc";
+import { allyFree, awayWhy, finaleHeldBack, heatMult, inFlashback, openSeasons, slotOpen, waitingOn, wouldBeHelped, missionReward, succChance } from "../calc";
 import { MISSIONS, episodeOf, missionUnlocked, seasonOf } from "../data/missions";
 import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
@@ -23,13 +23,17 @@ export function missionWeight(t: { ep?: string }): number {
   return (unseen ? 4 : 1) * (current ? 3 : 1) * (holdingBack ? 3 : 1);
 }
 
-/** Depth Perception (Beatriz) is the Season 5 finale of sorts: it holds back until every other Season 5 case is done. */
-export const GATED_EP = "516";
-export const gatedEpReady = (): boolean => MISSIONS.every(t => !t.ep || seasonOf(t.ep) !== 5 || t.ep === GATED_EP || t.ep === finaleEp(5) || !!S.episodesDone[t.ep]); // the finale waits on this one too
+/**
+ * The end of Season 5 is a chain: Depth Perception (516, where Beatriz turns up) waits until every earlier Season 5 case is done,
+ * then Acceptable Loss (517) waits on 516, and the finale, Fail Safe (518), waits on 517.
+ */
+export const STORY_CHAIN = ["516", "517", "518"];
+export const heldByStory = (ep: string): boolean =>
+  STORY_CHAIN.includes(ep) && MISSIONS.some(t => t.ep && seasonOf(t.ep) === 5 && +t.ep < +ep && !S.episodesDone[t.ep]);
 
 /** Every case that could be on the board right now: open Seasons only, and nothing held back as a finale or cliffhanger. */
 export const eligibleMissions = () =>
-  MISSIONS.filter(t => missionUnlocked(t, S.life) && (!t.ep || seasonOf(t.ep) <= openSeasons()) && (t.ep !== GATED_EP || gatedEpReady()) && (!t.ep || !finaleHeldBack(t.ep)));
+  MISSIONS.filter(t => missionUnlocked(t, S.life) && (!t.ep || seasonOf(t.ep) <= openSeasons()) && (!t.ep || (!heldByStory(t.ep) && !finaleHeldBack(t.ep))));
 
 export function newMission(): Mission {
   // Only seasons you've unlocked, and nothing that's already on the board or running.

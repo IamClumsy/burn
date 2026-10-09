@@ -39,7 +39,7 @@ import { FEE_CAP } from "../state";
 import { formatWait } from "../util";
 import { tickBusy } from "./tick";
 import { grossLife, inFlashback, samSharp } from "../calc";
-import { eligibleMissions, fillBoard, gatedEpReady, missionWeight, newMission, resolveMission, startMission } from "./missions";
+import { eligibleMissions, fillBoard, heldByStory, missionWeight, newMission, resolveMission, startMission } from "./missions";
 import { actionBlock, bossAction, bossWeight, loseBoss, spawnBoss, tickBoss, winBoss } from "./bosses";
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
 import { spawnClient, spawnEvent } from "./events";
@@ -1677,12 +1677,16 @@ describe("The Fall of Sam Axe", () => {
     expect(noticeOpen()).toBe(false);                   // only once
   });
 
-  it("Depth Perception stays off the board until every other Season 5 case is done", () => {
+  it("the end of Season 5 is a chain: 516 waits on 501-515, 517 on 516, and 518 on 517", () => {
     S.life = 5e8; S.episodesDone = {};
-    expect(gatedEpReady()).toBe(false);
-    for (let i = 0; i < 200; i++) { S.board = []; S.active = []; fillBoard(); expect(S.board.some(m => m.ep === "516")).toBe(false); }
-    for (const t of MISSIONS) if (t.ep && seasonOf(t.ep) === 5 && t.ep !== "516") S.episodesDone[t.ep] = true;
-    expect(gatedEpReady()).toBe(true);
+    expect([heldByStory("516"), heldByStory("517"), heldByStory("518")]).toEqual([true, true, true]);
+    for (let i = 0; i < 200; i++) { S.board = []; S.active = []; fillBoard(); expect(S.board.some(m => ["516", "517", "518"].includes(m.ep!))).toBe(false); }
+    for (const t of MISSIONS) if (t.ep && seasonOf(t.ep) === 5 && +t.ep < 516) S.episodesDone[t.ep] = true;
+    expect([heldByStory("516"), heldByStory("517"), heldByStory("518")]).toEqual([false, true, true]);   // 516 is free, the rest still wait
+    S.episodesDone["516"] = true;
+    expect([heldByStory("517"), heldByStory("518")]).toEqual([false, true]);
+    S.episodesDone["517"] = true;
+    expect(heldByStory("518")).toBe(false);
   });
 
   it("the game wears a flashback look, and the act pop-ups an inquiry look, while the case is on", () => {

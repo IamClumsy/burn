@@ -1847,6 +1847,19 @@ describe("The Fall of Sam Axe", () => {
     expect(bulkCost(g, n + 1)).toBeGreaterThan(5e11);
   });
 
+  it("the between-act cards are answers with small effects that count", () => {
+    S.life = 5e8; S.allies.sam = true; dismissAllNotices(); S.samChoices = {};
+    const base = choiceSucc();
+    S.arcStep[SAM_ARC_ID] = 2; S.samChoices[0] = 0;
+    startArc("samfall");
+    expect(document.querySelectorAll("#evtO button").length).toBe(2);   // a real choice, like the acts
+    answer(0);                                                          // "The plan did, mostly": +2% success
+    expect(S.samChoices["beat2"]).toBe(1);
+    expect(choiceSucc() - base).toBeCloseTo(0.02);
+    expect(panelHTML("fosa")).toContain("And in between");
+    S.active = []; S.arcStep[SAM_ARC_ID] = 0; S.samChoices = {};
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

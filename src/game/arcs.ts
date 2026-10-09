@@ -59,7 +59,10 @@ export function startArc(id: string): void {
   if (id === SAM_ARC_ID && SAM_BEATS[step] && !S.samChoices["beat" + step]) {
     if (choiceBusy()) return;
     const beat = SAM_BEATS[step];
-    showChoice(`The Fall of Sam Axe · ${beat.title}`, beat.inquiry, [[beat.go, () => { S.samChoices["beat" + step] = 1; return "Sam carries on."; }]], () => launchStep(a, step), { inquiry: true });
+    showChoice(`The Fall of Sam Axe · ${beat.title}`, `${beat.inquiry} ${beat.prompt}`, beat.options.map((o, k): [string, () => string] => [o.label, () => {
+      S.samChoices["beat" + step] = k + 1; // 0 would read as "not told yet"
+      return o.result;
+    }]), () => launchStep(a, step), { inquiry: true });
     return;
   }
   launchStep(a, step);

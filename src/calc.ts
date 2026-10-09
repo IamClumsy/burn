@@ -3,7 +3,7 @@ import { GENS, OP_CAP } from "./data/ops";
 import { UPGS } from "./data/upgrades";
 import { COVERS } from "./data/covers";
 import { BOSSES } from "./data/bosses";
-import { BOWLING, FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC_ID } from "./data/samAxe";
+import { BOWLING, FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC_ID, SAM_BEATS } from "./data/samAxe";
 import { STORY } from "./data/story";
 import { seasonsOpen } from "./data/missions";
 import { DAY_MS, FAVORS_PER_DAY } from "./data/pacing";
@@ -22,6 +22,10 @@ function chosenFx(): ChoiceFx[] {
     const k = S.samChoices[i];
     if (k !== undefined && a.options[k]) out.push(a.options[k].fx);
   });
+  for (const [step, beat] of Object.entries(SAM_BEATS)) { // and the smaller answers between the acts
+    const k = S.samChoices["beat" + step];
+    if (k && beat.options[k - 1]) out.push(beat.options[k - 1].fx);
+  }
   return out;
 }
 export const choiceMult = (key: "inc" | "heat" | "att" | "mis"): number =>

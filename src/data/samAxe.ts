@@ -62,22 +62,34 @@ export const SAM_BRIDGE = {
   go: "Hold the road",
 };
 
-/** The steps between acts: the Admiral cuts in, Sam carries on. No choice to make, just the story. */
-export const SAM_BEATS: Record<number, { title: string; inquiry: string; go: string }> = {
+/** The steps between acts: the Admiral cuts in, and Sam answers. Smaller choices than the acts, with smaller effects. */
+export const SAM_BEATS: Record<number, { title: string; inquiry: string; prompt: string; options: { label: string; result: string; fx: ChoiceFx }[] }> = {
   1: {
     title: "Act One, Continued: The Clinic",
-    inquiry: "The Admiral says the report mentions a clinic in a small town with a good deal of fear and very little help. He asks what Sam thought he could do about it.",
-    go: "\"Warn them,\" Sam says. \"Politely.\"",
+    inquiry: "The Admiral says the report mentions a clinic in a small town with a good deal of fear and very little help.",
+    prompt: "He asks what Sam thought he could do about it. How did Sam get the word out?",
+    options: [
+      { label: "Door to door, politely", result: "The Admiral notes that Sam is, if nothing else, polite. A little goodwill follows you around.", fx: { att: -0.05 } },
+      { label: "With a megaphone", result: "Everyone in the district heard it, including a few people who'll pay for the information later.", fx: { inc: 0.02 } },
+    ],
   },
   2: {
     title: "Act One, Continued: The Clinic Again",
-    inquiry: "The Admiral puts down his pen. Nobody would leave the clinic, he says, so how did Sam make sure the patients were safe?",
-    go: "\"A bomb, Admiral. I said it was a long story.\"",
+    inquiry: "The Admiral puts down his pen. Nobody would leave the clinic, he says.",
+    prompt: "So how did Sam make sure the patients were safe? Who gets the credit?",
+    options: [
+      { label: "The plan did, mostly", result: "Sam says he never doubted it. The Admiral doubts it enough for both of them, then writes \"successful\" anyway.", fx: { succ: 0.02 } },
+      { label: "The clinic's own staff", result: "The nurses get a mention, and the Admiral looks up for the first time. A good word travels.", fx: { mis: 0.05 } },
+    ],
   },
   4: {
     title: "Act Two, Continued: The Satellite Phone",
     inquiry: "The Admiral says there is a note in the file about a stolen satellite phone, and he would very much like Sam to account for it.",
-    go: "\"Borrowed,\" says Sam. \"With intent to return.\"",
+    prompt: "How does Sam say he came by it?",
+    options: [
+      { label: "He asked nicely first", result: "He did not, but he says he did, and the Admiral lets it go. Fewer people are looking at you.", fx: { heat: -0.03 } },
+      { label: "He stole it, and he's sorry", result: "\"Sorry\" is a strong word. The Admiral writes down \"regrets\", then underlines \"phone\".", fx: { inc: 0.02 } },
+    ],
   },
 };
 

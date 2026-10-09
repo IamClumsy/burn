@@ -22,7 +22,7 @@ import { portrait, portraitScope } from "./portrait";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep, stepDur } from "../game/arcs";
-import { FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC, SAM_ARC_ID } from "../data/samAxe";
+import { FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC, SAM_BEATS, SAM_ARC_ID } from "../data/samAxe";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 import { AUTOS, autoCut } from "../data/automation";
@@ -401,11 +401,15 @@ function fosa(): string {
     const k = S.samChoices[i], o = k !== undefined ? act.options[k] : null;
     return `<div class="box"><b>${act.title}</b>${o ? `<div class="small" style="color:var(--gold)">You told it: ${o.label}</div><div class="small" style="color:var(--text)">${o.result}</div>` : `<div class="small">Not yet answered this time.</div>`}</div>`;
   }).join("");
+  const asides = Object.entries(SAM_BEATS).map(([step, beat]) => {
+    const k = S.samChoices["beat" + step], o = k ? beat.options[k - 1] : null;
+    return o ? `<div class="small" style="margin-top:4px"><b>${beat.title.replace(/^.*?: /, "")}:</b> ${o.label}. <span style="color:var(--dim)">${o.result}</span></div>` : "";
+  }).join("");
   const again = S.samReplay
     ? `<div class="small" style="margin-top:8px">Sam is telling it again. Look for it under Open Cases.</div>`
     : `<div class="btns"><button data-act="replay" ${S.boss || S.active.length ? "disabled" : ""}>Hear it again</button></div>
        <div class="small" style="margin-top:6px">${S.boss || S.active.length ? "Finish what's running first. " : ""}Everything else waits while Sam tells it, and your answers can change. The favors, the medal and the cover were yours the first time.</div>`;
-  return `<div class="small" style="margin-bottom:8px">${a.epilogue}</div><h2>How you told it</h2>${told}${again}`;
+  return `<div class="small" style="margin-bottom:8px">${a.epilogue}</div><h2>How you told it</h2>${told}${asides ? `<div class="box"><b>And in between</b>${asides}</div>` : ""}${again}`;
 }
 
 /** Sound, saves and the other switches that used to live in the footer. */

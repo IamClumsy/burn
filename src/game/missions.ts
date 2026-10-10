@@ -1,4 +1,4 @@
-import { S, payClient } from "../state";
+import { KEEP_RATE, S, payClient } from "../state";
 import { allyFree, awayWhy, finaleHeldBack, heatMult, inFlashback, openSeasons, slotOpen, waitingOn, wouldBeHelped, missionReward, succChance } from "../calc";
 import { MISSIONS, episodeOf, missionUnlocked, seasonOf } from "../data/missions";
 import { LINES } from "../data/text";
@@ -104,7 +104,7 @@ export function resolveMission(m: ActiveMission): void {
     if (won) say(won, "mission", meta);
     if (note) say("Spy tip: " + note.tip, "mission", meta);
     if (Math.random() < 0.4) say(pick(LINES.returned), "mission", meta);
-    toast("Mission complete: " + m.n, `Paid ${money(paid)}${cut ? ` after your crew's ${Math.round(cut * 100)}% cut` : ""}. Expenses covered, the rest went back to the people who needed it. +${m.fav} favor`, "good");
+    toast("Mission complete: " + m.n, `Paid ${money(paid)}${cut ? ` after your crew's ${Math.round(cut * 100)}% cut` : ""}. You kept ${money(paid * KEEP_RATE)}, and the rest went back to the people who needed it. +${m.fav} favor`, "good");
     chime();
   } else {
     S.heat += m.heat * 1.5 * heatMult(); S.stats.mFail++;

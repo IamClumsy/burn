@@ -3,6 +3,7 @@ import { S, earn } from "./state";
 import { clickVal, heatMult } from "./calc";
 import { pick, money, setScientific } from "./util";
 import { QUOTES } from "./data/text";
+import { RECIPES } from "./data/perks";
 import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
 import { render, showModal } from "./ui/render";
@@ -26,10 +27,16 @@ import * as A from "./game/actions";
 const ACT: Record<string, (arg: string) => void> = {
   amt: a => { S.buyAmt = a === "max" ? "max" : (+a as 1 | 10 | 100); },
   gen: A.buyGen, upg: A.buyUpg, referral: () => A.buyReferral(), hire: A.hireAlly, ability: A.useAbility,
-  cover: A.setCover, auto: A.toggleAuto, callnate: () => A.callNate(), perk: A.buyPerk, contact: a => A.buyFavorFrom(a), hangout: () => A.buyFavorFrom("seymour", "hangout"), craft: A.craft,
+  cover: A.setCover, auto: A.toggleAuto, callnate: () => A.callNate(), perk: A.buyPerk, contact: a => A.buyFavorFrom(a), hangout: () => A.buyFavorFrom("seymour", "hangout"), craft: a => { // a double-tap builds one, not two, and you see it land
+    const t = Date.now(); if (t - lastCraft < 500) return; lastCraft = t;
+    if (A.craft(a)) floatText("Built ✓ " + (RECIPES.find(r => r.id === a)?.name ?? ""), lastTap.x - 40, lastTap.y - 24);
+  },
   start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
   setting: a => setting(a), bowling: () => rememberBowling(), replay: () => { replaySamStory(); showModal(null); },
 };
+
+let lastCraft = 0;
+let lastTap = { x: 200, y: 200 };
 
 /** The switches in Settings: sound, pop-ups, number style, and saves. */
 function setting(what: string): void {
@@ -46,6 +53,7 @@ function setting(what: string): void {
   }
 }
 const onAct = (e: MouseEvent) => {
+  lastTap = { x: e.clientX, y: e.clientY };
   const t = (e.target as HTMLElement).closest<HTMLElement>("[data-act]");
   if (!t || t.classList.contains("no") || (t as HTMLButtonElement).disabled) return;
   e.preventDefault();

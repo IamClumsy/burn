@@ -100,12 +100,13 @@ export function buyPerk(id: string): void {
   beep(700, 0.1, "triangle", 0.05);
 }
 
-export function craft(id: string): void {
+/** Build a gadget. Returns whether it was built (not enough parts, cash, or one already running: false). */
+export function craft(id: string): boolean {
   const r = RECIPES.find(x => x.id === id)!;
-  if (!Object.entries(r.need).every(([k, v]) => S.junk[k] >= v)) return;
+  if (!Object.entries(r.need).every(([k, v]) => S.junk[k] >= v)) return false;
   const cash = recipeCash(r);
-  if (S.cash < cash) return;
-  if (id === "sub" && S.fx.sub > 0) return; // one at a time
+  if (S.cash < cash) return false;
+  if (id === "sub" && S.fx.sub > 0) return false; // one at a time
   S.cash -= cash;
   for (const [k, v] of Object.entries(r.need)) S.junk[k] -= v;
   if (id === "smoke") { S.heat = Math.max(0, S.heat - 30); S.att = Math.max(0, S.att - 10); }
@@ -118,6 +119,7 @@ export function craft(id: string): void {
   if (id === "sub") { S.fx.sub = 21600; say("The sub slips under the harbor. Nobody is looking for a man who isn't anywhere. Six hours of quiet."); }
   S.stats.crafted++;
   chime(); say("Held together with tape and optimism. It works.");
+  return true;
 }
 
 const SEYMOUR_LINES = [

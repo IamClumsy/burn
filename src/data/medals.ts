@@ -32,7 +32,7 @@ export const MEDALS: Medal[] = [
   {id:"a23",n:"A Real Hero",     d:"Return $1B to the people you help",   t:s=>s.stats.returned>=1e9},
   {id:"a24",n:"A Necessary Evil", d:"Buy 10 favors from your contacts: Seymour, your intel man, and Barry", t:s=>s.stats.seymourFavors+s.stats.simonFavors+s.stats.barryFavors>=10},
   {id:"a25",n:"Open and Shut",    d:"Close a multi-step case", t:s=>Object.keys(s.arcsDone).length>=1},
-  {id:"a26",n:"Full Docket",      d:"Close every case", t:s=>ARCS.every(a=>s.arcsDone[a.id])},
+  {id:"a26",n:"Full Docket",      d:"Close every Open Case (the six multi-step cases, not every episode)", t:s=>ARCS.every(a=>s.arcsDone[a.id])},
   {id:"a27",n:"Slipping Away",    d:"Wear the Organization's grip down to 50%", t:s=>s.grip<=50},
   {id:"a28",n:"Clean Record",     d:"Complete the List and lift the burn", t:s=>s.cleanRecord},
   {id:"a29",n:"Handled",          d:"Take on 5 errands for a handler", t:s=>s.stats.errands>=5},

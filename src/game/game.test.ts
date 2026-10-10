@@ -2162,6 +2162,40 @@ describe("The Fall of Sam Axe", () => {
     }
   });
 
+  it("a 100K job counts in full in Lifetime earnings, with Michael's take at 10K (and the numbers show it)", () => {
+    S.life = 0; S.stats.returned = 0; S.cash = 0; S.board = []; S.active = []; S.auto.crew = false; fillBoard();
+    const m = S.board[0]; startMission(m.uid);
+    const a = S.active[0]; a.chance = 1; a.reward = 100000; a.sent = null; a.auto = false;
+    resolveMission(a);
+    expect(S.life).toBeCloseTo(10000);                 // Michael's take
+    expect(S.stats.returned).toBeCloseTo(90000);
+    expect(grossLife()).toBeCloseTo(100000);           // the true job payment
+    const html = panelHTML("file");
+    expect(html).toContain("$100K");                   // Lifetime earnings
+    expect(html).toContain("$10.0K");                  // Michael's take
+    dismissAllNotices();
+  });
+
+  it("building a gadget spends parts, and reports back whether it was built", () => {
+    S.cash = 1e6; S.junk = { bleach: 3, tape: 3, wire: 3, micro: 3 } as any; S.stats.crafted = 0; dismissAllNotices();
+    expect(craft("smoke")).toBe(true);                 // and it says it was built
+    expect(S.junk.bleach).toBe(2);                     // gadgets cost parts, not cash
+    expect(S.junk.tape).toBe(2);
+    S.junk = {} as any;
+    expect(craft("sweep")).toBe(false);                // not enough parts: nothing happens
+    expect(S.stats.crafted).toBe(1);
+    dismissAllNotices();
+  });
+
+  it("the Full Docket medal is for the six Open Cases, and says so", () => {
+    const med = MEDALS.find(m => m.n === "Full Docket")!;
+    expect(med.d).toMatch(/Open Case/);
+    S.arcsDone = {}; expect(med.t(S)).toBe(false);
+    for (const a of ARCS) S.arcsDone[a.id] = true;
+    expect(med.t(S)).toBe(true);
+    expect(ARCS.length).toBe(6);
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

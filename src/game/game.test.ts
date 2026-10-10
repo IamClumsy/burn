@@ -44,7 +44,6 @@ import { actionBlock, bossAction, bossWeight, loseBoss, spawnBoss, tickBoss, win
 import { awayWhy, bossDef, bossView, clickVal, tierDef } from "../calc";
 import { spawnClient, spawnEvent } from "./events";
 import { seasonOf } from "../data/missions";
-import { EP_NOTES } from "../data/episodeNotes";
 import { actionDmg, conChance, cps, genMult, referralCost, referralMult, upgradeUnlocked } from "../calc";
 import { checkBurn } from "./heat";
 import { BOSSES } from "../data/bosses";
@@ -55,6 +54,7 @@ import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from ".
 import { earn, merge } from "../state";
 import { loadGame, readSave, save } from "../persist";
 import { finaleEp, openSeasons, seasonLeft, waitingOn } from "../calc";
+import { EP_NOTES } from "../data/episodeNotes";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
 import { menuNew } from "../ui/badges";
@@ -2108,6 +2108,58 @@ describe("The Fall of Sam Axe", () => {
     expect(css).toMatch(/prefers-reduced-motion:reduce/);                           // motion switches off for anyone who asks
     const sheet = css.slice(css.indexOf("@media (max-width:520px){\n    .modal,#evt"));
     expect(sheet).not.toMatch(/\bfilter\s*:|mix-blend-mode|backdrop-filter/);         // those made clicks slow before
+  });
+
+  it("in a new game, Sam's story runs each step once, each card fires, and Season 6 stays locked until Season 5 is done", () => {
+    S.seasonGate = true; S.seasonOpen = 1; S.life = 1e13; S.allies.sam = true; S.episodesDone = {}; S.samOffered = true; dismissAllNotices();
+    for (const m of MISSIONS) if (+m.ep! < 516) S.episodesDone[m.ep!] = true;
+    S.episodesDone["516"] = true; S.seasonOpen = 5;                       // 517 and 518 are still to come
+    expect(openSeasons()).toBe(5);
+    const cards: string[] = [], steps: number[] = [];
+    for (let guard = 0; guard < 40 && !S.arcsDone.samfall; guard++) {
+      dismissAllNotices();
+      const before = S.arcStep.samfall ?? 0;
+      startArc("samfall");
+      while (document.getElementById("evt")!.style.display === "flex") { cards.push(document.getElementById("evtT")!.textContent!); document.querySelectorAll<HTMLButtonElement>("#evtO button")[0].click(); dismissAllNotices(); }
+      if (S.boss) { winBoss(); steps.push(before); continue; }
+      const a = S.active.find(x => x.arc?.id === "samfall")!;
+      a.chance = 1; resolveMission(a); steps.push(before);
+      expect(S.arcStep.samfall).toBe(before + 1);                         // each step moves exactly one forward
+      expect(openSeasons()).toBe(5);                                      // finishing steps never opens Season 6
+    }
+    expect(steps).toEqual([0, 1, 2, 3, 4, 5, 6]);                         // no step is repeated or skipped
+    expect(cards.filter(c => /Satellite Phone/.test(c)).length).toBe(1);  // step five's card fires, once
+    expect(cards.length).toBe(8);                                         // four acts, three in-betweens and the road scene
+    expect(S.arcsDone.samfall).toBe(true);
+    expect(openSeasons()).toBe(5);                                        // and Season 6 is still waiting on 517 and 518
+    expect(waitingOn()).toBe(5);
+    dismissAllNotices();
+  });
+
+  it("a failed Sam step is retried without a second question, and says so", () => {
+    S.life = 5e8; S.allies.sam = true; S.samOffered = true; dismissAllNotices();
+    S.arcStep[SAM_ARC_ID] = 4; S.samChoices = { 0: 0, 1: 0, beat1: 1, beat2: 1 };
+    startArc("samfall");
+    expect(document.getElementById("evtT")!.textContent).toMatch(/Satellite Phone/);    // the card fires the first time
+    answer(0);
+    const a = S.active.find(x => x.arc?.id === "samfall")!;
+    a.chance = 0; resolveMission(a);                                                    // it fails
+    expect(S.arcStep.samfall).toBe(4);                                                  // still step five
+    expect(document.getElementById("nT")!.textContent).toMatch(/Admiral isn't convinced/);
+    dismissAllNotices();
+    startArc("samfall");
+    expect(document.getElementById("evt")!.style.display).not.toBe("flex");             // no repeat card
+    expect(S.active.length).toBe(1);                                                    // the step simply runs again
+    S.active = [];
+  });
+
+  it("no ally helps on a case where they are the client", () => {
+    const notes = EP_NOTES as Record<string, { client?: string }>;
+    const names: Record<string, string> = { barry: "Barry", nate: "Nate", sam: "Sam", fiona: "Fiona", madeline: "Madeline", jesse: "Jesse" };
+    for (const m of MISSIONS) {
+      const client = notes[m.ep!]?.client ?? "";
+      expect(client, `${m.n} (${m.ep}): ${m.ally} helps their own case`).not.toBe(names[m.ally]);
+    }
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

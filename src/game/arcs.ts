@@ -111,5 +111,10 @@ export function advanceArc(id: string, step: number): void {
 
 export function failArcStep(id: string): void {
   const a = ARCS.find(x => x.id === id);
-  if (a) say(`${a.title} isn't closed yet. That step needs another try.`);
+  if (!a) return;
+  say(`${a.title} isn't closed yet. That step needs another try.`);
+  if (id === SAM_ARC_ID) { // in the inquiry room a repeat is a repeat: the Admiral wants that part again
+    const st = a.steps[arcStep(a)];
+    toast("The Admiral isn't convinced", `"That isn't how I read the report, Commander. Take it from \"${st.n}\" again." The step is yours to try again, and it won't open with a new question.`, "bad");
+  }
 }

@@ -66,6 +66,12 @@ function setting(what: string): void {
   if (what === "mute") S.mute = !S.mute;
   else if (what === "popups") S.popups = !S.popups;
   else if (what === "numfmt") { S.sci = !S.sci; setScientific(S.sci); }
+  else if (what === "refresh") { // ask the worker for the newest files, then reload onto them
+    (async () => {
+      try { const reg = await navigator.serviceWorker?.getRegistration(); await reg?.update(); } catch { /* offline or no worker */ }
+      location.reload();
+    })();
+  }
   else if (what === "export") exportSave();
   else if (what === "wipe") {
     showChoice("Wipe your save?", "This deletes your game on this device and starts over. Export a copy first if you might want it back.",

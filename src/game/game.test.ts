@@ -54,6 +54,7 @@ import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from ".
 import { earn, merge } from "../state";
 import { loadGame, readSave, save } from "../persist";
 import { clearBuilt } from "../ui/built";
+import { versionLine } from "../version";
 import { lockDev, resetDevForTests, setDevFunds, unlockDev } from "../dev";
 import { credGain, finaleEp, openSeasons, seasonLeft, waitingOn } from "../calc";
 import { EP_NOTES } from "../data/episodeNotes";
@@ -2304,6 +2305,14 @@ describe("The Fall of Sam Axe", () => {
     expect(S.cash).toBeLessThan(1e6);                  // hiding the menu turns it off
     expect(panelHTML("settings")).not.toContain("Unlimited cash");
     resetDevForTests();
+  });
+
+  it("Settings shows which version is running, so you can tell when the installed app has updated", () => {
+    const html = panelHTML("settings");
+    expect(html).toContain("Version");
+    expect(html).toContain(versionLine());
+    expect(versionLine()).toMatch(/^v\d+\.\d+\.\d+ · [\w-]+/);
+    expect(html).toContain('data-arg="refresh"');
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

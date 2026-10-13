@@ -20,6 +20,7 @@ import { CASE_ACTIONS } from "../data/caseActions";
 import { FAQ } from "../data/faq";
 import { portrait, portraitScope } from "./portrait";
 import { builtFlash } from "./built";
+import { versionLine } from "../version";
 import { devFundsOn, devUnlocked } from "../dev";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
@@ -447,6 +448,10 @@ function settings(): string {
     ${row("Big numbers", S.sci ? "Scientific (1.23e9)" : "Letters (1.23B)", "numfmt")}
   </div>
   ${devSection()}
+  <h2 style="margin-top:14px">About</h2>
+  <div class="dfile"><div class="drow"><span class="dlabel">Version</span><span class="dtext" id="appver">${versionLine()}</span></div></div>
+  <div class="btns" style="margin-top:6px"><button data-act="setting" data-arg="refresh">Check for an update</button></div>
+  <div class="small" style="margin-top:6px">If the build time here is old, tap the button: it reloads the app and picks up the newest version when you're online.</div>
   <h2 style="margin-top:14px">Your save</h2>
   <div class="small" id="saveinfo" style="margin-bottom:8px${st.warn ? ";color:var(--gold)" : ""}">${st.text}</div>
   <div class="btns"><button data-act="setting" data-arg="export">Export save</button><button data-act="setting" data-arg="import">Import save</button><button data-act="setting" data-arg="wipe">Wipe save</button></div>

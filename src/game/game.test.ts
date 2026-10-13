@@ -2261,6 +2261,15 @@ describe("The Fall of Sam Axe", () => {
     vi.restoreAllMocks();
   });
 
+  it("the game never tells the player a percentage for what Michael keeps", () => {
+    S.life = 1e10; S.stats.returned = 9e8; S.board = []; fillBoard(); dismissAllNotices();
+    for (const tab of ["file", "stats", "mis", "faq", "med"] as const) {
+      const text = panelHTML(tab).replace(/<[^>]+>/g, " ");
+      expect(text, tab).not.toMatch(/(keeps?|kept|takes?|take)[^.]{0,40}10\s*%/i);
+      expect(text, tab).not.toMatch(/\(10%\)/);
+    }
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

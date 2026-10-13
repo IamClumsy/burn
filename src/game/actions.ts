@@ -14,6 +14,7 @@ import { LINES } from "../data/text";
 import { beep, chime } from "../audio";
 import { pick } from "../util";
 import { say as sayTag, toast } from "../ui/fx";
+import { choiceBusy, showChoice } from "../ui/choice";
 import { ABILITIES } from "./abilities";
 import { checkBurn } from "./heat";
 import { newFixer, simonTip } from "./org";
@@ -206,10 +207,18 @@ function keptAllies(): Record<string, boolean> {
   return Object.fromEntries(Object.entries(S.allies).filter(([id]) => !later.has(id)));
 }
 
-export function prestige(): void {
+/** Reinstate. Without `confirmed`, it asks first, in the game's own pop-up (a sheet on phones). */
+export function prestige(confirmed = false): void {
   const gain = credGain();
   if (gain < 1) return;
-  if (!confirm(`Get reinstated? You reset cash, ops, upgrades and missions, but gain ${gain} Credibility (+${gain * 10}% income) and ${gain} favors. Allies who joined late in the story, like Madeline and Jesse, have to be hired again. Perks, medals and story are kept.`)) return;
+  if (!confirmed) {
+    if (choiceBusy()) return;
+    showChoice("Get Reinstated?",
+      `You reset cash, operations, upgrades and missions, but gain ${gain} Credibility (+${gain * 10}% income) and ${gain} favors. Allies who joined late in the story, like Madeline and Jesse, have to be hired again. Perks, medals and story are kept.`,
+      [["Get Reinstated", () => { prestige(true); return ""; }], ["Not yet", () => "You keep going. There's more to earn first."]],
+      undefined, { primary: 0 });
+    return;
+  }
   S.stats.bestRun = Math.max(S.stats.bestRun, S.run);
   const hadFiona = !!S.allies.fiona;
   const keep = {

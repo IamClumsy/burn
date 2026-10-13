@@ -6,6 +6,7 @@ import { QUOTES } from "./data/text";
 import { RECIPES } from "./data/perks";
 import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
+import { showChoice } from "./ui/choice";
 import { render, showModal } from "./ui/render";
 import { returnFromAway } from "./game/offline";
 import { initNotices, setNoticeGate } from "./ui/notice";
@@ -44,7 +45,10 @@ function setting(what: string): void {
   else if (what === "popups") S.popups = !S.popups;
   else if (what === "numfmt") { S.sci = !S.sci; setScientific(S.sci); }
   else if (what === "export") exportSave();
-  else if (what === "wipe") { if (confirm("Wipe your save and start over?")) wipeSave(); }
+  else if (what === "wipe") {
+    showChoice("Wipe your save?", "This deletes your game on this device and starts over. Export a copy first if you might want it back.",
+      [["Wipe save", () => { wipeSave(); return ""; }], ["Keep it", () => "Your save is safe."]], undefined, { primary: 1 });
+  }
   else if (what === "import") {
     const c = prompt("Paste your save code:");
     if (!c) return;

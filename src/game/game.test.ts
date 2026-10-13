@@ -53,7 +53,7 @@ import { clientCut, crewCut } from "../data/automation";
 import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from "../data/samAxe";
 import { earn, merge } from "../state";
 import { loadGame, readSave, save } from "../persist";
-import { finaleEp, openSeasons, seasonLeft, waitingOn } from "../calc";
+import { credGain, finaleEp, openSeasons, seasonLeft, waitingOn } from "../calc";
 import { EP_NOTES } from "../data/episodeNotes";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
@@ -674,7 +674,7 @@ describe("notifications", () => {
   it("the pop-ups setting survives Reinstate", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     S.popups = false; S.run = 2e8;
-    prestige();
+    prestige(true);
     expect(S.stats.reinstated).toBe(1);
     expect(S.popups).toBe(false);
     vi.restoreAllMocks();
@@ -817,7 +817,7 @@ describe("upgrades never run out", () => {
   it("Reinstating drops Jesse (he debuts in Season 4) but keeps the early crew", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     S.run = 2e8; S.life = 2e8; S.allies.sam = true; S.allies.jesse = true;
-    prestige();
+    prestige(true);
     expect(S.allies.sam).toBe(true);
     expect(S.allies.jesse).toBeFalsy();
     vi.restoreAllMocks();
@@ -826,7 +826,7 @@ describe("upgrades never run out", () => {
   it("the endless upgrade resets with the rest when you Reinstate", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     S.run = 2e8; S.referrals = 5;
-    prestige();
+    prestige(true);
     expect(S.referrals).toBe(0);
     vi.restoreAllMocks();
   });
@@ -1036,7 +1036,7 @@ describe("Reinstating: preview, stats and Fiona's time off", () => {
   it("reinstating sends Fiona off for one to four hours, and she can't be sent on missions meanwhile", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     S.allies.fiona = true; S.run = 2e8; S.stats.bestRun = 0;
-    prestige();
+    prestige(true);
     expect(S.stats.bestRun).toBe(2e8);
     expect(S.fionaAway).toBeGreaterThanOrEqual(3600);
     expect(S.fionaAway).toBeLessThanOrEqual(14400);
@@ -1050,7 +1050,7 @@ describe("Reinstating: preview, stats and Fiona's time off", () => {
   it("no Fiona, no disappearance", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     S.allies = {}; S.run = 2e8;
-    prestige();
+    prestige(true);
     expect(S.fionaAway).toBe(0);
     vi.restoreAllMocks();
   });
@@ -1966,7 +1966,7 @@ describe("The Fall of Sam Axe", () => {
     const back = merge(readSave()!);
     expect(back.episodesDone[m.ep!]).toBe(true);                                     // survives a reload
     S.cred = 0; S.life = 1e12; S.run = 1e12;
-    prestige();
+    prestige(true);
     expect(S.episodesDone[m.ep!]).toBe(true);                                        // and a Reinstate
     dismissAllNotices();
   });
@@ -2226,6 +2226,26 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
   });
 
+  it("Reinstate asks in the game's own pop-up, and nothing happens until you say yes", () => {
+    S.run = 2e8; S.cred = 0; S.life = 2e8; S.cash = 5e7; S.cred = 0; dismissAllNotices();
+    const gain = credGain();
+    expect(gain).toBeGreaterThanOrEqual(1);
+    prestige();                                            // no native confirm: the themed pop-up opens
+    expect(document.getElementById("evtT")!.textContent).toBe("Get Reinstated?");
+    expect(S.cash).toBe(5e7);                              // still untouched
+    const buttons = document.querySelectorAll<HTMLButtonElement>("#evtO button");
+    expect([...buttons].map(b => b.textContent)).toEqual(["Get Reinstated", "Not yet"]);
+    buttons[1].click();                                    // "Not yet"
+    expect(S.cred).toBe(0);
+    expect(S.cash).toBe(5e7);
+    dismissAllNotices();
+    prestige();
+    document.querySelectorAll<HTMLButtonElement>("#evtO button")[0].click();   // "Get Reinstated"
+    expect(S.cred).toBe(gain);
+    expect(S.cash).toBeLessThan(5e7);
+    dismissAllNotices();
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);
@@ -2319,7 +2339,7 @@ describe("The Fall of Sam Axe", () => {
   it("it stays through a Reinstate", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     S.run = 2e8; S.arcsDone.samfall = true; S.samChoices = { 0: 1, 1: 0 };
-    prestige();
+    prestige(true);
     expect(S.arcsDone.samfall).toBe(true);
     expect(S.samChoices).toEqual({ 0: 1, 1: 0 });
     vi.restoreAllMocks();
@@ -2731,7 +2751,7 @@ describe("The intel contact: Victor, then Simon, then Pearce", () => {
   it("Reinstating keeps the story: Simon doesn't come back after he's gone", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     S.intel = 2; S.run = 2e8;
-    prestige();
+    prestige(true);
     expect(S.intel).toBe(2);
     vi.restoreAllMocks();
   });
@@ -2743,7 +2763,7 @@ describe("Backup nudge", () => {
     S.stats.time = 7300; milestones();
     expect(S.backupNudged).toBe(true);
     dismissAllNotices();
-    S.run = 2e8; prestige();
+    S.run = 2e8; prestige(true);
     expect(S.backupNudged).toBe(true);
     vi.restoreAllMocks();
   });
@@ -2910,7 +2930,7 @@ describe("the daily limit on frienemy favors", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     rich(); S.run = 2e8;
     for (let i = 0; i < 4; i++) buyFavorFrom("seymour");
-    prestige();
+    prestige(true);
     expect(S.stats.reinstated).toBe(1);
     expect(favorsLeft("seymour")).toBe(0);
     vi.restoreAllMocks();

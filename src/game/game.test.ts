@@ -2204,6 +2204,17 @@ describe("The Fall of Sam Axe", () => {
     expect(notes["409"].client).toBe("Lane and Harris");     // Center of the Storm: both agents
   });
 
+  it("an away ally is dimmed by class, so the Call him back button stays bright", () => {
+    S.life = 1e8; S.allies.nate = true; S.nateAway = true; S.favors = 5;
+    const html = panelHTML("crew");
+    expect(html).toContain('class="box away"');
+    expect(html).not.toMatch(/style="opacity:\.6"/);           // not the whole card, which would dim the button too
+    expect(html).toContain('data-act="callnate"');
+    const css = readFileSync(resolve(__dirname, "../styles.css"), "utf8");
+    expect(css).toMatch(/\.box\.away button\[data-act="callnate"\]/);
+    S.nateAway = false;
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

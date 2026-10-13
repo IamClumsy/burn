@@ -234,3 +234,7 @@
       padding-bottom:calc(20px + env(safe-area-inset-bottom));max-height:88vh;max-height:88dvh;overflow-y:auto;animation:sheetUp .24s ease-out}
     .mdlg::before,#evt .dlg::before,.ndlg::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--dim);opacity:.5;margin:-4px auto 12px}
   }
+
+  /* someone who's away looks dimmed, but the one button that can still be used stays bright and obviously tappable */
+  .box.away .who > :first-child,.box.away .row,.box.away .who .small{opacity:.6}
+  .box.away button[data-act="callnate"]:not(:disabled){background:linear-gradient(#ff4fa3,#c42d7c);color:#fff;border-color:#ff8bc4;font-weight:700;opacity:1;box-shadow:0 0 14px #ff4fa366}

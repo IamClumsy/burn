@@ -958,7 +958,7 @@ describe("Ghosts From the Past", () => {
   });
 
   it("a ghost starts the Season AFTER the one where they die in the show", () => {
-    const diesIn: Record<string, number> = { carla: 2, strickler: 3, gilroy: 3, barrett: 4, brennen: 4, anson: 6, gray: 6, card: 6, bly: 6 };
+    const diesIn: Record<string, number> = { cowan: 1, carla: 2, strickler: 3, gilroy: 3, barrett: 4, brennen: 4, anson: 6, gray: 6, card: 6, bly: 6 };
     for (const [id, season] of Object.entries(diesIn)) expect(boss(id).ghost!.from.season, id).toBe(season + 1);
   });
 
@@ -967,12 +967,16 @@ describe("Ghosts From the Past", () => {
     for (const id of ["paxson", "larry", "oneill", "vaughn", "riley", "burke", "sonya", "kendrick"]) expect(bossView(boss(id)).n, id).toBe(boss(id).n);
   });
 
-  it("Cowan, who dies in the first Season's story, is a ghost once that beat has passed", () => {
-    S.life = 1e4; S.story = 0;
+  it("Cowan is a real fight all through Season 1, and only a ghost once Season 2 opens", () => {
+    S.seasonGate = false; S.story = 99;
+    S.life = 3e4;                                          // Season 1, and he's already on the board
+    expect(grossLife()).toBeGreaterThanOrEqual(boss("cowan").at);
     expect(bossView(boss("cowan")).n).toBe("Phillip Cowan");
-    S.story = STORY.findIndex(b => b.t === "The Man Who Burned You") + 1;
+    S.life = 1e5;                                          // Season 2 opens: he died in the Season 1 finale
     expect(bossView(boss("cowan")).n).toBe("Ghosts From the Past: Phillip Cowan");
     expect(bossView(boss("cowan")).m).toContain("freeze");
+    // and he comes before Carla on the List, as the story tells it
+    expect(BOSSES.findIndex(b => b.id === "cowan")).toBeLessThan(BOSSES.findIndex(b => b.id === "carla"));
   });
 
   it("the card, tab title, Rogues file and The List all use the ghost version", () => {
@@ -2605,7 +2609,7 @@ describe("Everyone on the List gets their turn", () => {
   });
 
   it("a ghost turns up like anyone else once the story has passed their time", () => {
-    S.life = 5e8; S.allies = {}; S.bossKills.bly = 1;     // Carla is next in story order
+    S.life = 5e8; S.allies = {}; S.bossKills.bly = 1; S.bossKills.cowan = 1;   // Carla is next in story order
     S.boss = null; spawnBoss();
     expect(S.boss!.id).toBe("carla");
     expect(bossDef()!.n).toBe("Ghosts From the Past: Carla Baxter");

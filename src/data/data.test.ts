@@ -100,14 +100,35 @@ describe("data integrity", () => {
     expect(outcomeLine({ tip: "x" }, true, first)).toBeNull();
     expect(outcomeLine(undefined, true, first)).toBeNull();
     const harlan = { client: "Marta", villain: "Rufino Cortez", friend: { name: "Harlan", role: "Bailed you out of jail", win: "Harlan gets his favor, and you're square." }, tip: "x" };
-    const lines = [0, 1, 2, 3].map(i => outcomeLine(harlan, true, a => a[i]));
-    expect(lines).toContain("Harlan gets his favor, and you're square.");
+    const last = <T,>(a: readonly T[]) => a[a.length - 1];
+    expect(outcomeLine(harlan, true, last)).toBe("Harlan gets his favor, and you're square.");
     // a friend with no line of their own gets a plain thank-you
     const plain = { client: "Jimmy", friend: { name: "Max", role: "Your handler" }, tip: "x" };
-    expect([0, 1, 2].map(i => outcomeLine(plain, true, a => a[i]))).toContain("Max is glad you came through.");
+    expect(outcomeLine(plain, true, last)).toBe("Max is glad you came through.");
     // a friend alone still gets a line, and nothing on a loss
     expect(outcomeLine({ friend: { name: "Max", role: "Your handler" }, tip: "x" }, true, a => a[0])).toBe("Max is glad you came through.");
     expect(outcomeLine({ friend: { name: "Max", role: "Your handler" }, tip: "x" }, false, a => a[0])).toBeNull();
+  });
+
+  it("closing lines have real variety, never repeat back to back, and fit the case", () => {
+    const note = { client: "Andy", villain: "Zeke", tip: "x" };
+    const seen = new Set<string>();
+    let prev = "";
+    for (let i = 0; i < 400; i++) {
+      const line = outcomeLine(note, true, a => a[Math.floor(Math.random() * a.length)])!;
+      expect(line, "no repeats in a row").not.toBe(prev);
+      expect(line).toMatch(/Andy|Zeke/);
+      prev = line; seen.add(line);
+    }
+    expect(seen.size).toBeGreaterThanOrEqual(12);          // not the same three lines
+    const lost = new Set<string>();
+    for (let i = 0; i < 200; i++) lost.add(outcomeLine(note, false, a => a[Math.floor(Math.random() * a.length)])!);
+    expect(lost.size).toBeGreaterThanOrEqual(5);
+    // a helper and a child change what can be said
+    const ctx = new Set<string>();
+    for (let i = 0; i < 400; i++) ctx.add(outcomeLine(note, true, a => a[Math.floor(Math.random() * a.length)], { kid: true, helper: "Sam" })!);
+    expect([...ctx].some(l => /Sam/.test(l))).toBe(true);
+    expect([...ctx].some(l => /Everyone goes home/.test(l))).toBe(true);
   });
 
   it("episode credits read naturally", () => {

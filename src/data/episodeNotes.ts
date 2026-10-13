@@ -119,19 +119,69 @@ export const EP_NOTES: Record<string, EpisodeNote> = {
   '713': {villain:'James Kendrick', tip:'Trust is rebuilt one honest act at a time.'},
 };
 
+/** What else is true of a case, so the closing line can fit it. */
+export interface OutcomeContext { kid?: boolean; elder?: boolean; helper?: string }
+
+const lastLine = { won: "", lost: "" };
+/** Never say the same closing line twice in a row. */
+function fresh(pool: string[], key: "won" | "lost", pick: <T>(a: readonly T[]) => T): string {
+  const options = pool.length > 1 ? pool.filter(l => l !== lastLine[key]) : pool;
+  const line = pick(options);
+  lastLine[key] = line;
+  return line;
+}
+
 /** One line of narration for how an episode's mission ended, using the people in it. */
-export function outcomeLine(note: EpisodeNote | undefined, won: boolean, pick: <T>(a: readonly T[]) => T): string | null {
+export function outcomeLine(note: EpisodeNote | undefined, won: boolean, pick: <T>(a: readonly T[]) => T, ctx: OutcomeContext = {}): string | null {
   if (!note) return null;
-  const { client, villain, friend } = note;
+  const { client: c, villain: v, friend } = note;
   // The friend gets a line too, now and then: their own if they have one, otherwise a plain thank-you.
   const withFriend = friend ? [friend.win ?? `${friend.name} is glad you came through.`] : [];
+  const extras: string[] = [...withFriend];
+  if (ctx.helper) extras.push(`${ctx.helper} would like it noted that the plan was good, and that ${ctx.helper} helped.`, `${ctx.helper} is already making plans for a celebratory drink.`);
   if (won) {
-    if (client && villain) return pick([`${client} is safe, and ${villain} has run out of road.`, `${villain} never saw it coming. ${client} finally exhales.`, `${client} thanks you twice. ${villain} is not thanking anyone.`, ...withFriend]);
-    if (client) return pick([`${client} can finally sleep.`, `${client} thanks you, and means it.`, ...withFriend]);
-    if (villain) return pick([`${villain} is out of moves.`, `${villain} learns what it feels like to be outplayed.`, ...withFriend]);
-    return friend ? pick(withFriend) : null;
+    if (c && v) {
+      const pool = [
+        `${c} is safe, and ${v} has run out of road.`,
+        `${v} never saw it coming. ${c} finally exhales.`,
+        `${c} thanks you twice. ${v} is not thanking anyone.`,
+        `${c} gets their life back. ${v} gets a lawyer and a long list of regrets.`,
+        `${v} had the upper hand until about noon. ${c} is walking away with it.`,
+        `It took a day, a plan and some duct tape. By evening ${c} is in the clear and ${v} is out of options.`,
+        `${c} offers to pay in cash and favors. You take the favors.`,
+        `${v} was sure of three things today. All three turned out wrong, and ${c} is the reason.`,
+        `The last thing ${v} hears is a door closing. ${c} is on the other side of it.`,
+        `${c} will be telling this story for years. ${v} won't be telling it at all.`,
+        `Plan B worked, which is lucky, because there was no Plan C. ${c} is in the clear.`,
+        `${c} sleeps through the night for the first time in weeks. ${v} doesn't sleep at all.`,
+        `${v} learns that the quiet ones are the ones to worry about. ${c} learns that somebody answers the phone.`,
+        `Nobody has to explain what happened to ${v}. ${c} just stops looking over a shoulder.`,
+        `${v} made one mistake: assuming ${c} was alone.`,
+        ...(ctx.kid ? [`${c} holds on a little longer than usual. Some jobs are worth the heat.`, `Everyone goes home. That's the whole point, and it never gets old.`] : []),
+        ...(ctx.elder ? [`The street is a little quieter tonight, and ${c} has someone to wave to again.`] : []),
+        ...extras,
+      ];
+      return fresh(pool, "won", pick);
+    }
+    if (c) return fresh([
+      `${c} can finally sleep.`, `${c} thanks you, and means it.`, `${c} stops checking the window. That's how you know it worked.`,
+      `${c} has a story to tell and, for once, a happy ending.`, `Problem solved. ${c} insists on paying in baked goods.`, ...extras,
+    ], "won", pick);
+    if (v) return fresh([
+      `${v} is out of moves.`, `${v} learns what it feels like to be outplayed.`, `${v} spends the evening wondering where it went wrong. It went wrong at you.`,
+      `${v} is going to need a new plan, and a new address.`, `${v} wanted a quiet week. Not today.`, ...extras,
+    ], "won", pick);
+    return extras.length ? fresh(extras, "won", pick) : null;
   }
-  if (villain) return pick([`${villain} slips away this time.`, `${villain} is still out there, and now knows your face.`]);
-  if (client) return `${client} is still waiting on you.`;
+  if (v) return fresh([
+    `${v} slips away this time.`,
+    `${v} is still out there, and now knows your face.`,
+    `That could have gone better. ${v} is a step ahead, and ${c ?? "everyone"} knows it.`,
+    `${v} leaves nothing useful behind. This one needs another try.`,
+    `The plan holds for about an hour. ${v} spends the rest of the night improving theirs.`,
+    `${v} walks, and the clock keeps running.`,
+    `You had it, and then you didn't. ${v} is grateful for the lesson.`,
+  ], "lost", pick);
+  if (c) return fresh([`${c} is still waiting on you.`, `${c} still needs help, and the window is getting smaller.`, `You owe ${c} another try.`], "lost", pick);
   return null;
 }

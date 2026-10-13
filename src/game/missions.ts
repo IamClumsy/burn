@@ -100,7 +100,8 @@ export function resolveMission(m: ActiveMission): void {
     reduceGrip(1);
     say(m.kid ? pick(KID_LINES) : pick(LINES.mOk), "mission", meta);
     const note = m.ep ? EP_NOTES[m.ep] : undefined;
-    const won = outcomeLine(note, true, pick);
+    const helper = m.sent ? (ALLIES.find(a => a.id === m.sent)?.name.split(" ")[0]) : undefined;
+    const won = outcomeLine(note, true, pick, { kid: m.kid, elder: m.elder, helper });
     if (won) say(won, "mission", meta);
     if (note) say("Spy tip: " + note.tip, "mission", meta);
     if (Math.random() < 0.4) say(pick(LINES.returned), "mission", meta);

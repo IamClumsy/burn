@@ -1,7 +1,7 @@
 import type { MissionTpl } from "../types";
 
 /** Missions unlock a season at a time as you earn: season N opens at SEASON_UNLOCK[N - 1] lifetime earnings. */
-export const SEASON_UNLOCK = [0, 1e5, 2e6, 3e7, 5e8, 8e9, 1e11];
+export const SEASON_UNLOCK = [0, 1e5, 2e6, 3e7, 5e8, 8e9, 4e10];
 
 /**
  * One mission per episode, written from the wiki's synopses. Anything with a child at stake always succeeds.

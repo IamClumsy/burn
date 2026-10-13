@@ -48,7 +48,7 @@ import { actionDmg, conChance, cps, genMult, referralCost, referralMult, upgrade
 import { checkBurn } from "./heat";
 import { BOSSES } from "../data/bosses";
 import { EVENTS } from "../data/events";
-import { MISSIONS, seasonsOpen } from "../data/missions";
+import { MISSIONS, SEASON_UNLOCK, seasonsOpen } from "../data/missions";
 import { clientCut, crewCut } from "../data/automation";
 import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from "../data/samAxe";
 import { earn, merge } from "../state";
@@ -2272,6 +2272,13 @@ describe("The Fall of Sam Axe", () => {
       expect(text, tab).not.toMatch(/(keeps?|kept|takes?|take)[^.]{0,40}10\s*%/i);
       expect(text, tab).not.toMatch(/\(10%\)/);
     }
+  });
+
+  it("Season 7 opens at $40B, and the Season 6 foes all arrive before it, the Season 7 foes after", () => {
+    const at = (id: string) => BOSSES.find(b => b.id === id)!.at;
+    expect(SEASON_UNLOCK[6]).toBe(4e10);
+    for (const id of ["card", "gray", "riley"]) expect(at(id), id).toBeLessThan(4e10);
+    for (const id of ["burke", "sonya", "kendrick"]) expect(at(id), id).toBeGreaterThanOrEqual(4e10);
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

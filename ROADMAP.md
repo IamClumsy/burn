@@ -5,7 +5,7 @@ What's built is listed at the bottom. This is what's left, roughly in the order 
 ## 1. Before calling it finished
 
 - **Real-device playtest:** phone and tablet widths, a long session, and a couple of Reinstates. Watch Vercel's INP numbers after each deploy (the flashback look was reworked once already to keep clicks fast).
-- **Pacing pass after a long playthrough:** several Reinstates in, check boss timing, favor prices, how fast the late Seasons open, and how long the last foes on The List take (Burke $110B, Sonya $180B, Kendrick $300B).
+- **Pacing pass after a long playthrough:** several Reinstates in, check boss timing, favor prices, how fast the late Seasons open, and how long the last foes on The List take (Season 7 opens at $40B; Burke $44B, Sonya $72B, Kendrick $120B).
 - **Accessibility pass:** keyboard focus rings and reduced-motion are in; still to do is a check of contrast on the dimmed cards and focus handling inside pop-ups.
 
 ## 2. An ending that lands

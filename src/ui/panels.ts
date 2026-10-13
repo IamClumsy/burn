@@ -569,11 +569,13 @@ function file(): string {
     <div class="small" style="margin-top:4px;color:var(--dim)">Cases and clients pay a full fee. Michael only takes what's needed to cover expenses, and the rest is returned. Operations, jobs and bosses pay him directly. Lifetime earnings count all of it plus what you handed back, and they open the foes on The List. Michael's take opens Seasons, covers and story leads. Both keep counting across Reinstates. The waits assume your income stays where it is now, so they only get shorter as you grow.</div></div>`;
   // Where they have you right now sits in the file itself, between Status and Former Occupation.
   const standing = `<div class="drow"><span class="dlabel">Organization Status</span><span class="dtext"><b>${t.name}</b>. ${t.note}</span></div>`;
+  // Once every name is crossed off, the file says so
+  const cleared: Record<string, string> = S.cleanRecord ? { Status: "Burn lifted. Cleared.", Recommendation: "No further action. Leave him alone." } : {};
   const rows = DOSSIER.map(d => (S.attPeak >= d.peak
-    ? `<div class="drow"><span class="dlabel">${d.label}</span><span class="dtext">${d.text}</span></div>`
+    ? `<div class="drow"><span class="dlabel">${d.label}</span><span class="dtext">${cleared[d.label] ?? d.text}</span></div>`
     : `<div class="drow redacted"><span class="dlabel">██████ ████</span><span class="dtext">████████ ██████ <span class="small">(Reached at ${d.peak}% attention)</span></span></div>`) + (d.label === "Status" ? standing : "")).join("");
   const learned = DOSSIER.filter(d => S.attPeak >= d.peak).length;
-  return `<div class="filehead"><div class="who">${portrait("michael", 72)}<div><div class="dstamp">Burned</div>
+  return `<div class="filehead"><div class="who">${portrait("michael", 72)}<div><div class="dstamp${S.cleanRecord ? " lifted" : ""}">${S.cleanRecord ? "Burn lifted" : "Burned"}</div>
       <div class="small">Organization file, ${learned} of ${DOSSIER.length} entries filled in</div></div></div></div>
     <div class="dfile">${rows}</div>
     <div class="small" style="margin-top:8px">The more attention you draw from the Organization, the more of this they fill in. The file doesn't shrink, even when your attention drops.</div>

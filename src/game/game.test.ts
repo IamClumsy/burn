@@ -2315,6 +2315,20 @@ describe("The Fall of Sam Axe", () => {
     expect(html).toContain('data-arg="refresh"');
   });
 
+  it("Michael's File says Burn lifted once every name is crossed off", () => {
+    S.cleanRecord = false; S.attPeak = 100;
+    let html = panelHTML("file");
+    expect(html).toMatch(/dstamp">Burned</);
+    expect(html).toContain("Deal with him permanently");
+    S.cleanRecord = true;
+    html = panelHTML("file");
+    expect(html).toMatch(/dstamp lifted">Burn lifted</);
+    expect(html).toContain("Burn lifted. Cleared.");
+    expect(html).not.toContain("Deal with him permanently");
+    expect(html).not.toMatch(/dstamp">Burned</);
+    S.cleanRecord = false;
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

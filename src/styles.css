@@ -246,3 +246,4 @@
   .item.just{border-color:var(--good);box-shadow:0 0 16px #5fe59a55}
   .builtslot{min-height:68px;margin-bottom:6px}
   .builtslot .built{margin-bottom:0}
+  .dstamp.lifted{color:var(--good);border-color:var(--good)}

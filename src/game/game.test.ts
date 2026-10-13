@@ -2200,6 +2200,8 @@ describe("The Fall of Sam Axe", () => {
     const notes = EP_NOTES as Record<string, { client?: string; villain?: string }>;
     expect(notes["109"].villain).toBe("Reyes");              // Hard Bargain: the head kidnapper, not Lucio
     expect(notes["211"].client).toBe("Corey and Tanya");     // Hot Spot: the football clients, not the coach
+    expect(notes["405"].client).toBe("David");               // Neighborhood Watch: the wiki's "The Client"
+    expect(notes["409"].client).toBe("Lane and Harris");     // Center of the Storm: both agents
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

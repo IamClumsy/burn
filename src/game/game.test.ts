@@ -53,6 +53,7 @@ import { clientCut, crewCut } from "../data/automation";
 import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from "../data/samAxe";
 import { earn, merge } from "../state";
 import { loadGame, readSave, save } from "../persist";
+import { clearBuilt } from "../ui/built";
 import { credGain, finaleEp, openSeasons, seasonLeft, waitingOn } from "../calc";
 import { EP_NOTES } from "../data/episodeNotes";
 import type { GameState } from "../types";
@@ -2244,6 +2245,20 @@ describe("The Fall of Sam Axe", () => {
     expect(S.cred).toBe(gain);
     expect(S.cash).toBeLessThan(5e7);
     dismissAllNotices();
+  });
+
+  it("building a gadget confirms it on the Gadgets screen for a few seconds, and highlights its row", () => {
+    S.life = 1e8; S.junk = { bleach: 3, tape: 3, wire: 3, micro: 3 } as any; clearBuilt();
+    expect(panelHTML("gad")).not.toContain("✓ Built");
+    const now = Date.now();
+    expect(craft("smoke")).toBe(true);
+    const html = panelHTML("gad");
+    expect(html).toContain("✓ Built");
+    expect(html).toContain("Smoke Bomb");
+    expect(html).toMatch(/class="item[^"]* just/);
+    vi.spyOn(Date, "now").mockReturnValue(now + 6000);   // a few seconds later it goes away
+    expect(panelHTML("gad")).not.toContain("✓ Built");
+    vi.restoreAllMocks();
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

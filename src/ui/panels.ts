@@ -19,6 +19,7 @@ import { EP_NOTES } from "../data/episodeNotes";
 import { CASE_ACTIONS } from "../data/caseActions";
 import { FAQ } from "../data/faq";
 import { portrait, portraitScope } from "./portrait";
+import { builtFlash } from "./built";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep, stepDur } from "../game/arcs";
@@ -221,14 +222,17 @@ function crew(): string {
 }
 
 function gadgets(): string {
-  let h = `<div class="small">Junk drops from jobs and Duct-Tape Gadgets.</div><div style="margin:8px 0 12px">` +
+  const built = builtFlash();
+  // a fixed-height slot, so the list never jumps under your thumb when the confirmation appears
+  let h = `<div class="builtslot" aria-live="polite">${built ? `<div class="built" role="status">✓ Built: <b>${built.name}</b><span>${built.desc}</span></div>` : ""}</div>`;
+  h += `<div class="small">Junk drops from jobs and Duct-Tape Gadgets.</div><div style="margin:8px 0 12px">` +
     Object.entries(JUNK).map(([k, n]) => `<span class="chip">${n}: ${S.junk[k]}</span>`).join("") + `</div>`;
   h += RECIPES.map(r => {
     const cash = recipeCash(r), under = r.id === "sub" && S.fx.sub > 0;
     const ok = Object.entries(r.need).every(([k, v]) => S.junk[k] >= v) && S.cash >= cash && !under;
     const price = Object.entries(r.need).map(([k, v]) => v + " " + JUNK[k].toLowerCase()).join(", ") + (cash ? ` + ${money(cash)}` : "");
     const title = r.rare ? `${r.name} <span class="chip rare">RARE</span>` : r.name;
-    return item("craft", r.id, ok, title, under ? `${r.desc} (active: ${formatWait(S.fx.sub * 1000)} left)` : r.desc, `<span class="small">${price}</span>`, r.rare ? "rare" : "");
+    return item("craft", r.id, ok, title, under ? `${r.desc} (active: ${formatWait(S.fx.sub * 1000)} left)` : r.desc, `<span class="small">${price}</span>`, (r.rare ? "rare" : "") + (built?.id === r.id ? " just" : ""));
   }).join("");
   return h;
 }

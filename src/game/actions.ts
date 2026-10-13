@@ -15,6 +15,7 @@ import { beep, chime } from "../audio";
 import { pick } from "../util";
 import { say as sayTag, toast } from "../ui/fx";
 import { choiceBusy, showChoice } from "../ui/choice";
+import { flashBuilt } from "../ui/built";
 import { ABILITIES } from "./abilities";
 import { checkBurn } from "./heat";
 import { newFixer, simonTip } from "./org";
@@ -120,6 +121,7 @@ export function craft(id: string): boolean {
   if (id === "sub") { S.fx.sub = 21600; say("The sub slips under the harbor. Nobody is looking for a man who isn't anywhere. Six hours of quiet."); }
   S.stats.crafted++;
   chime(); say("Held together with tape and optimism. It works.");
+  flashBuilt(id, r.name, r.desc);
   return true;
 }
 

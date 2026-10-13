@@ -238,3 +238,11 @@
   /* someone who's away looks dimmed, but the one button that can still be used stays bright and obviously tappable */
   .box.away .who > :first-child,.box.away .row,.box.away .who .small{opacity:.6}
   .box.away button[data-act="callnate"]:not(:disabled){background:linear-gradient(#ff4fa3,#c42d7c);color:#fff;border-color:#ff8bc4;font-weight:700;opacity:1;box-shadow:0 0 14px #ff4fa366}
+
+  /* the gadget you just built: a green confirmation at the top of the screen and a glow on its row */
+  .built{display:flex;flex-direction:column;gap:2px;background:#0f2a1f;border:2px solid var(--good);color:var(--text);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:15px;animation:pop .22s ease-out}
+  .built b{color:var(--good)}
+  .built span{font-size:13px;color:var(--dim)}
+  .item.just{border-color:var(--good);box-shadow:0 0 16px #5fe59a55}
+  .builtslot{min-height:68px;margin-bottom:6px}
+  .builtslot .built{margin-bottom:0}

@@ -30,7 +30,10 @@ const ACT: Record<string, (arg: string) => void> = {
   gen: A.buyGen, upg: A.buyUpg, referral: () => A.buyReferral(), hire: A.hireAlly, ability: A.useAbility,
   cover: A.setCover, auto: A.toggleAuto, callnate: () => A.callNate(), perk: A.buyPerk, contact: a => A.buyFavorFrom(a), hangout: () => A.buyFavorFrom("seymour", "hangout"), craft: a => { // a double-tap builds one, not two, and you see it land
     const t = Date.now(); if (t - lastCraft < 500) return; lastCraft = t;
-    if (A.craft(a)) floatText("Built ✓ " + (RECIPES.find(r => r.id === a)?.name ?? ""), lastTap.x - 40, lastTap.y - 24);
+    if (A.craft(a)) {
+      floatText("Built ✓ " + (RECIPES.find(r => r.id === a)?.name ?? ""), lastTap.x - 40, lastTap.y - 24);
+      try { navigator.vibrate?.(35); } catch { /* not supported */ }   // a small buzz on phones that allow it
+    }
   },
   start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
   setting: a => setting(a), bowling: () => rememberBowling(), replay: () => { replaySamStory(); showModal(null); },

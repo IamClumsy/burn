@@ -1,4 +1,5 @@
 import { S, earn } from "../state";
+import { devFundsOn } from "../dev";
 import { attNet, cps, heatNet, inFlashback, openSeasons, owned, seasonLeft, waitingOn } from "../calc";
 import { checkEnding, tickOrg } from "./org";
 import { STORY } from "../data/story";
@@ -17,6 +18,7 @@ import { tickBoss } from "./bosses";
 const say = (t: string): void => sayTag(t, "story");
 
 let sec = 0;
+const DEV_FUNDS = 1e18;
 
 export function milestones(): void {
   checkEnding();
@@ -120,6 +122,7 @@ export function tickNate(dt: number): void {
 }
 
 export function tick(dt: number): void {
+  if (devFundsOn() && S.cash < DEV_FUNDS) S.cash = DEV_FUNDS; // the hidden developer switch: spendable cash, but lifetime earnings and unlocks untouched
   earn(cps() * dt);
   S.stats.time += dt;
 

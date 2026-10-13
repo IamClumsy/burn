@@ -20,6 +20,7 @@ import { CASE_ACTIONS } from "../data/caseActions";
 import { FAQ } from "../data/faq";
 import { portrait, portraitScope } from "./portrait";
 import { builtFlash } from "./built";
+import { devFundsOn, devUnlocked } from "../dev";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep, stepDur } from "../game/arcs";
@@ -423,6 +424,19 @@ function fosa(): string {
   return `<div class="small" style="margin-bottom:8px">${a.epilogue}</div><h2>How you told it</h2>${told}${asides ? `<div class="box"><b>And in between</b>${asides}</div>` : ""}${again}`;
 }
 
+/** The hidden developer switches. Shown only after Settings' title is tapped seven times. */
+function devSection(): string {
+  if (!devUnlocked()) return "";
+  return `<h2 style="margin-top:14px">Developer</h2>
+  <div class="small" style="margin-bottom:8px">Only you can see this. Cash and favors from here don't count as earnings, so Seasons, foes and covers still unlock the normal way.</div>
+  <div class="btns">
+    <button data-act="dev" data-arg="funds" class="${devFundsOn() ? "on" : ""}">${devFundsOn() ? "☑" : "☐"} Unlimited cash</button>
+    <button data-act="dev" data-arg="cash">+ $1T cash</button>
+    <button data-act="dev" data-arg="favors">+ 100 favors</button>
+    <button data-act="dev" data-arg="lock">Hide this menu</button>
+  </div>`;
+}
+
 /** Sound, saves and the other switches that used to live in the footer. */
 function settings(): string {
   const row = (label: string, state: string, act: string) => `<div class="drow"><span class="dlabel">${label}</span><span class="dtext"><button data-act="setting" data-arg="${act}">${state}</button></span></div>`;
@@ -432,6 +446,7 @@ function settings(): string {
     ${row("Pop-ups", S.popups ? "On, in the middle of the screen" : "Off, small corner notes instead", "popups")}
     ${row("Big numbers", S.sci ? "Scientific (1.23e9)" : "Letters (1.23B)", "numfmt")}
   </div>
+  ${devSection()}
   <h2 style="margin-top:14px">Your save</h2>
   <div class="small" id="saveinfo" style="margin-bottom:8px${st.warn ? ";color:var(--gold)" : ""}">${st.text}</div>
   <div class="btns"><button data-act="setting" data-arg="export">Export save</button><button data-act="setting" data-arg="import">Import save</button><button data-act="setting" data-arg="wipe">Wipe save</button></div>

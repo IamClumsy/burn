@@ -7,6 +7,7 @@ import { RECIPES } from "./data/perks";
 import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
 import { showChoice } from "./ui/choice";
+import { devUnlocked, devFundsOn, lockDev, setDevFunds, unlockDev } from "./dev";
 import { render, showModal } from "./ui/render";
 import { returnFromAway } from "./game/offline";
 import { initNotices, setNoticeGate } from "./ui/notice";
@@ -36,10 +37,28 @@ const ACT: Record<string, (arg: string) => void> = {
     }
   },
   start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
-  setting: a => setting(a), bowling: () => rememberBowling(), replay: () => { replaySamStory(); showModal(null); },
+  setting: a => setting(a), dev: a => devAct(a), bowling: () => rememberBowling(), replay: () => { replaySamStory(); showModal(null); },
 };
 
 let lastCraft = 0;
+
+/** The hidden developer buttons (Settings, after seven taps on its title). */
+function devAct(what: string): void {
+  if (!devUnlocked()) return;
+  if (what === "funds") setDevFunds(!devFundsOn());
+  else if (what === "cash") S.cash = Math.min(S.cash + 1e12, 1e300);
+  else if (what === "favors") S.favors += 100;
+  else if (what === "lock") lockDev();
+  render();
+}
+// seven quick taps on the Settings title unlock the menu
+let titleTaps: number[] = [];
+$("modalTitle").addEventListener("click", () => {
+  if ($("modalTitle").textContent !== "Settings") return;
+  const now = Date.now();
+  titleTaps = [...titleTaps.filter(t => now - t < 4000), now];
+  if (titleTaps.length >= 7) { titleTaps = []; unlockDev(); toast("Developer menu", "Unlocked. It's at the bottom of Settings.", "story"); render(); }
+});
 let lastTap = { x: 200, y: 200 };
 
 /** The switches in Settings: sound, pop-ups, number style, and saves. */

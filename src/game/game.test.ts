@@ -54,6 +54,7 @@ import { BOWLING, SAM_ACTS, SAM_ARC, SAM_ARC_ID, SAM_BEATS, SAM_BRIDGE } from ".
 import { earn, merge } from "../state";
 import { loadGame, readSave, save } from "../persist";
 import { clearBuilt } from "../ui/built";
+import { lockDev, resetDevForTests, setDevFunds, unlockDev } from "../dev";
 import { credGain, finaleEp, openSeasons, seasonLeft, waitingOn } from "../calc";
 import { EP_NOTES } from "../data/episodeNotes";
 import type { GameState } from "../types";
@@ -2279,6 +2280,30 @@ describe("The Fall of Sam Axe", () => {
     expect(SEASON_UNLOCK[6]).toBe(4e10);
     for (const id of ["card", "gray", "riley"]) expect(at(id), id).toBeLessThan(4e10);
     for (const id of ["burke", "sonya", "kendrick"]) expect(at(id), id).toBeGreaterThanOrEqual(4e10);
+  });
+
+  it("the hidden developer menu: invisible by default, unlimited cash without touching earnings", () => {
+    resetDevForTests();
+    expect(panelHTML("settings")).not.toContain("Developer");
+    expect(panelHTML("settings")).not.toContain("Unlimited cash");
+    unlockDev();
+    expect(panelHTML("settings")).toContain("Unlimited cash");
+    S.cash = 10; S.life = 1234; const run = S.run;
+    tick(0.1);
+    expect(S.cash).toBeLessThan(1e18);                 // switch is off by default
+    setDevFunds(true);
+    tick(0.1);
+    expect(S.cash).toBeGreaterThanOrEqual(1e18);       // the till is full
+    expect(S.life).toBeLessThan(1e6);                  // but nothing counted as earned
+    expect(S.run).toBeLessThan(run + 1e6);
+    S.cash = 5;                                        // spending it...
+    tick(0.1);
+    expect(S.cash).toBeGreaterThanOrEqual(1e18);       // ...refills
+    lockDev();
+    S.cash = 5; tick(0.1);
+    expect(S.cash).toBeLessThan(1e6);                  // hiding the menu turns it off
+    expect(panelHTML("settings")).not.toContain("Unlimited cash");
+    resetDevForTests();
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

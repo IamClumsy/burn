@@ -570,7 +570,7 @@ function file(): string {
   // Where they have you right now sits in the file itself, between Status and Former Occupation.
   const standing = `<div class="drow"><span class="dlabel">Organization Status</span><span class="dtext"><b>${t.name}</b>. ${t.note}</span></div>`;
   // Once every name is crossed off, the file says so
-  const cleared: Record<string, string> = S.cleanRecord ? { Status: "Burn lifted. Cleared.", Recommendation: "No further action. Leave him alone." } : {};
+  const cleared: Record<string, string> = S.cleanRecord ? { Status: "Burn lifted. Cleared.", "Address on File": "Unknown. A cabin somewhere, with snow.", Recommendation: "No further action. Leave him alone." } : {};
   const rows = DOSSIER.map(d => (S.attPeak >= d.peak
     ? `<div class="drow"><span class="dlabel">${d.label}</span><span class="dtext">${cleared[d.label] ?? d.text}</span></div>`
     : `<div class="drow redacted"><span class="dlabel">██████ ████</span><span class="dtext">████████ ██████ <span class="small">(Reached at ${d.peak}% attention)</span></span></div>`) + (d.label === "Status" ? standing : "")).join("");

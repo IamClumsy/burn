@@ -2320,10 +2320,13 @@ describe("The Fall of Sam Axe", () => {
     let html = panelHTML("file");
     expect(html).toMatch(/dstamp">Burned</);
     expect(html).toContain("Deal with him permanently");
+    expect(html).toContain("A loft in Miami");
     S.cleanRecord = true;
     html = panelHTML("file");
     expect(html).toMatch(/dstamp lifted">Burn lifted</);
     expect(html).toContain("Burn lifted. Cleared.");
+    expect(html).toContain("A cabin somewhere, with snow.");        // a nod to the finale
+    expect(html).not.toContain("A loft in Miami");
     expect(html).not.toContain("Deal with him permanently");
     expect(html).not.toMatch(/dstamp">Burned</);
     S.cleanRecord = false;

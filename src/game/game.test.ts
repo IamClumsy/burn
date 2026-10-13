@@ -2332,14 +2332,15 @@ describe("The Fall of Sam Axe", () => {
     S.cleanRecord = false;
   });
 
-  it("an ally who isn't available yet shows as ????? with no name and no Season (Madeline included)", () => {
-    S.life = 1e5; S.allies = {}; S.seasonGate = false;              // Season 2: Madeline's time hasn't come
+  it("an ally who hasn't arrived yet shows as ????? with no name and no Season, but Madeline is never gated", () => {
+    S.life = 1e5; S.allies = {}; S.seasonGate = false; S.episodesDone = {};   // Season 2, no Jesse yet
     const html = panelHTML("crew");
-    expect(html).not.toMatch(/Madeline/);
+    expect(html).toContain("?????");                                 // Jesse, not met
+    expect(html).not.toMatch(/Jesse/);
+    expect(html).toContain("Madeline Westen");                       // Madeline is in the story from the start
     expect(html).not.toMatch(/Season [34]/);
-    expect(html).toContain("?????");
-    S.life = 2e7; S.episodesDone["402"] = true;                      // Season 3 opens (money alone, old save)
-    expect(panelHTML("crew")).toContain("Hire Madeline Westen");
+    S.cash = 1e12; hireAlly("madeline");
+    expect(S.allies.madeline).toBe(true);                            // and can be hired whenever you can afford her
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

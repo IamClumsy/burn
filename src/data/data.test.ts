@@ -238,9 +238,10 @@ describe("data integrity", () => {
     expect(MISSIONS.filter(m => m.ally === "jesse").length).toBeGreaterThanOrEqual(10);
   });
 
-  it("Madeline joins in Season 3, later than Nate and the rest of the early crew", () => {
+  it("Madeline can be hired from the start, but only has missions from Season 3, Episode 2 on", () => {
     const m = ALLIES.find(a => a.id === "madeline")!, n = ALLIES.find(a => a.id === "nate")!;
-    expect([m.debut, m.debutEp]).toEqual([3, "302"]);
+    expect(m.debut).toBeUndefined();                       // not gated by a Season
+    expect(m.debutEp).toBe("302");                         // her first case as a helper
     expect(m.cost).toBeGreaterThan(n.cost);
     expect(MISSIONS.filter(x => x.ally === "madeline").every(x => +x.ep! >= 302)).toBe(true);
   });

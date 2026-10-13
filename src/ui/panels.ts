@@ -1,4 +1,4 @@
-import { S } from "../state";
+import { KEEP_RATE, S } from "../state";
 import type { ContactId } from "../types";
 import {
   REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, cps, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
@@ -537,10 +537,16 @@ function nextUnlocks(): { what: string; name: string; at: number; have: number; 
 function file(): string {
   const t = tierDef();
   const rate = cps();
+  // Cases and clients pay a full fee and Michael keeps 10% of it; everything else (operations, jobs, bosses) goes straight to him.
+  const fees = S.stats.returned / (1 - KEEP_RATE), keptFromFees = fees * KEEP_RATE, direct = Math.max(0, S.life - keptFromFees);
   const lifetime = `<div class="box"><div class="row"><b>Lifetime earnings</b><span class="small" style="color:var(--gold)">${money(grossLife())}</span></div>
-    <div class="row small"><span>Michael's take (10%)</span><span>${money(S.life)}</span></div>
+    <div class="small" style="color:var(--dim);margin-bottom:4px">Everything that was paid, counting the share you handed back.</div>
+    <div class="row small"><span>Michael's take (what he kept)</span><span>${money(S.life)}</span></div>
+    <div class="row small" style="padding-left:12px"><span>from operations, jobs and bosses</span><span>${money(direct)}</span></div>
+    <div class="row small" style="padding-left:12px"><span>from case and client fees (10% of ${money(fees)})</span><span>${money(keptFromFees)}</span></div>
+    <div class="row small"><span>Handed back to the people you helped</span><span>${money(S.stats.returned)}</span></div>
     ${nextUnlocks().map(u => `<div class="row small" style="padding:2px 0"><span>${u.what}: ${u.name}</span><span>${u.right ?? `${money(u.at)}${rate > 0 ? ` · about ${formatWait(Math.max(0, (u.at - u.have) / rate) * 1000)}` : ""}`}</span></div>`).join("")}
-    <div class="small" style="margin-top:4px;color:var(--dim)">Lifetime earnings are the full fees, including what you hand back, and they open the foes on The List. Michael's take opens Seasons, covers and story leads. Both keep counting across Reinstates. The waits assume your income stays where it is now, so they only get shorter as you grow.</div></div>`;
+    <div class="small" style="margin-top:4px;color:var(--dim)">Cases and clients pay a full fee, and Michael keeps 10% of it. Operations, jobs and bosses pay him directly. Lifetime earnings count all of it plus what you handed back, and they open the foes on The List. Michael's take opens Seasons, covers and story leads. Both keep counting across Reinstates. The waits assume your income stays where it is now, so they only get shorter as you grow.</div></div>`;
   // Where they have you right now sits in the file itself, between Status and Former Occupation.
   const standing = `<div class="drow"><span class="dlabel">Organization Status</span><span class="dtext"><b>${t.name}</b>. ${t.note}</span></div>`;
   const rows = DOSSIER.map(d => (S.attPeak >= d.peak

@@ -1911,7 +1911,7 @@ describe("The Fall of Sam Axe", () => {
     expect(grossLife()).toBe(1e9);
     expect(open()).toBeGreaterThan(before);
     expect(panelHTML("file")).toContain("Michael's take");
-    expect(panelHTML("file")).toContain("full fees");
+    expect(panelHTML("file")).toContain("Handed back to the people you helped");
     S.stats.returned = 0;
   });
 

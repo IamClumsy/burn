@@ -2196,6 +2196,12 @@ describe("The Fall of Sam Axe", () => {
     expect(ARCS.length).toBe(6);
   });
 
+  it("client and villain names follow the wiki for the cases that were corrected", () => {
+    const notes = EP_NOTES as Record<string, { client?: string; villain?: string }>;
+    expect(notes["109"].villain).toBe("Reyes");              // Hard Bargain: the head kidnapper, not Lucio
+    expect(notes["211"].client).toBe("Corey and Tanya");     // Hot Spot: the football clients, not the coach
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

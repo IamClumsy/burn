@@ -63,7 +63,7 @@ export function milestones(): void {
     // A decision needs the dialog free; try again next second if something else is open.
     if (s.choice && (choiceBusy() || S.boss)) break;
     S.story++; S.favors += s.fav;
-    toast("Case File: " + s.t, s.x.slice(0, 90) + "… (+" + s.fav + " favors)", "story");
+    toast("Case File: " + s.t, s.x + " (+" + s.fav + " favors)", "story"); // the whole entry, not a clipped start
     say(s.x); chime();
     if (s.choice) {
       showChoice(s.t, s.choice.prompt, s.choice.options.map((o, k): [string, () => string] => [o.label, () => {

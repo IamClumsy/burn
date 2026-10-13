@@ -2215,6 +2215,17 @@ describe("The Fall of Sam Axe", () => {
     S.nateAway = false;
   });
 
+  it("a Case File notice shows the whole entry, not a clipped start", () => {
+    S.story = 0; S.life = 1e12; S.intel = 2; S.seasonOpen = 7; dismissAllNotices();
+    milestones();
+    const texts: string[] = [];
+    while (noticeOpen()) { texts.push(document.getElementById("nT")!.textContent + "|" + document.getElementById("nM")!.textContent); dismissNotice(); if (document.getElementById("evt")!.style.display === "flex") document.querySelectorAll<HTMLButtonElement>("#evtO button")[0].click(); }
+    const caseFile = texts.filter(t => t.startsWith("Case File:"));
+    expect(caseFile.length).toBeGreaterThan(0);
+    for (const t of caseFile) expect(t).not.toContain("… (+");
+    dismissAllNotices();
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

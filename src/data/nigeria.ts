@@ -12,8 +12,8 @@ export const NIGERIA_ID = "nigeria";
 export const NIGERIA_ACTS: FlashbackAct[] = [
   {
     title: "Act One: The Drop",
-    inquiry: "Sam leans on the bar. \"So, Mikey. Nigeria. You never told me what happened in Nigeria?? Hey! Another mojito over here!\"",
-    prompt: "He wants to know how the night started. How does Michael tell the job?",
+    inquiry: "Sam leans on the bar. \"So, Mikey. Nigeria. The gun-running capital of the world, and the one place I'd never take a vacation, and you never told me what happened there?? Hey! Another mojito over here!\"",
+    prompt: "He wants to know how the night started. A briefcase of money, a warlord, and an arms trade where everyone is armed: how does Michael tell the job?",
     options: [
       { label: "Routine. A payoff and a handshake", result: "Sam nods like a man who has heard the word \"routine\" before. \"Nothing in Nigeria is routine, Mikey.\" He's right, and the whole bar can tell.", fx: { succ: 0.03 } },
       { label: "Admit he had a bad feeling", result: "\"You had a bad feeling and you went anyway?\" Sam is delighted. \"That's the most Michael thing I've ever heard.\" He buys the next round.", fx: { att: -0.05 } },
@@ -66,12 +66,12 @@ const WARLORD: Boss = {
   intro: "Make it to the airport!!! The warlord's trucks are on the road behind you, and the plane doesn't wait for anyone.",
   win: "Michael makes the airport, a plane, and a seat with a poor view. He passes out before takeoff and wakes up in Miami.",
   lose: "The trucks close the gap. Michael finds a way across a field and tries again.",
-  file: "A Nigerian warlord who was promised a payment that never arrived. He was paid in promises by a man who had already been burned, and he took it out on the man who was there. Little is known about him; he never gave his name to someone he was about to beat.",
+  file: "A Nigerian warlord who was promised a payment that never arrived, in a place where arms are the main business and nobody is unarmed. He was paid in promises by a man who had already been burned, and he took it out on the man who was there. Little is known about him; he never gave his name to someone he was about to beat.",
 };
 
 export const NIGERIA_ARC: Arc = {
   id: NIGERIA_ID, title: "Nigeria", at: 2e4, ally: "sam", favors: 4, needsEp: "101", orSeason: 2,
-  blurb: "Sam has been needling you for months. Tonight he's buying: a mojito, a barstool, and the whole story of the night Michael was burned in Nigeria.",
+  blurb: "Sam has been needling you for months. Tonight he's buying: a mojito, a barstool, and the whole story of the night Michael was burned in Nigeria, the gun-running capital of the world, where nobody walks in alone and expects to walk out.",
   epilogue: "Michael woke up in Miami with no money, no job and a burn notice he had never been shown. Sam finishes his drink. \"So that's the whole story?\" \"That's the whole story.\" \"Mikey. We are going to need another round.\"",
   steps: [
     { n: "Make the Drop", dur: 45, succ: 0.8, heat: 8, rm: 2.0, act: 0 },
@@ -112,7 +112,7 @@ export const NIGERIA_FLASHBACK: FlashbackDef = {
   pausedText: "Everything else waits: no new cases, no clients, no visitors, and your other jobs and the Organization hold still until he's finished the story.",
   offer: () => ({
     title: "Sam wants a story",
-    text: "Sam has been needling you for a while. \"Nigeria, Mikey. You never told me what happened in Nigeria.\" He's already ordered you a mojito. Nigeria is now an Open Case.",
+    text: "Sam has been needling you for a while. \"Nigeria, Mikey. The gun-running capital of the world, and you never told me what happened.\" He's already ordered you a mojito. Nigeria is now an Open Case.",
     say: "Sam pushes a mojito across the bar and raises an eyebrow. \"Go on.\"",
   }),
   replay: {

@@ -2550,6 +2550,16 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
   });
 
+  it("Fiona is in prison, away from the crew, from when First Contact is offered until it's told", () => {
+    S.seasonGate = false; S.life = 9e9; S.allies.fiona = true; S.episodesDone = { "601": true }; S.arcStep = {}; S.arcsDone = { nigeria: true, samfall: true }; S.fionaAway = 0; dismissAllNotices();
+    expect(awayWhy("fiona")).toBeNull();                                 // not offered yet
+    milestones();
+    dismissAllNotices();
+    expect(awayWhy("fiona")?.short).toBe("is in prison");
+    S.arcsDone.firstcontact = true;                                      // told
+    expect(awayWhy("fiona")).toBeNull();
+  });
+
   it("Satisfied Clients Refer Friends stops at level 20 and the card says so", () => {
     S.cash = 1e60; S.life = 1e60; S.referrals = 19;
     buyReferral();

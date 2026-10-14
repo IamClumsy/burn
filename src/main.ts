@@ -6,7 +6,8 @@ import { QUOTES } from "./data/text";
 import { RECIPES } from "./data/perks";
 import { $ } from "./ui/dom";
 import { floatText, say, toast } from "./ui/fx";
-import { showChoice } from "./ui/choice";
+import { choiceBusy, showChoice } from "./ui/choice";
+import { newerBuildAvailable } from "./update";
 import { devUnlocked, devFundsOn, lockDev, setDevFunds, unlockDev } from "./dev";
 import { render, showModal } from "./ui/render";
 import { returnFromAway } from "./game/offline";
@@ -191,3 +192,18 @@ if (import.meta.env.DEV) {
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => { navigator.serviceWorker.register("/sw.js").catch(() => { /* private window or blocked: the game works online as usual */ }); });
 }
+
+// An installed app left in the background keeps running the code it started with. When you come back to it, or every
+// quarter of an hour while it's open, check whether a newer build is out: reload straight away after saving if you've
+// just returned, and otherwise offer it.
+let updateAsked = false;
+async function checkForNewBuild(returning: boolean): Promise<void> {
+  if (!(await newerBuildAvailable())) return;
+  if (returning) { save(); location.reload(); return; }
+  if (updateAsked || choiceBusy()) return;
+  updateAsked = true;
+  showChoice("A new version is ready", "The game has been updated. Reload to get the latest; your progress is saved first.",
+    [["Reload now", () => { save(); location.reload(); return ""; }], ["Later", () => { updateAsked = false; return ""; }]], undefined, { primary: 0 });
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") void checkForNewBuild(true); });
+setInterval(() => { if (document.visibilityState === "visible") void checkForNewBuild(false); }, 15 * 60 * 1000);

@@ -55,6 +55,7 @@ import { earn, merge } from "../state";
 import { loadGame, readSave, save } from "../persist";
 import { clearBuilt } from "../ui/built";
 import { versionLine } from "../version";
+import { newerBuildAvailable } from "../update";
 import { lockDev, resetDevForTests, setDevFunds, unlockDev } from "../dev";
 import { credGain, finaleEp, openSeasons, seasonLeft, waitingOn } from "../calc";
 import { EP_NOTES } from "../data/episodeNotes";
@@ -2356,6 +2357,14 @@ describe("The Fall of Sam Axe", () => {
     expect(cards.innerHTML).not.toBe(before);
     dismissAllNotices();
     render();
+  });
+
+  it("a running copy notices when a newer build has been deployed", async () => {
+    const page = (hash: string) => async () => ({ ok: true, text: async () => `<html><script type="module" src="/assets/index-${hash}.js"></script></html>` }) as Response;
+    expect(await newerBuildAvailable(page("NEW") as any, "/assets/index-OLD.js")).toBe(true);
+    expect(await newerBuildAvailable(page("OLD") as any, "/assets/index-OLD.js")).toBe(false);   // same build: nothing to do
+    expect(await newerBuildAvailable((async () => { throw new Error("offline"); }) as any, "/assets/index-OLD.js")).toBe(false);
+    expect(await newerBuildAvailable(page("NEW") as any, "")).toBe(false);                       // development: no built script to compare
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

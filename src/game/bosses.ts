@@ -10,7 +10,8 @@ import { floatText, hitBoss, say as sayTag, shake, toast } from "../ui/fx";
 import { checkBurn } from "./heat";
 import { learnName, reduceGrip } from "./org";
 import { nextBossGap } from "../data/pacing";
-import { FLASHBACK_BOSSES } from "../data/samAxe";
+import { FLASHBACKS } from "../data/flashbacks";
+import { fbState } from "../flashbackState";
 import { advanceArc } from "./arcs";
 const say = (t: string): void => sayTag(t, "boss");
 
@@ -37,7 +38,7 @@ export function spawnBoss(): void {
 
 /** A showdown that's a step of an Open Case (Veracruz in the flashback). It never turns up on its own. */
 export function startFlashbackBoss(id: string, arc: string, step: number): void {
-  const b = FLASHBACK_BOSSES.find(x => x.id === id);
+  const b = FLASHBACKS.flatMap(f => f.bosses).find(x => x.id === id);
   if (!b || S.boss) return;
   const max = bossHP(b);
   S.boss = { id: b.id, hp: max, max, left: 90, arc: { id: arc, step } };
@@ -49,7 +50,7 @@ export function startFlashbackBoss(id: string, arc: string, step: number): void 
 export function winBoss(): void {
   const b = bossDef()!, arc = S.boss?.arc;
   if (b.flashback) { // not on the List: pay out, and the case moves on
-    const reward = cps() * 200 * b.hpm + 500, fav = S.samReplay ? 0 : Math.ceil(2 * b.hpm);
+    const reward = cps() * 200 * b.hpm + 500, fav = arc && fbState(arc.id).replay ? 0 : Math.ceil(2 * b.hpm);
     earn(reward); S.favors += fav;
     S.boss = null; S.bossCd = nextBossGap();
     chime();

@@ -111,6 +111,8 @@ export interface Arc {
   ep?: string;
   steps: { n: string; dur: number; succ: number; heat: number; rm: number; /** Starting this step tells the next act of a flashback. */ act?: number; /** This step is a showdown with a flashback boss. */ boss?: string }[];
 }
+/** What a flashback stores in the save. */
+export interface FlashbackState { choices: Dict<number>; offered: boolean; replay: boolean }
 export interface Medal { id: string; n: string; d: string; t: (s: GameState) => boolean }
 /** An event option; `needs` is an ally who has to be on the crew for it to be offered. */
 export type EventOption = [label: string, run: () => string, needs?: string];
@@ -143,6 +145,8 @@ export interface GameState {
   seen: Dict<number>;
   /** How you told each act of The Fall of Sam Axe (act number to the option you picked). */
   samChoices: Dict<number>;
+  /** Every flashback other than Sam's keeps its answers, offer and replay here, by id. */
+  fb: Dict<FlashbackState>;
   /** Has Sam offered to tell The Fall of Sam Axe yet? */
   /** New games only: Season 2 waits for every Season 1 case. Older saves skip it. */ seasonGate: boolean; /** Nate has died, in "Shock Wave". */ nateGone: boolean; /** Madeline has died, in "Reckoning". */ madelineGone: boolean; samOffered: boolean; samReplay: boolean; backupNudged: boolean; intel: number;
   /** The Organization's grip on you: starts at 100 and is worn down by wins. */

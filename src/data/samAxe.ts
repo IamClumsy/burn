@@ -1,4 +1,5 @@
 import type { Arc, Boss, ChoiceFx } from "../types";
+import type { FlashbackAct, FlashbackDef } from "./flashbacks";
 
 /**
  * The Fall of Sam Axe: the prequel movie, set in Colombia in 2005, as Sam tells it at a Navy inquiry.
@@ -8,13 +9,8 @@ import type { Arc, Boss, ChoiceFx } from "../types";
  */
 export const SAM_ARC_ID = "samfall";
 
-export interface SamAct {
-  title: string;
-  /** Admiral Lawrence at the inquiry, setting up the act. */
-  inquiry: string;
-  prompt: string;
-  options: { label: string; result: string; fx: ChoiceFx }[];
-}
+/** Admiral Lawrence at the inquiry sets up each act. */
+export type SamAct = FlashbackAct;
 
 export const SAM_ACTS: SamAct[] = [
   {
@@ -127,4 +123,35 @@ export const BOWLING = {
   text: "Before any of it, Sam remembers a bowling alley and a younger, scruffier Michael (Sam calls him Mike), years before the burn notice, hearing him out about a romantic mess and giving him straight advice. Sam did not follow all of it. Still, a good friend's advice makes the first step a little easier (+8% on Step 1).",
   say: "Sam stares at a bowling ball and remembers Michael's advice. He'd have been better off taking all of it.",
   succ: 0.08,
+};
+
+/** The Fall of Sam Axe as a registered flashback. */
+export const SAM_FLASHBACK: FlashbackDef = {
+  id: SAM_ARC_ID,
+  title: "The Fall of Sam Axe",
+  teller: "Sam",
+  arc: SAM_ARC,
+  acts: SAM_ACTS,
+  beats: SAM_BEATS,
+  bridge: { ...SAM_BRIDGE, result: "Sam holds the road." },
+  nod: { label: "Remember Mike at the bowling alley", portrait: "michaelpre", ...BOWLING },
+  bosses: FLASHBACK_BOSSES,
+  speed: 0.5,
+  menuId: "fosa",
+  menuTitle: "The Fall of Sam Axe",
+  pausedTitle: "Sam is telling his story.",
+  pausedText: "Everything else waits: no new cases, no clients, no visitors, and your other jobs and the Organization hold still until he finishes.",
+  offer: s => (s.episodesDone["516"]
+    ? { title: "Sam has a story", text: "Beatriz is safe, and Sam goes quiet in the way he does when a name from long ago turns up. \"I met her in Colombia,\" he says. \"Pull up a chair. It's the worst assignment of my career, and I'm going to tell you all of it.\" The Fall of Sam Axe is now an Open Case.", say: "Sam clears his throat. This is going to take a while, and he's ordering a drink first." }
+    : { title: "Sam has a story", text: "Sam has been saving a story for a long time. \"Colombia, 2005,\" he says. \"Pull up a chair.\" The Fall of Sam Axe is now an Open Case.", say: "Sam clears his throat. This is going to take a while, and he's ordering a drink first." }),
+  replay: {
+    title: "Sam tells it again",
+    text: "\"Colombia, 2005,\" says Sam, and orders a drink. Everything else waits until he's done. The Fall of Sam Axe is an Open Case again, and this time you can answer the Admiral differently. The favors and prizes were yours the first time.",
+    say: "Sam clears his throat. He's been waiting for someone to ask.",
+  },
+  retry: step => ({
+    title: "The Admiral isn't convinced",
+    text: `"That isn't how I read the report, Commander. Take it from \"${step}\" again." The step is yours to try again, and it won't open with a new question.`,
+  }),
+  replayHelp: "Everything else waits while Sam tells it, and your answers can change. The favors, the medal and the cover were yours the first time.",
 };

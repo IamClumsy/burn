@@ -3,7 +3,9 @@ import { GENS, OP_CAP } from "./data/ops";
 import { UPGS } from "./data/upgrades";
 import { COVERS } from "./data/covers";
 import { BOSSES } from "./data/bosses";
-import { BOWLING, FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC_ID, SAM_BEATS } from "./data/samAxe";
+import { SAM_ARC_ID } from "./data/samAxe";
+import { FLASHBACKS, flashbackById } from "./data/flashbacks";
+import { fbState } from "./flashbackState";
 import { STORY } from "./data/story";
 import { MISSIONS, seasonOf, seasonsOpen } from "./data/missions";
 import { DAY_MS, FAVORS_PER_DAY } from "./data/pacing";
@@ -18,13 +20,16 @@ function chosenFx(): ChoiceFx[] {
     const k = S.choices[i];
     if (b.choice && k !== undefined && b.choice.options[k]) out.push(b.choice.options[k].fx);
   });
-  SAM_ACTS.forEach((a, i) => { // how Sam told his story
-    const k = S.samChoices[i];
-    if (k !== undefined && a.options[k]) out.push(a.options[k].fx);
-  });
-  for (const [step, beat] of Object.entries(SAM_BEATS)) { // and the smaller answers between the acts
-    const k = S.samChoices["beat" + step];
-    if (k && beat.options[k - 1]) out.push(beat.options[k - 1].fx);
+  for (const f of FLASHBACKS) { // how each flashback was told
+    const ch = fbState(f.id).choices;
+    f.acts.forEach((a, i) => {
+      const k = ch[i];
+      if (k !== undefined && a.options[k]) out.push(a.options[k].fx);
+    });
+    for (const [step, beat] of Object.entries(f.beats)) { // and the smaller answers between the acts
+      const k = ch["beat" + step];
+      if (k && beat.options[k - 1]) out.push(beat.options[k - 1].fx);
+    }
   }
   return out;
 }
@@ -259,7 +264,7 @@ export const wouldBeHelped = (m: { send: boolean; ally: string }): boolean =>
 export const allyFree = (id: string): boolean => allyHere(id) && !S.active.some(a => a.sent === id);
 export function succChance(m: Mission): number {
   if (m.kid) return 1; // Michael never fails when a kid is involved
-  const c = m.succ + tierDef().succ + choiceSucc() + (m.arc?.id === SAM_ARC_ID && m.arc.step === 0 && S.samChoices.bowling ? BOWLING.succ : 0) + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
+  const c = m.succ + tierDef().succ + choiceSucc() + (m.arc && m.arc.step === 0 && flashbackById(m.arc.id)?.nod && fbState(m.arc.id).choices.nod ? flashbackById(m.arc.id)!.nod!.succ : 0) + 0.03 * perk("insider") + (S.allies.jesse ? 0.1 : 0) + (m.send && allyFree(m.ally) ? 0.25 : 0);
   return Math.min(0.97, c);
 }
 /** What the client pays in total. Michael keeps KEEP_RATE of it. */
@@ -290,7 +295,7 @@ export const bossView = (b: Boss): Boss => {
     listNote: "Gone, but not finished.",
   };
 };
-export const bossDef = (): Boss | null => { const b = S.boss ? [...BOSSES, ...FLASHBACK_BOSSES].find(x => x.id === S.boss!.id) : undefined; return b ? bossView(b) : null; };
+export const bossDef = (): Boss | null => { const b = S.boss ? [...BOSSES, ...FLASHBACKS.flatMap(f => f.bosses)].find(x => x.id === S.boss!.id) : undefined; return b ? bossView(b) : null; };
 
 /** Has Sam told the whole story? It sharpens him: a quieter Sam, and a better ability. */
 export const samSharp = (): boolean => !!S.arcsDone[SAM_ARC_ID];
@@ -313,7 +318,12 @@ export function conChance(): number {
   return Math.min(0.95, c);
 }
 
-/** The Fall of Sam Axe is underway (a step is running, its showdown is on, or you're between steps), so the game wears its flashback look. */
-export const inFlashback = (): boolean =>
-  S.samReplay || !!S.active.some(m => m.arc?.id === SAM_ARC_ID) || !!S.boss?.arc && S.boss.arc.id === SAM_ARC_ID ||
-  ((S.arcStep[SAM_ARC_ID] || 0) > 0 && !S.arcsDone[SAM_ARC_ID]);
+/** The flashback that's underway: a step is running, its showdown is on, it's being replayed, or you're between steps. */
+export const activeFlashback = (): string | null => {
+  for (const f of FLASHBACKS) {
+    if (fbState(f.id).replay || S.active.some(m => m.arc?.id === f.id) || S.boss?.arc?.id === f.id || ((S.arcStep[f.id] || 0) > 0 && !S.arcsDone[f.id])) return f.id;
+  }
+  return null;
+};
+/** Is a flashback underway, so the game wears its flashback look and everything else waits? */
+export const inFlashback = (): boolean => activeFlashback() !== null;

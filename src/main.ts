@@ -19,7 +19,7 @@ import { loadGame, save, wipeSave, exportSave, importSave } from "./persist";
 import { tick } from "./game/tick";
 import { checkBurn, layLow } from "./game/heat";
 import { fillBoard, startMission } from "./game/missions";
-import { rememberBowling, replaySamStory, startArc } from "./game/arcs";
+import { rememberNod, replayFlashback, startArc } from "./game/arcs";
 import { bossAction } from "./game/bosses";
 import type { CaseAction } from "./types";
 import { scheduleClient, scheduleEvent } from "./game/events";
@@ -40,7 +40,7 @@ const ACT: Record<string, (arg: string) => void> = {
   start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
   setting: a => setting(a), dev: a => devAct(a),
   recapcopy: () => { void navigator.clipboard?.writeText(recapText()).then(() => toast("Copied", "Your run is on the clipboard.", "good")).catch(() => toast("Couldn't copy", "Your browser didn't allow it.", "bad")); },
-  recapclose: () => showModal(null), bowling: () => rememberBowling(), replay: () => { replaySamStory(); showModal(null); },
+  recapclose: () => showModal(null), nod: a => rememberNod(a), replay: a => { replayFlashback(a); showModal(null); },
 };
 
 let lastCraft = 0;

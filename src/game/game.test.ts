@@ -55,6 +55,8 @@ import { earn, merge } from "../state";
 import { loadGame, readSave, save } from "../persist";
 import { clearBuilt } from "../ui/built";
 import { versionLine } from "../version";
+import { FLASHBACKS } from "../data/flashbacks";
+import { fbState } from "../flashbackState";
 import { epilogueEntries } from "../data/epilogue";
 import { newerBuildAvailable } from "../update";
 import { lockDev, resetDevForTests, setDevFunds, unlockDev } from "../dev";
@@ -1753,12 +1755,12 @@ describe("The Fall of Sam Axe", () => {
 
   it("remembering the bowling alley boosts Step 1 once, and the button then goes away", () => {
     S.life = 5e8; S.samOffered = true; dismissAllNotices();
-    expect(panelHTML("mis")).toContain('data-act="bowling"');
+    expect(panelHTML("mis")).toContain('data-act="nod"');
     const before = succChance({ ...MISSIONS[0], uid: 1, arc: { id: SAM_ARC_ID, step: 0 } } as any);
     rememberBowling(); rememberBowling();
     const after = succChance({ ...MISSIONS[0], uid: 1, arc: { id: SAM_ARC_ID, step: 0 } } as any);
     expect(after - before).toBeCloseTo(BOWLING.succ);
-    expect(panelHTML("mis")).not.toContain('data-act="bowling"');
+    expect(panelHTML("mis")).not.toContain('data-act="nod"');
     dismissAllNotices();
   });
 
@@ -1801,7 +1803,7 @@ describe("The Fall of Sam Axe", () => {
     S.arcsDone[SAM_ARC_ID] = true;
     const html = panelHTML("rogue");
     expect(html).toContain("Commandante Veracruz");
-    expect(html).toContain("never turns up again");
+    expect(html).toContain("Never turns up again");
   });
 
   it("Veracruz is noted beside The List too, without counting toward it", () => {
@@ -2460,6 +2462,33 @@ describe("The Fall of Sam Axe", () => {
     expect(epilogueEntries(true, false).find(e => e.who === "Madeline")!.text).toMatch(/place at the table/);
     expect(epilogueEntries(false, true).find(e => e.who === "Charlie")!.text).toMatch(/his brother/);
     S.madelineGone = false;
+  });
+
+  it("the flashback registry is consistent, and any flashback's answers live in the save", () => {
+    const ids = new Set<string>(), menus = new Set<string>();
+    for (const f of FLASHBACKS) {
+      expect(ids.has(f.id), `${f.id} is unique`).toBe(false); ids.add(f.id);
+      expect(menus.has(f.menuId), `${f.menuId} is unique`).toBe(false); menus.add(f.menuId);
+      expect(ARCS.some(a => a.id === f.id), `${f.id} is an Open Case`).toBe(true);
+      expect(MENU, `${f.id} has a menu page`).toContain(f.menuId as any);
+      f.arc.steps.forEach((st, i) => {
+        if (st.act !== undefined) expect(f.acts[st.act], `${f.id} step ${i} has its act`).toBeDefined();
+        else if (!st.boss) expect(f.beats[i], `${f.id} step ${i} has a card between acts`).toBeDefined();
+        if (st.boss) expect(f.bosses.some(b => b.id === st.boss), `${f.id} step ${i} has its foe`).toBe(true);
+      });
+      expect(f.speed).toBeGreaterThan(0);
+      expect(f.offer(S).text.length).toBeGreaterThan(10);
+      expect(f.retry("x").text).toContain("x");
+    }
+    // a flashback other than Sam's keeps what it needs in S.fb, and it survives a save
+    fbState("test-flashback").choices[0] = 1; fbState("test-flashback").offered = true;
+    const back = merge(JSON.parse(JSON.stringify(S)));
+    expect(back.fb["test-flashback"].choices[0]).toBe(1);
+    expect(back.fb["test-flashback"].offered).toBe(true);
+    delete S.fb["test-flashback"];
+    // Sam's keeps using the fields older saves already have
+    fbState("samfall").choices[0] = 1;
+    expect(S.samChoices[0]).toBe(1);
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

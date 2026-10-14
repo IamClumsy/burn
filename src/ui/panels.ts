@@ -3,7 +3,7 @@ import type { ContactId } from "../types";
 import {
   REINSTATE_MIN, allyAvailable, referralCost, referralMult, upgradeUnlocked, baseIncome, tierDef, allyFree, allyHere, awayWhy, bossView, bulkCost, cps, buyN, cover, credGain, genMult, incomeMult, missionReward, owned, perk, perkCost,
   contactPrice, favorsLeft, hangOutPrice, nextFavorIn, succChance,
-  samSharp, grossLife, openSeasons, seasonLeft, waitingOn, inFlashback, slotOpen, wouldBeHelped, SOLO_SLOTS, HELP_SLOTS, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
+  samSharp, grossLife, openSeasons, seasonLeft, waitingOn, inFlashback, activeFlashback, slotOpen, wouldBeHelped, SOLO_SLOTS, HELP_SLOTS, recipeCash, HEAT_COOLING, attCooling, attGain, attNet, bossDef, choiceMult, gripAtt, heatFactors, heatGain, heatMult, heatNet, opsNoise,
 } from "../calc";
 import { GENS } from "../data/ops";
 import { REFERRAL, UPGS } from "../data/upgrades";
@@ -25,7 +25,8 @@ import { devFundsOn, devUnlocked } from "../dev";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
 import { arcAvailable, arcStep, stepDur } from "../game/arcs";
-import { FLASHBACK_BOSSES, SAM_ACTS, SAM_ARC, SAM_BEATS, SAM_ARC_ID } from "../data/samAxe";
+import { FLASHBACKS, flashbackById, type FlashbackDef } from "../data/flashbacks";
+import { fbState } from "../flashbackState";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
 import { fmt, formatWait, money } from "../util";
 import { AUTOS, autoCut } from "../data/automation";
@@ -45,11 +46,11 @@ export const SECTIONS: [TabId, string][] = [
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"], ["gad", "Gadgets"], ["fav", "Favors"],
   ["list", "The List"], ["file", "Michael's File"], ["stats", "Stats"], ["auto", "Automation"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
-  ["options", "Menu"], ["settings", "Settings"], ["fosa", "The Fall of Sam Axe"], ["recap", "Your Run"], ["narrator", "Narrator"], ["heatinfo", "Heat and Attention"],
+  ["options", "Menu"], ["settings", "Settings"], ...FLASHBACKS.map((f): [TabId, string] => [f.menuId as TabId, f.menuTitle]), ["recap", "Your Run"], ["narrator", "Narrator"], ["heatinfo", "Heat and Attention"],
 ];
 
 /** What the menu button offers. Crew, Covers, Gadgets and Favors stay in The Loft, so they aren't here. */
-export const MENU: TabId[] = ["list", "file", "stats", "auto", "story", "rogue", "med", "rep", "faq", "recap", "fosa", "settings"];
+export const MENU: TabId[] = ["list", "file", "stats", "auto", "story", "rogue", "med", "rep", "faq", "recap", ...FLASHBACKS.map(f => f.menuId as TabId), "settings"];
 
 
 
@@ -150,14 +151,15 @@ function missions(): string {
     <div class="small" style="margin-bottom:8px">Up to 3 missions at once, plus a fourth slot that only takes a case an ally is helping with (${S.active.length}/${SOLO_SLOTS + HELP_SLOTS}). Clients pay well. Michael keeps what he needs for expenses and hands the rest back. Ask an ally for help for +25% success (or +1 favor on cases that can't fail). They're busy until it ends.</div>`;
   const open = ARCS.filter(arcAvailable);
   if (waitingOn()) h += `<div class="box" style="border-color:var(--gold)"><b>Season ${waitingOn() + 1} is waiting.</b> <div class="small">You've earned enough, but it opens once you've done every Season ${waitingOn()} case (${seasonLeft(waitingOn())} left). Those are turning up more often now. Look for the ones without a Seen tag.</div></div>`;
-  if (inFlashback()) h += `<div class="box"><b>Sam is telling his story.</b> <div class="small">Everything else waits: no new cases, no clients, no visitors, and your other jobs and the Organization hold still until he finishes.</div></div>`;
+  const running = flashbackById(activeFlashback() ?? "");
+  if (running) h += `<div class="box"><b>${running.pausedTitle}</b> <div class="small">${running.pausedText}</div></div>`;
   if (open.length) {
     h += `<h2>Open Cases</h2>` + open.map(a => {
       const k = arcStep(a), st = a.steps[k];
       return `<div class="box"><b>${a.title}</b> <span class="chip">Step ${k + 1} of ${a.steps.length}</span>
         <div class="small">${a.blurb}</div>
         <div class="small" style="color:var(--text)">Next: ${st.n} · ${stepDur(a, st.dur)}s · +${st.heat} heat${S.allies[a.ally] ? "" : ""}</div>
-        <div class="btns"><button data-act="arc" data-arg="${a.id}" ${slotOpen(allyFree(a.ally)) ? "" : "disabled"}>Start this step</button>${a.id === SAM_ARC_ID && k === 0 && !S.samChoices.bowling ? `<span class="small" style="display:inline-flex;align-items:center;gap:6px">${portrait("michaelpre", 28)}<button data-act="bowling">Remember Mike at the bowling alley</button></span>` : ""}</div></div>`;
+        <div class="btns"><button data-act="arc" data-arg="${a.id}" ${slotOpen(allyFree(a.ally)) ? "" : "disabled"}>Start this step</button>${nodFor(a.id, k)}</div></div>`;
     }).join("");
   }
   if (S.active.length) {
@@ -274,18 +276,24 @@ function rogues(): string {
     }).join("") + flashbackRogues();
 }
 
-/** Have you opened The Fall of Sam Axe (started it, or finished it)? Its foe stays hidden until then. */
-const samStarted = (): boolean => (S.arcStep[SAM_ARC_ID] || 0) > 0 || !!S.arcsDone[SAM_ARC_ID] || S.samReplay || !!S.active.some(m => m.arc?.id === SAM_ARC_ID);
+/** The once-only nod before a flashback's first step (for Sam's story, the bowling alley), as a button on its case card. */
+function nodFor(id: string, step: number): string {
+  const f = flashbackById(id);
+  if (!f?.nod || step !== 0 || fbState(id).choices.nod) return "";
+  return `<span class="small" style="display:inline-flex;align-items:center;gap:6px">${f.nod.portrait ? portrait(f.nod.portrait, 28) : ""}<button data-act="nod" data-arg="${id}">${f.nod.label}</button></span>`;
+}
 
-/** The one-off foes of Sam's flashback. They're not on The List and never turn up on their own, but they get a place here. */
+/** Have you opened this flashback (started it, or finished it)? Its foes and answers stay hidden until then. */
+const started = (f: FlashbackDef): boolean => (S.arcStep[f.id] || 0) > 0 || !!S.arcsDone[f.id] || fbState(f.id).replay || !!S.active.some(m => m.arc?.id === f.id);
+
+/** The one-off foes of the flashbacks. They're not on The List and never turn up on their own, but they get a place here. */
 function flashbackRogues(): string {
-  if (!samStarted()) return ""; // hidden until you open The Fall of Sam Axe
-  return `<h2 style="margin-top:14px">The Fall of Sam Axe</h2>` + FLASHBACK_BOSSES.map(b => {
-    const done = !!S.arcsDone[SAM_ARC_ID];
-    return `<div class="box" style="border-color:var(--gold);${done ? "" : "opacity:.6"}"><div class="who">${portrait(b.id, 56, done)}<div><div class="row"><b>${done ? b.n : "???"}</b><span class="small">${done ? "Beaten, once and for all" : "Waiting in Sam's story"}</span></div>
-      ${done ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">He never turns up again: he belongs to The Fall of Sam Axe, not to The List.</div>
-        <div class="small" style="margin-top:6px;color:var(--text)"><b>File:</b> ${b.file}</div>` : `<div class="small" style="margin-top:6px">Someone from a story Sam hasn't finished telling yet.</div>`}</div></div></div>`;
-  }).join("");
+  return FLASHBACKS.filter(f => started(f) && f.bosses.length).map(f => `<h2 style="margin-top:14px">${f.title}</h2>` + f.bosses.map(b => {
+    const done = !!S.arcsDone[f.id];
+    return `<div class="box" style="border-color:var(--gold);${done ? "" : "opacity:.6"}"><div class="who">${portrait(b.id, 56, done)}<div><div class="row"><b>${done ? b.n : "???"}</b><span class="small">${done ? "Beaten, once and for all" : `Waiting in ${f.teller}'s story`}</span></div>
+      ${done ? `<div class="small">${b.title}</div><div class="small" style="color:var(--gold)">Never turns up again: belongs to ${f.title}, not to The List.</div>
+        <div class="small" style="margin-top:6px;color:var(--text)"><b>File:</b> ${b.file}</div>` : `<div class="small" style="margin-top:6px">Someone from a story ${f.teller} hasn't finished telling yet.</div>`}</div></div></div>`;
+  }).join("")).join("");
 }
 
 function story(): string {
@@ -412,25 +420,25 @@ function narrator(): string {
 /** The menu behind the hamburger button. */
 function options(): string {
   const fresh = menuNew();
-  return `<div class="menugrid">${MENU.filter(id => (id !== "fosa" || S.arcsDone[SAM_ARC_ID]) && (id !== "recap" || S.cleanRecord)).map(id => `<button data-modal="${id}">${titleOf(id)}${fresh[id] ? `<span class="newchip">NEW</span>` : ""}</button>`).join("")}</div>`;
+  return `<div class="menugrid">${MENU.filter(id => { const f = FLASHBACKS.find(x => x.menuId === id); return (!f || S.arcsDone[f.id]) && (id !== "recap" || S.cleanRecord); }).map(id => `<button data-modal="${id}">${titleOf(id)}${fresh[id] ? `<span class="newchip">NEW</span>` : ""}</button>`).join("")}</div>`;
 }
 
-/** Sam's story, once it's been told: how you told it, and a way to hear it again. Only in the menu after it's closed. */
-function fosa(): string {
-  const a = SAM_ARC;
-  const told = SAM_ACTS.map((act, i) => {
-    const k = S.samChoices[i], o = k !== undefined ? act.options[k] : null;
+/** A flashback, once it's been told: how you told it, and a way to hear it again. Only in the menu after it's closed. */
+function flashbackPage(f: FlashbackDef): string {
+  const fb = fbState(f.id);
+  const told = f.acts.map((act, i) => {
+    const k = fb.choices[i], o = k !== undefined ? act.options[k] : null;
     return `<div class="box"><b>${act.title}</b>${o ? `<div class="small" style="color:var(--gold)">You told it: ${o.label}</div><div class="small" style="color:var(--text)">${o.result}</div>` : `<div class="small">Not yet answered this time.</div>`}</div>`;
   }).join("");
-  const asides = Object.entries(SAM_BEATS).map(([step, beat]) => {
-    const k = S.samChoices["beat" + step], o = k ? beat.options[k - 1] : null;
+  const asides = Object.entries(f.beats).map(([step, beat]) => {
+    const k = fb.choices["beat" + step], o = k ? beat.options[k - 1] : null;
     return o ? `<div class="small" style="margin-top:4px"><b>${beat.title.replace(/^.*?: /, "")}:</b> ${o.label}. <span style="color:var(--dim)">${o.result}</span></div>` : "";
   }).join("");
-  const again = S.samReplay
-    ? `<div class="small" style="margin-top:8px">Sam is telling it again. Look for it under Open Cases.</div>`
-    : `<div class="btns"><button data-act="replay" ${S.boss || S.active.length ? "disabled" : ""}>Hear it again</button></div>
-       <div class="small" style="margin-top:6px">${S.boss || S.active.length ? "Finish what's running first. " : ""}Everything else waits while Sam tells it, and your answers can change. The favors, the medal and the cover were yours the first time.</div>`;
-  return `<div class="small" style="margin-bottom:8px">${a.epilogue}</div><h2>How you told it</h2>${told}${asides ? `<div class="box"><b>And in between</b>${asides}</div>` : ""}${again}`;
+  const again = fb.replay
+    ? `<div class="small" style="margin-top:8px">${f.teller} is telling it again. Look for it under Open Cases.</div>`
+    : `<div class="btns"><button data-act="replay" data-arg="${f.id}" ${S.boss || S.active.length ? "disabled" : ""}>Hear it again</button></div>
+       <div class="small" style="margin-top:6px">${S.boss || S.active.length ? "Finish what's running first. " : ""}${f.replayHelp}</div>`;
+  return `<div class="small" style="margin-bottom:8px">${f.arc.epilogue}</div><h2>How you told it</h2>${told}${asides ? `<div class="box"><b>And in between</b>${asides}</div>` : ""}${again}`;
 }
 
 /** The hidden developer switches. Shown only after Settings' title is tapped seven times. */
@@ -535,10 +543,10 @@ function theList(): string {
     const status = done ? "Crossed off" : known ? "Known, not yet faced" + (note ? `. ${note}` : "") : "Unknown";
     return `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : known ? "color:var(--text)" : "color:var(--dim)"}"><span style="display:flex;align-items:center;gap:8px">${portrait(b.id, 30, !!(known || done))}${done ? "✓ " : "○ "}${known || done ? b.n : "??????"}</span><span>${status}</span></div>`;
   }).join("");
-  if (samStarted()) { // the flashback's one-off foe, noted beside the List but never counted on it
-    const done = !!S.arcsDone[SAM_ARC_ID];
-    h += `<div class="small" style="margin-top:10px;color:var(--dim)">The Fall of Sam Axe:</div>` + FLASHBACK_BOSSES.map(b =>
-      `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : "color:var(--dim)"}"><span style="display:flex;align-items:center;gap:8px">${portrait(b.id, 30, done)}${done ? "✓ " : "○ "}${done ? b.n : "??????"}</span><span>${done ? "Beaten in Sam's story" : "Waiting in Sam's story"}</span></div>`).join("");
+  for (const f of FLASHBACKS.filter(x => started(x) && x.bosses.length)) { // a flashback's one-off foes, noted beside the List but never counted on it
+    const done = !!S.arcsDone[f.id];
+    h += `<div class="small" style="margin-top:10px;color:var(--dim)">${f.title}:</div>` + f.bosses.map(b =>
+      `<div class="row small" style="padding:3px 0;${done ? "color:var(--gold)" : "color:var(--dim)"}"><span style="display:flex;align-items:center;gap:8px">${portrait(b.id, 30, done)}${done ? "✓ " : "○ "}${done ? b.n : "??????"}</span><span>${done ? `Beaten in ${f.teller}'s story` : `Waiting in ${f.teller}'s story`}</span></div>`).join("");
   }
   h += S.cleanRecord
     ? `<div class="box" style="margin-top:8px;border-color:var(--gold)"><b>The burn is lifted.</b><div class="small" style="color:var(--text)">Every name is crossed off. You're clear, and your income is up 25% for good.</div></div>`
@@ -567,13 +575,13 @@ export function recapRows(): [string, string][] {
   return rows;
 }
 export function recapText(): string {
-  const told = SAM_ACTS.map((a, i) => (S.samChoices[i] !== undefined && a.options[S.samChoices[i]] ? `${a.title}: ${a.options[S.samChoices[i]].label}` : "")).filter(Boolean);
+  const told = FLASHBACKS.flatMap(f => f.acts.map((a, i) => { const k = fbState(f.id).choices[i]; return k !== undefined && a.options[k] ? `${a.title}: ${a.options[k].label}` : ""; })).filter(Boolean);
   return ["Burned: Miami Idle, my run", ...recapRows().map(([k, v]) => `${k}: ${v}`), ...(told.length ? ["", "How I told Sam's story:", ...told] : []), (S.nateGone || S.madelineGone) ? `\nFor ${[S.nateGone && "Nate", S.madelineGone && "Madeline"].filter(Boolean).join(" and ")}.` : ""].join("\n");
 }
 
 /** Your Run: the recap, once the burn is lifted. */
 function recap(): string {
-  const told = SAM_ACTS.map((a, i) => (S.samChoices[i] !== undefined && a.options[S.samChoices[i]] ? `<div class="small"><b>${a.title}:</b> ${a.options[S.samChoices[i]].label}</div>` : "")).join("");
+  const told = FLASHBACKS.flatMap(f => f.acts.map((a, i) => { const k = fbState(f.id).choices[i]; return k !== undefined && a.options[k] ? `<div class="small"><b>${a.title}:</b> ${a.options[k].label}</div>` : ""; })).join("");
   return `<div class="small" style="margin-bottom:8px">The burn is lifted. Here's how it went.</div>
     <div class="dfile">${recapRows().map(([k, v]) => `<div class="drow"><span class="dlabel">${k}</span><span class="dtext">${v}</span></div>`).join("")}</div>
     ${told ? `<h2 style="margin-top:14px">How you told Sam's story</h2><div class="box">${told}</div>` : ""}
@@ -636,7 +644,7 @@ function faq(): string {
 const VIEWS: Record<TabId, () => string> = {
   faq,
   list: theList,
-  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, fosa, narrator, heatinfo: heatInfo, story, med: medals, rep: reinstate, recap,
+  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, fosa: () => flashbackPage(flashbackById("samfall")!), narrator, heatinfo: heatInfo, story, med: medals, rep: reinstate, recap,
 };
 
 export const panelHTML = (tab: TabId): string => { portraitScope(tab); return VIEWS[tab](); };

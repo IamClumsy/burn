@@ -2550,6 +2550,19 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
   });
 
+  it("Satisfied Clients Refer Friends stops at level 20 and the card says so", () => {
+    S.cash = 1e60; S.life = 1e60; S.referrals = 19;
+    buyReferral();
+    expect(S.referrals).toBe(20);
+    const cash = S.cash;
+    buyReferral();                                                       // nothing more to buy
+    expect(S.referrals).toBe(20);
+    expect(S.cash).toBe(cash);
+    const h = panelHTML("upg");
+    expect(h).toContain("level 20, max");
+    expect(h).toContain("Maxed");
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

@@ -126,10 +126,12 @@ function upgrades(): string {
   const rows = av.map(u => ({ cost: u.cost, html: item("upg", u.id, S.cash >= u.cost, u.name, u.desc, `<div class="cost">${money(u.cost)}</div>`) }));
 
   // The one that never runs out sits in the list at its price, like everything else.
-  if (S.life >= referralCost() * REFERRAL.unlockFraction) {
-    rows.push({ cost: referralCost(), html: item("referral", "x", S.cash >= referralCost(), `${REFERRAL.name} (level ${S.referrals})`,
-      `Each level makes all income ×${REFERRAL.gain}. Now ×${referralMult().toFixed(2)}. You can always buy another.`,
-      `<div class="cost">${money(referralCost())}</div>`) });
+  if (S.life >= referralCost() * REFERRAL.unlockFraction || S.referrals >= REFERRAL.max) {
+    const maxed = S.referrals >= REFERRAL.max;
+    rows.push({ cost: referralCost(), html: item("referral", "x", !maxed && S.cash >= referralCost(), `${REFERRAL.name} (level ${S.referrals}${maxed ? ", max" : ""})`,
+      maxed ? `Each level made all income ×${REFERRAL.gain}. Now ×${referralMult().toFixed(2)}. Everyone who needed to hear about you has.`
+        : `Each level makes all income ×${REFERRAL.gain}, up to level ${REFERRAL.max}. Now ×${referralMult().toFixed(2)}.`,
+      `<div class="cost">${maxed ? "Maxed" : money(referralCost())}</div>`) });
   }
   const h = rows.sort((x, y) => x.cost - y.cost).map(r => r.html).join("");
 

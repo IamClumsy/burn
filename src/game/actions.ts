@@ -4,7 +4,7 @@ import {
   recipeCash, samSharp, referralCost, allyHere, bribeCost, bribeDrop, bulkCost, buyN, contactPrice, credGain, favorsLeft, hangOutPrice, owned, perk, perkCost, recentFavors,
 } from "../calc";
 import { GENS } from "../data/ops";
-import { UPGS } from "../data/upgrades";
+import { REFERRAL, UPGS } from "../data/upgrades";
 import { ALLIES } from "../data/allies";
 import { AUTOS } from "../data/automation";
 import { nateReturns } from "./tick";
@@ -43,7 +43,7 @@ export function buyUpg(id: string): void {
 
 export function buyReferral(): void {
   const c = referralCost();
-  if (S.cash < c) return;
+  if (S.referrals >= REFERRAL.max || S.cash < c) return;
   S.cash -= c; S.referrals++;
   say("Word keeps spreading. People Michael helped send people he hasn't met yet.");
   beep(780, 0.1, "triangle", 0.05);

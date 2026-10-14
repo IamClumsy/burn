@@ -53,4 +53,6 @@ export const REFERRAL = {
   unlockFraction: 0.3,
   firstCost: 2e8,
   growth: 2.4,
+  /** The most levels you can buy in a run. */
+  max: 20,
 };

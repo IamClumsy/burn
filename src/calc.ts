@@ -6,6 +6,7 @@ import { BOSSES } from "./data/bosses";
 import { SAM_ARC_ID } from "./data/samAxe";
 import { FLASHBACKS, flashbackById } from "./data/flashbacks";
 import { fbState } from "./flashbackState";
+import { FIONA_RELEASE_EP } from "./data/firstContact";
 import { STORY } from "./data/story";
 import { MISSIONS, seasonOf, seasonsOpen } from "./data/missions";
 import { DAY_MS, FAVORS_PER_DAY } from "./data/pacing";
@@ -245,8 +246,8 @@ export const allyHere = (id: string): boolean => !!S.allies[id] && !awayWhy(id);
 /** Why an ally isn't around right now, or null if they are. */
 export function awayWhy(id: string): { short: string; long: string } | null {
   if (id === "nate" && S.nateAway) return { short: "has wandered off", long: "Wandered off. No idea when he'll be back" };
-  if (id === "fiona" && fbState("firstcontact").offered && !S.arcsDone.firstcontact) // First Contact is the story told while she's inside
-    return { short: "is in prison", long: "In prison since she turned herself in. She's back once you've told the story at the bar" };
+  if (id === "fiona" && fbState("firstcontact").offered && !S.arcsDone.firstcontact && !S.episodesDone[FIONA_RELEASE_EP]) // First Contact is the story told while she's inside
+    return { short: "is in prison", long: "In prison since she turned herself in. She's back once you've told the story at the bar, or when she is released" };
   if (id === "fiona" && S.boss && bossDef()?.m.includes("snatch")) return { short: "has been taken", long: "Taken by Thomas O'Neill. Win the case to get her back" };
   if (id === "fiona" && S.fionaAway > 0) return S.fionaWhy === "reinstate"
     ? { short: "has gone off on her own for a bit", long: "Off on her own for a bit. She'll be back when she's done" }

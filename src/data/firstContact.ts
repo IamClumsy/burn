@@ -10,6 +10,8 @@ import type { FlashbackAct, FlashbackDef } from "./flashbacks";
  * warehouse job, a firefight at a farm). Everything is written for the game in its own words.
  */
 export const FIRSTCONTACT_ID = "firstcontact";
+/** The episode where her release is fought over; by the next one she is out, so she is back in the crew once it is done. */
+export const FIONA_RELEASE_EP = "606";
 
 export const FIRSTCONTACT_ACTS: FlashbackAct[] = [
   {
@@ -99,7 +101,7 @@ export const FIRSTCONTACT_FLASHBACK: FlashbackDef = {
   pausedText: "Everything else waits: no new cases, no clients, no visitors, and your other jobs and the Organization hold still until the story is told.",
   offer: () => ({
     title: "Jesse wants a story",
-    text: "Fiona is in prison, and Michael hasn't left the loft in days. Sam and Jesse haul him out for Jesse's birthday and ask for one thing: how did Michael and Fiona actually meet? Fiona is away from the crew until the story is told, and First Contact is now an Open Case.",
+    text: "Fiona is in prison, and Michael hasn't left the loft in days. Sam and Jesse haul him out for Jesse's birthday and ask for one thing: how did Michael and Fiona actually meet? Fiona is away from the crew until the story is told, or until she is released, and First Contact is now an Open Case.",
     say: "Jesse slides a glass across the bar. \"Come on. All of it.\"",
   }),
   replay: {

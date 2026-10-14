@@ -2558,6 +2558,10 @@ describe("The Fall of Sam Axe", () => {
     expect(awayWhy("fiona")?.short).toBe("is in prison");
     S.arcsDone.firstcontact = true;                                      // told
     expect(awayWhy("fiona")).toBeNull();
+    S.arcsDone = { nigeria: true, samfall: true };                       // not told, but her release episode is done: she is out
+    expect(awayWhy("fiona")?.short).toBe("is in prison");
+    S.episodesDone["606"] = true;
+    expect(awayWhy("fiona")).toBeNull();
   });
 
   it("Satisfied Clients Refer Friends stops at level 20 and the card says so", () => {

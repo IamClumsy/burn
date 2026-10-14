@@ -2507,7 +2507,7 @@ describe("The Fall of Sam Axe", () => {
       const before = S.arcStep.nigeria ?? 0;
       startArc("nigeria");
       while (document.getElementById("evt")!.style.display === "flex") { cards.push(document.getElementById("evtT")!.textContent!); document.querySelectorAll<HTMLButtonElement>("#evtO button")[0].click(); dismissAllNotices(); }
-      if (S.boss) { expect(S.boss.id).toBe("warlord"); winBoss(); steps.push(before); continue; }
+      if (S.boss) { expect(S.boss.id).toBe("boris"); winBoss(); steps.push(before); continue; }
       const a = S.active.find(x => x.arc?.id === "nigeria")!; a.chance = 1; resolveMission(a); steps.push(before);
     }
     expect(steps).toEqual([0, 1, 2, 3, 4]);
@@ -2518,7 +2518,7 @@ describe("The Fall of Sam Axe", () => {
     // it's on the menu, and the foe has a place
     expect(panelHTML("options")).toContain('data-modal="nigeria"');
     expect(panelHTML("nigeria")).toContain("How you told it");
-    expect(panelHTML("rogue")).toContain("The Warlord");
+    expect(panelHTML("rogue")).toContain("Boris");
     dismissAllNotices();
   });
 

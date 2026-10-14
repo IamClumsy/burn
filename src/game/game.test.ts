@@ -2522,11 +2522,13 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
   });
 
-  it("First Contact: offered once Jesse has joined, told by both of them, five steps with no showdown", () => {
-    S.seasonGate = false; S.life = 4e8; S.allies.fiona = true; S.episodesDone = {}; S.arcStep = {}; S.arcsDone = { nigeria: true, samfall: true }; dismissAllNotices();
+  it("First Contact: offered at the start of Season 6 (Fiona in prison), five steps with no showdown", () => {
+    S.seasonGate = false; S.life = 9e9; S.allies.fiona = true; S.episodesDone = {}; S.arcStep = {}; S.arcsDone = { nigeria: true, samfall: true }; dismissAllNotices();
     const f = FLASHBACKS.find(x => x.id === "firstcontact")!, arc = f.arc;
-    expect(arcAvailable(arc)).toBe(false);                               // not until Jesse's episode is done (or Season 5 opens)
-    S.episodesDone["402"] = true;
+    S.life = 7e9;
+    expect(arcAvailable(arc)).toBe(false);                               // Season 6 hasn't opened and the premiere isn't done
+    S.life = 9e9;
+    S.episodesDone["601"] = true;                                        // the premiere is done, so it's offered
     expect(arcAvailable(arc)).toBe(true);
     milestones();
     expect(document.getElementById("nT")!.textContent).toBe("Jesse wants a story");

@@ -34,7 +34,7 @@ import { menuNew } from "./badges";
 import { narration, type NarrationEntry, type NarrationTag } from "./fx";
 import { EPILOGUE, EPILOGUE_CLOSE, EPILOGUE_TITLE } from "../data/epilogue";
 
-export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "heatinfo" | "med" | "rep" | "fosa";
+export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "heatinfo" | "med" | "rep" | "fosa" | "recap";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
@@ -45,11 +45,11 @@ export const SECTIONS: [TabId, string][] = [
 export const MODALS: [TabId, string][] = [
   ["crew", "Crew"], ["cov", "Covers"], ["gad", "Gadgets"], ["fav", "Favors"],
   ["list", "The List"], ["file", "Michael's File"], ["stats", "Stats"], ["auto", "Automation"], ["story", "Case File"], ["rogue", "Rogues"], ["med", "Medals"], ["rep", "Reinstate"], ["faq", "FAQ"],
-  ["options", "Menu"], ["settings", "Settings"], ["fosa", "The Fall of Sam Axe"], ["narrator", "Narrator"], ["heatinfo", "Heat and Attention"],
+  ["options", "Menu"], ["settings", "Settings"], ["fosa", "The Fall of Sam Axe"], ["recap", "Your Run"], ["narrator", "Narrator"], ["heatinfo", "Heat and Attention"],
 ];
 
 /** What the menu button offers. Crew, Covers, Gadgets and Favors stay in The Loft, so they aren't here. */
-export const MENU: TabId[] = ["list", "file", "stats", "auto", "story", "rogue", "med", "rep", "faq", "fosa", "settings"];
+export const MENU: TabId[] = ["list", "file", "stats", "auto", "story", "rogue", "med", "rep", "faq", "recap", "fosa", "settings"];
 
 
 
@@ -171,7 +171,7 @@ function missions(): string {
     const al = ALLIES.find(a => a.id === m.ally)!, free = allyFree(m.ally), first = al.name.split(" ")[0];
     const out = S.active.find(a => a.sent === m.ally);
     // Say exactly why the ally can't go, so a greyed-out button is never a mystery.
-    const why = !S.allies[m.ally] ? `Hire ${first} in Crew to ask ${al.she ? "her" : "him"} for help (${m.kid ? "+1 favor" : "+25%"})`
+    const why = (m.ally === "nate" && S.nateGone) ? "Nate's gone. This one is yours." : !S.allies[m.ally] ? `Hire ${first} in Crew to ask ${al.she ? "her" : "him"} for help (${m.kid ? "+1 favor" : "+25%"})`
       : out ? `${first} is helping with "${out.n}", free in ${lv("w" + m.uid, Math.ceil(out.left) + "s")}`
       : !allyHere(m.ally) ? `${first} ${awayWhy(m.ally)?.short ?? "is away"}. This one can't start without ${al.she ? "her" : "him"}.` : "";
     const blocked = !!awayWhy(m.ally);
@@ -205,6 +205,11 @@ function crew(): string {
     ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() && favorsLeft("seymour") > 0 ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div>
     <div class="small" style="margin-top:4px">${favorStatus(c.id)}</div></div></div></div>`; }).join("");
   return contact + ALLIES.map(a => {
+    if (a.id === "nate" && S.nateGone) { // in memory
+      return `<div class="box"><div class="who">${portrait("nate", 64)}<div><div class="row"><b>Nate Westen</b><span class="small">In memory</span></div>
+        <div class="small">Michael's younger brother. A gambler, a con man, a limo-company owner and a father. He stood in front of Michael in the end.</div>
+        <div class="small" style="color:var(--gold)">What he left you: +5% income, for good.</div></div></div></div>`;
+    }
     // not met yet: no name, no Season, nothing that gives the story away
     if (!S.allies[a.id] && ((a.gateEp && a.debutEp && !S.episodesDone[a.debutEp]) || !allyAvailable(a))) {
       return item("hire", a.id, false, "?????", "Someone you haven't met yet. They'll show up when the story gets there.", `<div class="small">?????</div>`, "", portrait(a.id, 48, false));
@@ -402,7 +407,7 @@ function narrator(): string {
 /** The menu behind the hamburger button. */
 function options(): string {
   const fresh = menuNew();
-  return `<div class="menugrid">${MENU.filter(id => id !== "fosa" || S.arcsDone[SAM_ARC_ID]).map(id => `<button data-modal="${id}">${titleOf(id)}${fresh[id] ? `<span class="newchip">NEW</span>` : ""}</button>`).join("")}</div>`;
+  return `<div class="menugrid">${MENU.filter(id => (id !== "fosa" || S.arcsDone[SAM_ARC_ID]) && (id !== "recap" || S.cleanRecord)).map(id => `<button data-modal="${id}">${titleOf(id)}${fresh[id] ? `<span class="newchip">NEW</span>` : ""}</button>`).join("")}</div>`;
 }
 
 /** Sam's story, once it's been told: how you told it, and a way to hear it again. Only in the menu after it's closed. */
@@ -537,6 +542,41 @@ function theList(): string {
   return h;
 }
 
+/** The numbers behind the run, for the recap screen and the copy button. */
+export function recapRows(): [string, string][] {
+  const st = S.stats;
+  const rows: [string, string][] = [
+    ["Time played", formatWait(st.time * 1000)],
+    ["Episodes seen", `${Object.keys(S.episodesDone).length} of ${MISSIONS.length}`],
+    ["Open Cases closed", `${ARCS.filter(a => S.arcsDone[a.id]).length} of ${ARCS.length}`],
+    ["Foes crossed off", `${BOSSES.filter(b => S.bossKills[b.id]).length} of ${BOSSES.length}`],
+    ["Cases won", `${st.mDone}` + (st.mFail ? `, lost ${st.mFail}` : "")],
+    ["Lifetime earnings", money(grossLife())],
+    ["Handed back to people who needed it", money(st.returned)],
+    ["Reinstated", `${st.reinstated} time${st.reinstated === 1 ? "" : "s"}, Credibility ${S.cred}`],
+    ["Gadgets built", String(st.crafted)],
+    ["Medals", `${S.ach.length} of ${MEDALS.length}`],
+    ["Your cover", cover().name],
+  ];
+  if (st.bestRun > 0) rows.push(["Best single run", money(st.bestRun)]);
+  return rows;
+}
+export function recapText(): string {
+  const told = SAM_ACTS.map((a, i) => (S.samChoices[i] !== undefined && a.options[S.samChoices[i]] ? `${a.title}: ${a.options[S.samChoices[i]].label}` : "")).filter(Boolean);
+  return ["Burned: Miami Idle, my run", ...recapRows().map(([k, v]) => `${k}: ${v}`), ...(told.length ? ["", "How I told Sam's story:", ...told] : []), S.nateGone ? "\nFor Nate." : ""].join("\n");
+}
+
+/** Your Run: the recap, once the burn is lifted. */
+function recap(): string {
+  const told = SAM_ACTS.map((a, i) => (S.samChoices[i] !== undefined && a.options[S.samChoices[i]] ? `<div class="small"><b>${a.title}:</b> ${a.options[S.samChoices[i]].label}</div>` : "")).join("");
+  return `<div class="small" style="margin-bottom:8px">The burn is lifted. Here's how it went.</div>
+    <div class="dfile">${recapRows().map(([k, v]) => `<div class="drow"><span class="dlabel">${k}</span><span class="dtext">${v}</span></div>`).join("")}</div>
+    ${told ? `<h2 style="margin-top:14px">How you told Sam's story</h2><div class="box">${told}</div>` : ""}
+    ${S.nateGone ? `<div class="small" style="margin-top:10px;color:var(--gold)">For Nate.</div>` : ""}
+    <div class="btns" style="margin-top:12px"><button data-act="recapcopy">Copy my run</button><button data-act="recapclose">Keep playing</button></div>
+    <div class="small" style="margin-top:8px">${EPILOGUE_CLOSE}</div>`;
+}
+
 /** Michael's file as the Organization keeps it. More of it fills in as their attention on you peaks. */
 /** The next thing to unlock of each kind, by lifetime earnings, with how long it takes at the current rate. */
 function nextUnlocks(): { what: string; name: string; at: number; have: number; right?: string }[] {
@@ -591,7 +631,7 @@ function faq(): string {
 const VIEWS: Record<TabId, () => string> = {
   faq,
   list: theList,
-  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, fosa, narrator, heatinfo: heatInfo, story, med: medals, rep: reinstate,
+  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, fosa, narrator, heatinfo: heatInfo, story, med: medals, rep: reinstate, recap,
 };
 
 export const panelHTML = (tab: TabId): string => { portraitScope(tab); return VIEWS[tab](); };

@@ -62,7 +62,7 @@ import { EP_NOTES } from "../data/episodeNotes";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
 import { menuNew } from "../ui/badges";
-import { MENU, MODALS, SECTIONS, buildLayout, panelHTML, titleOf } from "../ui/panels";
+import { MENU, MODALS, SECTIONS, buildLayout, panelHTML, recapText, titleOf } from "../ui/panels";
 
 beforeAll(() => {
   const html = readFileSync(resolve(__dirname, "../../index.html"), "utf8");
@@ -2385,6 +2385,56 @@ describe("The Fall of Sam Axe", () => {
     expect(S.boss).toBeNull();                               // no more encounters
     dismissAllNotices();
     S.cleanRecord = false;
+  });
+
+  it("Nate dies in Shock Wave: a scene, he leaves the crew, and a small bonus stays", () => {
+    S.allies.nate = true; S.nateGone = false; S.episodesDone = {}; S.life = 5e10; S.story = 99; S.intel = 2; S.seasonOpen = 7; dismissAllNotices();
+    const before = incomeMult();
+    milestones();
+    expect(S.nateGone).toBe(false);                                   // not until the episode is done
+    S.episodesDone["606"] = true;
+    const withNate = incomeMult();
+    milestones();
+    expect(S.nateGone).toBe(true);
+    expect(S.allies.nate).toBeUndefined();
+    const texts: string[] = [];
+    while (noticeOpen()) { texts.push(document.getElementById("nT")!.textContent!); dismissNotice(); }
+    expect(texts).toEqual(expect.arrayContaining(["Atlantic City", "One Shot", "Nate Westen"]));
+    expect(incomeMult()).toBeGreaterThan(before / 1.15 * 1.04);       // his +15% is gone, but +5% stays
+    expect(incomeMult()).toBeLessThan(withNate);
+    expect(panelHTML("crew")).toContain("In memory");
+    expect(panelHTML("crew")).not.toContain("Hire Nate Westen");
+    milestones();                                                     // and it only happens once
+    expect(noticeOpen()).toBe(false);
+    S.nateGone = false;
+  });
+
+  it("the recap screen appears in the menu once the burn is lifted, with the run's numbers", () => {
+    S.cleanRecord = false;
+    expect(panelHTML("options")).not.toContain('data-modal="recap"');
+    S.cleanRecord = true; S.stats.time = 7200; S.stats.reinstated = 2; S.episodesDone = { "101": true, "102": true };
+    expect(panelHTML("options")).toContain('data-modal="recap"');
+    const html = panelHTML("recap");
+    expect(html).toContain("Episodes seen");
+    expect(html).toContain("2 of");
+    expect(html).toContain("2h");
+    expect(html).toContain("Keep playing");
+    expect(recapText()).toContain("Episodes seen: 2 of");
+    S.cleanRecord = false;
+  });
+
+  it("Season 6 turns on Shock Wave: 601 to 605 first, then 606, and nothing after it until Nate's scene", () => {
+    S.episodesDone = {};
+    const six = MISSIONS.filter(m => seasonOf(m.ep!) === 6).map(m => m.ep!);
+    expect(heldByStory("606")).toBe(true);                              // waits for the first five
+    for (const ep of six.filter(e => +e > 606)) expect(heldByStory(ep), ep).toBe(true);
+    for (const ep of six.filter(e => +e < 606)) expect(heldByStory(ep), ep).toBe(false);
+    for (const ep of ["601", "602", "603", "604", "605"]) S.episodesDone[ep] = true;
+    expect(heldByStory("606")).toBe(false);                             // now it's the only new thing
+    for (const ep of six.filter(e => +e > 606)) expect(heldByStory(ep), ep).toBe(true);
+    S.episodesDone["606"] = true;                                       // Nate's scene has played
+    for (const ep of six.filter(e => +e > 606)) expect(heldByStory(ep), ep).toBe(false);
+    S.episodesDone = {};
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

@@ -78,6 +78,7 @@ export function checkEnding(): void {
   S.favors += 15;
   chime();
   toast(EPILOGUE_TITLE, `+15 favors and +25% income, forever.\n\n${epilogueText()}`, "story");
+  try { window.dispatchEvent(new Event("burn:ending")); } catch { /* no window */ }
   say("You cross out the last name. The phone doesn't ring. For the first time in a long time, nobody is watching. Miami still has problems, though, and so do the people in it.");
 }
 

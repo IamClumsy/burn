@@ -47,8 +47,8 @@ export const gripAtt = (): number => gripPerks().reduce((m, p) => m * (1 + (p.at
 export const gripFixer = (): number => gripPerks().reduce((m, p) => m * (p.fixer ?? 1), 1);
 
 /** Has this ally's season opened yet? Someone who debuts in Season 4 can't be hired in Season 2. */
-export const allyAvailable = (a: { debut?: number; debutEp?: string; gateEp?: boolean }): boolean =>
-  (!a.debut || openSeasons() >= a.debut) && (!a.gateEp || !a.debutEp || !!S.episodesDone[a.debutEp]);
+export const allyAvailable = (a: { id?: string; debut?: number; debutEp?: string; gateEp?: boolean }): boolean =>
+  (a.id !== "nate" || !S.nateGone) && (!a.debut || openSeasons() >= a.debut) && (!a.gateEp || !a.debutEp || !!S.episodesDone[a.debutEp]);
 
 /** The endless upgrade: every level makes all income a bit bigger, forever. */
 export const referralMult = (): number => Math.pow(REFERRAL.gain, S.referrals);
@@ -68,6 +68,7 @@ export function incomeMult(): number {
   for (const u of UPGS) if (S.upgs[u.id] && u.kind === "all") m *= u.m!;
   if (S.fx.boost > 0) m *= 3;
   if (allyHere("nate")) m *= 1.15;
+  if (S.nateGone) m *= 1.05; // what Nate left behind
   return m * choiceMult("inc") * gripInc() * (S.cleanRecord ? 1.25 : 1) * referralMult();
 }
 

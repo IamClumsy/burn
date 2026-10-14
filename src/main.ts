@@ -13,7 +13,7 @@ import { render, showModal } from "./ui/render";
 import { returnFromAway } from "./game/offline";
 import { initNotices, setNoticeGate } from "./ui/notice";
 import { portrait, portraitScope } from "./ui/portrait";
-import { buildLayout, type TabId } from "./ui/panels";
+import { buildLayout, recapText, type TabId } from "./ui/panels";
 import { beep } from "./audio";
 import { loadGame, save, wipeSave, exportSave, importSave } from "./persist";
 import { tick } from "./game/tick";
@@ -38,7 +38,9 @@ const ACT: Record<string, (arg: string) => void> = {
     }
   },
   start: a => startMission(+a), arc: a => startArc(a), prestige: () => A.prestige(), send: a => A.toggleSend(+a),
-  setting: a => setting(a), dev: a => devAct(a), bowling: () => rememberBowling(), replay: () => { replaySamStory(); showModal(null); },
+  setting: a => setting(a), dev: a => devAct(a),
+  recapcopy: () => { void navigator.clipboard?.writeText(recapText()).then(() => toast("Copied", "Your run is on the clipboard.", "good")).catch(() => toast("Couldn't copy", "Your browser didn't allow it.", "bad")); },
+  recapclose: () => showModal(null), bowling: () => rememberBowling(), replay: () => { replaySamStory(); showModal(null); },
 };
 
 let lastCraft = 0;
@@ -207,3 +209,6 @@ async function checkForNewBuild(returning: boolean): Promise<void> {
 }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") void checkForNewBuild(true); });
 setInterval(() => { if (document.visibilityState === "visible") void checkForNewBuild(false); }, 15 * 60 * 1000);
+
+// when the last name is crossed off, the recap opens behind the epilogue notice and is there when you close it
+window.addEventListener("burn:ending", () => showModal("recap"));

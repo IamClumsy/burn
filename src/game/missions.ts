@@ -7,6 +7,7 @@ import { money, pick, weightedPick } from "../util";
 import { say, toast, type NarrationMeta } from "../ui/fx";
 import { advanceArc, failArcStep } from "./arcs";
 import { ALLIES } from "../data/allies";
+import { NATE_DEATH_EP } from "./nate";
 import { crewCut } from "../data/automation";
 import { reduceGrip } from "./org";
 import { EP_NOTES, outcomeLine } from "../data/episodeNotes";
@@ -28,8 +29,13 @@ export function missionWeight(t: { ep?: string }): number {
  * then Acceptable Loss (517) waits on 516, and the finale, Fail Safe (518), waits on 517.
  */
 export const STORY_CHAIN = ["516", "517", "518"];
-export const heldByStory = (ep: string): boolean =>
-  STORY_CHAIN.includes(ep) && MISSIONS.some(t => t.ep && seasonOf(t.ep) === 5 && +t.ep < +ep && !S.episodesDone[t.ep]);
+export const heldByStory = (ep: string): boolean => {
+  if (STORY_CHAIN.includes(ep)) return MISSIONS.some(t => t.ep && seasonOf(t.ep) === 5 && +t.ep < +ep && !S.episodesDone[t.ep]);
+  // Season 6 turns on "Shock Wave" (6x06, where Nate dies): it waits for 601 to 605, and nothing after it appears until it's done
+  if (seasonOf(ep) === 6 && ep === NATE_DEATH_EP) return MISSIONS.some(t => t.ep && seasonOf(t.ep) === 6 && +t.ep < +NATE_DEATH_EP && !S.episodesDone[t.ep]);
+  if (seasonOf(ep) === 6 && +ep > +NATE_DEATH_EP) return !S.episodesDone[NATE_DEATH_EP];
+  return false;
+};
 
 /** Every case that could be on the board right now: open Seasons only, and nothing held back as a finale or cliffhanger. */
 export const eligibleMissions = () =>

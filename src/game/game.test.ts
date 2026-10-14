@@ -55,9 +55,10 @@ import { earn, merge } from "../state";
 import { loadGame, readSave, save } from "../persist";
 import { clearBuilt } from "../ui/built";
 import { versionLine } from "../version";
+import { epilogueEntries } from "../data/epilogue";
 import { newerBuildAvailable } from "../update";
 import { lockDev, resetDevForTests, setDevFunds, unlockDev } from "../dev";
-import { credGain, finaleEp, openSeasons, seasonLeft, waitingOn } from "../calc";
+import { credGain, finaleEp, layCdMax, openSeasons, seasonLeft, waitingOn } from "../calc";
 import { EP_NOTES } from "../data/episodeNotes";
 import type { GameState } from "../types";
 import { dockProgress, render, showModal } from "../ui/render";
@@ -2435,6 +2436,30 @@ describe("The Fall of Sam Axe", () => {
     S.episodesDone["606"] = true;                                       // Nate's scene has played
     for (const ep of six.filter(e => +e > 606)) expect(heldByStory(ep), ep).toBe(false);
     S.episodesDone = {};
+  });
+
+  it("Madeline's scene comes after Reckoning (7x13), and the epilogue stops mentioning a dinner for forty", () => {
+    S.allies.madeline = true; S.madelineGone = false; S.episodesDone = {}; S.life = 5e10; S.story = 99; S.intel = 2; S.seasonOpen = 7; S.nateGone = false; dismissAllNotices();
+    milestones();
+    expect(S.madelineGone).toBe(false);
+    S.episodesDone["713"] = true;
+    milestones();
+    expect(S.madelineGone).toBe(true);
+    expect(S.allies.madeline).toBeUndefined();
+    const texts: string[] = [];
+    while (noticeOpen()) { texts.push(document.getElementById("nT")!.textContent!); dismissNotice(); }
+    expect(texts).toEqual(expect.arrayContaining(["The Reckoning", "For My Boys", "Madeline Westen"]));
+    expect(layCdMax()).toBe(4);                                         // her Lay Low advice stays
+    expect(panelHTML("crew")).toContain("In memory");
+    expect(panelHTML("crew")).not.toContain("Hire Madeline Westen");
+    // the epilogue follows what happened, and no longer has the dinner for forty
+    for (const [m, n] of [[false, false], [true, false], [false, true], [true, true]] as const) {
+      const lines = epilogueEntries(m, n).map(e => e.text).join(" ");
+      expect(lines, `${m}/${n}`).not.toMatch(/dinner for forty/i);
+    }
+    expect(epilogueEntries(true, false).find(e => e.who === "Madeline")!.text).toMatch(/place at the table/);
+    expect(epilogueEntries(false, true).find(e => e.who === "Charlie")!.text).toMatch(/his brother/);
+    S.madelineGone = false;
   });
 
   it("the Depth Perception mission is the one where Beatriz turns up", () => {

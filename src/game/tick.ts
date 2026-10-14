@@ -1,6 +1,6 @@
 import { S, earn } from "../state";
 import { devFundsOn } from "../dev";
-import { NATE_DEATH_EP, nateDies } from "./nate";
+import { MADELINE_DEATH_EP, NATE_DEATH_EP, madelineDies, nateDies } from "./nate";
 import { attNet, cps, heatNet, inFlashback, openSeasons, owned, seasonLeft, waitingOn } from "../calc";
 import { checkEnding, tickOrg } from "./org";
 import { STORY } from "../data/story";
@@ -42,6 +42,7 @@ export function milestones(): void {
       : "Sam has been saving a story for a long time. \"Colombia, 2005,\" he says. \"Pull up a chair.\" The Fall of Sam Axe is now an Open Case.", "story");
     say("Sam clears his throat. This is going to take a while, and he's ordering a drink first.");
   }
+  if (!S.madelineGone && S.episodesDone[MADELINE_DEATH_EP]) madelineDies(); // "Reckoning" is done
   if (!S.nateGone && S.episodesDone[NATE_DEATH_EP]) nateDies(); // "Shock Wave" is done: Nate's last scene
   if (!S.backupNudged && S.stats.time >= 7200) {
     S.backupNudged = true;

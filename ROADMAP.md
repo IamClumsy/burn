@@ -10,8 +10,7 @@ What's built is listed at the bottom. This is what's left, roughly in the order 
 
 ## 2. An ending that lands
 
-- **A bigger finish:** crossing off the last name already gives an epilogue pop-up with the crew, saved in the Case File, plus +15 favors and +25% income. A "keep playing" screen with a recap of your run (time, cases, foes, answers in Sam's story) would give it more weight.
-- **Late-story beats:** Nate's Season 6 fate could get the same quiet "after the story beat" treatment that Carla has.
+- **A bigger finish:** built as "Your Run": a recap of the run in the menu, which opens when the burn is lifted. Nate's and Madeline's scenes (after "Shock Wave" and "Reckoning") close out their stories.
 
 ## 3. More to do mid-game
 

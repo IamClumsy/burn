@@ -32,7 +32,7 @@ import { AUTOS, autoCut } from "../data/automation";
 import { saveStatus } from "../saveStatus";
 import { menuNew } from "./badges";
 import { narration, type NarrationEntry, type NarrationTag } from "./fx";
-import { EPILOGUE, EPILOGUE_CLOSE, EPILOGUE_TITLE } from "../data/epilogue";
+import { EPILOGUE_CLOSE, EPILOGUE_TITLE, epilogueEntries } from "../data/epilogue";
 
 export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "heatinfo" | "med" | "rep" | "fosa" | "recap";
 
@@ -171,7 +171,7 @@ function missions(): string {
     const al = ALLIES.find(a => a.id === m.ally)!, free = allyFree(m.ally), first = al.name.split(" ")[0];
     const out = S.active.find(a => a.sent === m.ally);
     // Say exactly why the ally can't go, so a greyed-out button is never a mystery.
-    const why = (m.ally === "nate" && S.nateGone) ? "Nate's gone. This one is yours." : !S.allies[m.ally] ? `Hire ${first} in Crew to ask ${al.she ? "her" : "him"} for help (${m.kid ? "+1 favor" : "+25%"})`
+    const why = (m.ally === "nate" && S.nateGone) ? "Nate's gone. This one is yours." : (m.ally === "madeline" && S.madelineGone) ? "Madeline's gone. This one is yours." : !S.allies[m.ally] ? `Hire ${first} in Crew to ask ${al.she ? "her" : "him"} for help (${m.kid ? "+1 favor" : "+25%"})`
       : out ? `${first} is helping with "${out.n}", free in ${lv("w" + m.uid, Math.ceil(out.left) + "s")}`
       : !allyHere(m.ally) ? `${first} ${awayWhy(m.ally)?.short ?? "is away"}. This one can't start without ${al.she ? "her" : "him"}.` : "";
     const blocked = !!awayWhy(m.ally);
@@ -205,6 +205,11 @@ function crew(): string {
     ${c.id === "seymour" ? `<button data-act="hangout" data-arg="seymour" ${!S.busy && S.cash >= hangOutPrice() && favorsLeft("seymour") > 0 ? "" : "disabled"}>Spend the afternoon — ${money(hangOutPrice())}</button>` : ""}</div>
     <div class="small" style="margin-top:4px">${favorStatus(c.id)}</div></div></div></div>`; }).join("");
   return contact + ALLIES.map(a => {
+    if (a.id === "madeline" && S.madelineGone) { // in memory
+      return `<div class="box"><div class="who">${portrait("madeline", 64)}<div><div class="row"><b>Madeline Westen</b><span class="small">In memory</span></div>
+        <div class="small">Michael's mother. Sharp, chain-smoking and nosy, and always the first to open a door for someone in need.</div>
+        <div class="small" style="color:var(--gold)">What she left you: Lay Low always cools down twice as fast.</div></div></div></div>`;
+    }
     if (a.id === "nate" && S.nateGone) { // in memory
       return `<div class="box"><div class="who">${portrait("nate", 64)}<div><div class="row"><b>Nate Westen</b><span class="small">In memory</span></div>
         <div class="small">Michael's younger brother. A gambler, a con man, a limo-company owner and a father. He stood in front of Michael in the end.</div>
@@ -308,7 +313,7 @@ function story(): string {
 
   const empty = !beats ? `<div class="small">Nothing yet. Earn some money and the story finds you.</div>` : "";
   const epilogue = S.cleanRecord
-    ? `<h2 style="margin-top:12px">${EPILOGUE_TITLE}</h2>` + EPILOGUE.map(e => `<div class="box"><b>${e.who}</b><div class="small" style="font-size:13px;color:var(--text)">${e.text}</div></div>`).join("") + `<div class="small" style="margin:6px 0 10px">${EPILOGUE_CLOSE}</div>`
+    ? `<h2 style="margin-top:12px">${EPILOGUE_TITLE}</h2>` + epilogueEntries(S.madelineGone, S.nateGone).map(e => `<div class="box"><b>${e.who}</b><div class="small" style="font-size:13px;color:var(--text)">${e.text}</div></div>`).join("") + `<div class="small" style="margin:6px 0 10px">${EPILOGUE_CLOSE}</div>`
     : "";
   return empty + beats + cases + epilogue + next + notebook;
 }
@@ -563,7 +568,7 @@ export function recapRows(): [string, string][] {
 }
 export function recapText(): string {
   const told = SAM_ACTS.map((a, i) => (S.samChoices[i] !== undefined && a.options[S.samChoices[i]] ? `${a.title}: ${a.options[S.samChoices[i]].label}` : "")).filter(Boolean);
-  return ["Burned: Miami Idle, my run", ...recapRows().map(([k, v]) => `${k}: ${v}`), ...(told.length ? ["", "How I told Sam's story:", ...told] : []), S.nateGone ? "\nFor Nate." : ""].join("\n");
+  return ["Burned: Miami Idle, my run", ...recapRows().map(([k, v]) => `${k}: ${v}`), ...(told.length ? ["", "How I told Sam's story:", ...told] : []), (S.nateGone || S.madelineGone) ? `\nFor ${[S.nateGone && "Nate", S.madelineGone && "Madeline"].filter(Boolean).join(" and ")}.` : ""].join("\n");
 }
 
 /** Your Run: the recap, once the burn is lifted. */
@@ -572,7 +577,7 @@ function recap(): string {
   return `<div class="small" style="margin-bottom:8px">The burn is lifted. Here's how it went.</div>
     <div class="dfile">${recapRows().map(([k, v]) => `<div class="drow"><span class="dlabel">${k}</span><span class="dtext">${v}</span></div>`).join("")}</div>
     ${told ? `<h2 style="margin-top:14px">How you told Sam's story</h2><div class="box">${told}</div>` : ""}
-    ${S.nateGone ? `<div class="small" style="margin-top:10px;color:var(--gold)">For Nate.</div>` : ""}
+    ${(S.nateGone || S.madelineGone) ? `<div class="small" style="margin-top:10px;color:var(--gold)">For ${[S.nateGone && "Nate", S.madelineGone && "Madeline"].filter(Boolean).join(" and ")}.</div>` : ""}
     <div class="btns" style="margin-top:12px"><button data-act="recapcopy">Copy my run</button><button data-act="recapclose">Keep playing</button></div>
     <div class="small" style="margin-top:8px">${EPILOGUE_CLOSE}</div>`;
 }

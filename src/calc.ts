@@ -48,7 +48,7 @@ export const gripFixer = (): number => gripPerks().reduce((m, p) => m * (p.fixer
 
 /** Has this ally's season opened yet? Someone who debuts in Season 4 can't be hired in Season 2. */
 export const allyAvailable = (a: { id?: string; debut?: number; debutEp?: string; gateEp?: boolean }): boolean =>
-  (a.id !== "nate" || !S.nateGone) && (!a.debut || openSeasons() >= a.debut) && (!a.gateEp || !a.debutEp || !!S.episodesDone[a.debutEp]);
+  (a.id !== "nate" || !S.nateGone) && (a.id !== "madeline" || !S.madelineGone) && (!a.debut || openSeasons() >= a.debut) && (!a.gateEp || !a.debutEp || !!S.episodesDone[a.debutEp]);
 
 /** The endless upgrade: every level makes all income a bit bigger, forever. */
 export const referralMult = (): number => Math.pow(REFERRAL.gain, S.referrals);
@@ -127,7 +127,7 @@ export const attCooling = (): number => (S.heat < 20 ? 0.25 : 0);
 export const attNet = (): number => attGain() - attCooling();
 
 export const layAmt = (): number => (S.upgs.h2 ? 60 : 35);
-export const layCdMax = (): number => (S.allies.madeline ? 4 : 8);
+export const layCdMax = (): number => (S.allies.madeline || S.madelineGone ? 4 : 8); // her Lay Low advice outlives her
 
 /** Everything the jobs paid, counting the 90% Michael hands back, not just his 10%. This is what opens the foes on The List. */
 export const grossLife = (): number => S.life + S.stats.returned;

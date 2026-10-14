@@ -2526,12 +2526,18 @@ describe("The Fall of Sam Axe", () => {
     S.seasonGate = false; S.life = 9e9; S.allies.fiona = true; S.episodesDone = {}; S.arcStep = {}; S.arcsDone = { nigeria: true, samfall: true }; dismissAllNotices();
     const f = FLASHBACKS.find(x => x.id === "firstcontact")!, arc = f.arc;
     S.life = 7e9;
-    expect(arcAvailable(arc)).toBe(false);                               // Season 6 hasn't opened and the premiere isn't done
+    expect(arcAvailable(arc)).toBe(false);                               // Season 6 hasn't opened
     S.life = 9e9;
-    S.episodesDone["601"] = true;                                        // the premiere is done, so it's offered
-    expect(arcAvailable(arc)).toBe(true);
+    expect(arcAvailable(arc)).toBe(true);                                // it opens with Season 6, no episode needed
+    S.seasonOpen = 5;
+    const shown = (): string[] => { const t: string[] = []; for (let g = 0; g < 40 && noticeOpen(); g++) { t.push(document.getElementById("nT")!.textContent!); dismissNotice(); } return t; };
+    milestones();                                                        // the Season's own card and the narration come first
+    const first = shown();
+    expect(first).toContain("Season 6");
+    expect(first).not.toContain("Jesse wants a story");
+    expect(fbState("firstcontact").offered).toBe(false);
     milestones();
-    expect(document.getElementById("nT")!.textContent).toBe("Jesse wants a story");
+    expect(shown()).toContain("Jesse wants a story");
     dismissAllNotices();
     const cards: string[] = [], steps: number[] = [];
     for (let guard = 0; guard < 30 && !S.arcsDone.firstcontact; guard++) {
@@ -2551,7 +2557,7 @@ describe("The Fall of Sam Axe", () => {
   });
 
   it("Fiona is in prison, away from the crew, from when First Contact is offered until it's told", () => {
-    S.seasonGate = false; S.life = 9e9; S.allies.fiona = true; S.episodesDone = { "601": true }; S.arcStep = {}; S.arcsDone = { nigeria: true, samfall: true }; S.fionaAway = 0; dismissAllNotices();
+    S.seasonGate = false; S.life = 9e9; S.allies.fiona = true; S.episodesDone = {}; S.arcStep = {}; S.arcsDone = { nigeria: true, samfall: true }; S.fionaAway = 0; S.seasonOpen = 6; dismissAllNotices();
     expect(awayWhy("fiona")).toBeNull();                                 // not offered yet
     milestones();
     dismissAllNotices();

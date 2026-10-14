@@ -37,7 +37,7 @@ export function milestones(): void {
   }
   for (const f of FLASHBACKS) { // a flashback's teller offers it once its conditions are met
     const fb = fbState(f.id);
-    if (!fb.offered && arcAvailable(f.arc)) {
+    if (!fb.offered && arcAvailable(f.arc) && S.seasonOpen >= (f.arc.season ?? 0)) { // after the Season's own card
       fb.offered = true;
       const o = f.offer(S);
       toast(o.title, o.text, "story");
@@ -62,6 +62,7 @@ export function milestones(): void {
     S.grip = 100;
     const foe = SEASON_GRIP[open] ?? "Someone new has your number.";
     toast(`Season ${open} cases are open`, `New clients are knocking, and the cases are getting bigger.\n\nTheir grip on you starts over: ${foe}`, "story");
+    if (open === 6) toast("Season 6", "With Fiona in prison after turning herself in, Michael hasn't left the loft in days. The phone rings, and the crew is trying to keep things moving without her.", "story");
     say(`Word spreads. Season ${open} cases start turning up on your board.`);
     chime();
   }

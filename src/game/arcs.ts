@@ -24,7 +24,7 @@ export const arcStep = (a: Arc): number => S.arcStep[a.id] || 0;
 export const arcAvailable = (a: Arc): boolean => {
   const replaying = !!flashbackById(a.id) && fbState(a.id).replay;
   return S.life >= a.at && (!a.ep || openSeasons() >= seasonOf(a.ep)) && (!a.ep || !finaleHeldBack(a.ep)) && (!S.arcsDone[a.id] || replaying) && !S.active.some(m => m.arc?.id === a.id) &&
-    (!a.needsEp || !!S.episodesDone[a.needsEp] || openSeasons() >= (a.orSeason ?? 99));
+    (!a.needsEp || !!S.episodesDone[a.needsEp] || openSeasons() >= (a.orSeason ?? 99)) && (!a.season || openSeasons() >= a.season);
 };
 
 /** Hear a flashback again from the menu once it's been told: the case starts over, with new answers and no second helping of rewards. */

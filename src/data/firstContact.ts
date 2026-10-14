@@ -65,7 +65,7 @@ export const FIRSTCONTACT_BEATS: Record<number, FlashbackAct> = {
 };
 
 export const FIRSTCONTACT_ARC: Arc = {
-  id: FIRSTCONTACT_ID, title: "First Contact", at: 8e9, ally: "fiona", favors: 4, needsEp: "601", orSeason: 6,
+  id: FIRSTCONTACT_ID, title: "First Contact", at: 8e9, ally: "fiona", favors: 4, season: 6,
   blurb: "Fiona is in prison and Michael hasn't left the loft in days. It's Jesse's birthday, so Sam and Jesse haul him to a bar and ask for one story: Dublin, 2003, the first time he met her, and what happened on the job that sealed it.",
   epilogue: "That night in the story, Michael finally told her the truth about what he was and what he'd done. Fiona said they had fundamental differences, and thanked him for it anyway. Sam taps the bar. \"That's the nicest thing I've ever heard you say, Mikey.\" \"Don't tell her,\" says Michael. Jesse is already writing it down so he can.",
   steps: [

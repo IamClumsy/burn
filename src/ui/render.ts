@@ -114,6 +114,7 @@ function paintDock(): void {
   $("dockfill").style.width = pct + "%";
 }
 
+let coveredTicks = 0;
 export function render(): void {
   if (openModal) markSeen(openModal); // anything that turns up while you're looking at a screen is already seen
   document.body.classList.toggle("flashback", inFlashback());
@@ -168,6 +169,10 @@ export function render(): void {
     });
   }
 
+  // While a notice or decision covers the screen, the cards and screens behind it only need a refresh now and then
+  // (about twice a second), so tapping "Got it" doesn't land on top of a full redraw.
+  if ((noticeOpen() || choiceOpen()) && ++coveredTicks % 5 !== 0) return;
+  coveredTicks = 0;
   // Only touch a card's DOM when its structure changed; moving numbers are patched in place.
   resetLive();
   for (const [id] of SECTIONS) {

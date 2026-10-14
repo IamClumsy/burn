@@ -2343,6 +2343,21 @@ describe("The Fall of Sam Axe", () => {
     expect(S.allies.madeline).toBe(true);                            // and can be hired whenever you can afford her
   });
 
+  it("while a notice covers the screen, the cards behind it are only redrawn now and then", () => {
+    S.life = 1e6; S.cash = 111; dismissAllNotices(); render();
+    const cards = document.getElementById("sec-ops")!;
+    const before = cards.innerHTML;
+    notify("Hello", "A notice is up.", "good");
+    expect(noticeOpen()).toBe(true);
+    S.gens.inf = 40;                                 // something on the board changes
+    for (let i = 0; i < 4; i++) render();
+    expect(cards.innerHTML).toBe(before);            // four quick redraws: the page behind is left alone
+    render();                                        // the fifth one catches up
+    expect(cards.innerHTML).not.toBe(before);
+    dismissAllNotices();
+    render();
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

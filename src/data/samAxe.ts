@@ -15,11 +15,11 @@ export type SamAct = FlashbackAct;
 export const SAM_ACTS: SamAct[] = [
   {
     title: "Act One: The Window",
-    inquiry: "Admiral Lawrence says this is an informal inquiry, then asks how a bedroom window and a borrowed belt come to be part of a military operation.",
+    inquiry: "Admiral Lawrence says this is an informal inquiry, then asks how a bedroom window and a belt left behind come to be part of a military operation.",
     prompt: "Sam says he's getting to it. How does he tell the first part?",
     options: [
       { label: "Own it, with a joke", result: "The Admiral doesn't laugh. A junior officer almost does. Sam counts that as a win, and the room cools a little.", fx: { heat: -0.05 } },
-      { label: "Blame Michael's advice", result: "Michael isn't in the room to defend himself, which makes it very satisfying. Word travels, and it pays off in a small way.", fx: { inc: 0.03 } },
+      { label: "Admit Michael had it right", result: "Michael isn't in the room to say \"I told you so\", which is the only reason Sam can say it first. He told him to confess before the wife did. Word travels, and it pays off in a small way.", fx: { inc: 0.03 } },
     ],
   },
   {
@@ -27,7 +27,7 @@ export const SAM_ACTS: SamAct[] = [
     inquiry: "The Admiral points out that Sam's report says a clinic was blown up with a bomb made from a defibrillator, and wants to know why anyone would do that.",
     prompt: "Sam leans in. What does he say about the clinic?",
     options: [
-      { label: "It saved every patient inside", result: "Sam's version of the clinic is hard to argue with: everyone got out. The Organization pays a little less attention to a man with that story.", fx: { att: -0.1 } },
+      { label: "It saved every patient: they were on the trucks", result: "Sam's version of the clinic is hard to argue with: everyone got out. The Organization pays a little less attention to a man with that story.", fx: { att: -0.1 } },
       { label: "Ben did most of the work", result: "Ben Delaney gets a good deal of credit, and a sympathetic nod from the Admiral. Credit like that pays forward, in better cases.", fx: { mis: 0.1 } },
     ],
   },
@@ -95,7 +95,7 @@ export const SAM_ARC: Arc = {
   // Beatriz, the girl from the movie, turns up in Depth Perception (Season 5, Episode 16). That's when Sam tells the story.
   needsEp: "516", orSeason: 6,
   blurb: "At a Navy inquiry in Bogotá, Sam Axe tells the story of the worst assignment of his career. It starts with a married woman, a bedroom window, and a pair of bright blue fatigues.",
-  epilogue: "Sam's story is on the record. The clinic's patients are alive, the Governor is under arrest, a village of goat farmers has a nickname for the man with the chin, and Admiral Lawrence is still deciding whether he's allowed to enjoy it.",
+  epilogue: "Sam's story is on the record. The clinic's patients are alive, the Governor is under arrest, a village of goat farmers has a nickname for the man with the chin, and Admiral Lawrence, who was never going to enjoy this, has agreed to an honorable discharge, a first-class ticket and one ice-cold beer.",
   steps: [
     { n: "Make a Hasty Exit From Virginia", dur: 60, succ: 0.78, heat: 14, rm: 4.2, act: 0 },
     { n: "Warn a Clinic Nobody Will Evacuate", dur: 72, succ: 0.7, heat: 20, rm: 5.2 },
@@ -112,7 +112,7 @@ export const FLASHBACK_BOSSES: Boss[] = [
   {id: "veracruz", n: "Commandante Veracruz", title: "A militia commander on a governor's payroll, hunting a Navy man and a village of goat farmers", at: 5e8, hpm: 3.4, m: ["rush", "heat"], flashback: true,
    mech: "A convoy on a deadline: the clock runs 50% faster, and every hour he's on the road makes more noise.",
    intro: "Commandante Veracruz is coming down the mountain with every truck he can find, and he has a governor behind him. Sam has until the help arrives, a road, and a village that believes in him.",
-   win: "The convoy stalls on the road, help arrives from the south, and Commandante Veracruz finds out what a goat farmer with a rifle and a grudge can do.",
+   win: "The convoy stalls on the road. When the helicopters rise behind Sam, Commandante Veracruz pulls a knife and finds out what a Navy SEAL can do in a stand-up fight. It takes one punch.",
    lose: "Veracruz gets through the road. Sam pulls everyone back, takes a breath, and plans another way to hold it.",
    file: "Colonel Veracruz led a local militia in Colombia and told the world a story: a clinic burned by terrorists who had kidnapped a Navy observer. The 'terrorists' were goat farmers, and the observer was Sam Axe. He answered to a governor who was on a cartel's payroll, and he was losing his patience with them both."},
 ];
@@ -120,8 +120,8 @@ export const FLASHBACK_BOSSES: Boss[] = [
 /** Sam remembers the bowling alley (Michael's cameo in the movie), a small nod before Act One. */
 export const BOWLING = {
   title: "The Bowling Alley",
-  text: "Before any of it, Sam remembers a bowling alley and a younger, scruffier Michael (Sam calls him Mike), years before the burn notice, hearing him out about a romantic mess and giving him straight advice. Sam did not follow all of it. Still, a good friend's advice makes the first step a little easier (+8% on Step 1).",
-  say: "Sam stares at a bowling ball and remembers Michael's advice. He'd have been better off taking all of it.",
+  text: "Before any of it, Sam remembers a bowling alley and a younger, scruffier Michael (Sam calls him Mike), back from a mission and in town for a few days, who told him to confess to the Admiral before the wife did. Sam pointed out that Michael had dated exactly one woman, and she was a psycho. Michael was right. A good friend's advice makes the first step a little easier, even when you ignored it (+8% on Step 1).",
+  say: "Sam stares at a bowling ball and remembers Michael's advice. He'd have been better off taking any of it.",
   succ: 0.08,
 };
 

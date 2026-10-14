@@ -1,6 +1,7 @@
 import { S } from "../state";
 import { REINSTATE_MIN, attNet, activeFlashback, bossDef, bribeCost, bribeDrop, clickVal, cover, cps, credGain, heatNet, layAmt, tierDef } from "../calc";
 import { FX_NAMES } from "../data/perks";
+import { flashbackById } from "../data/flashbacks";
 import { formatWait, money } from "../util";
 import type { CaseAction } from "../types";
 import { CASE_ACTIONS, MAX_LEADS, ROTATING } from "../data/caseActions";
@@ -121,6 +122,7 @@ export function render(): void {
   document.body.classList.toggle("flashback", fbId !== null);
   for (const c of Array.from(document.body.classList)) if (c.startsWith("fb-") && c !== "fb-" + fbId) document.body.classList.remove(c);
   if (fbId) document.body.classList.add("fb-" + fbId); // each flashback can have its own look
+  document.body.classList.toggle("fb-paper", !!fbId && !!flashbackById(fbId)?.paper);
   paintTitle();
   paintDock();
   setText($("cash"), money(S.cash));

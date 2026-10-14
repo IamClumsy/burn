@@ -1755,12 +1755,12 @@ describe("The Fall of Sam Axe", () => {
 
   it("remembering the bowling alley boosts Step 1 once, and the button then goes away", () => {
     S.life = 5e8; S.samOffered = true; dismissAllNotices();
-    expect(panelHTML("mis")).toContain('data-act="nod"');
+    expect(panelHTML("mis")).toContain('data-act="nod" data-arg="samfall"');
     const before = succChance({ ...MISSIONS[0], uid: 1, arc: { id: SAM_ARC_ID, step: 0 } } as any);
     rememberBowling(); rememberBowling();
     const after = succChance({ ...MISSIONS[0], uid: 1, arc: { id: SAM_ARC_ID, step: 0 } } as any);
     expect(after - before).toBeCloseTo(BOWLING.succ);
-    expect(panelHTML("mis")).not.toContain('data-act="nod"');
+    expect(panelHTML("mis")).not.toContain('data-act="nod" data-arg="samfall"');
     dismissAllNotices();
   });
 
@@ -1783,10 +1783,10 @@ describe("The Fall of Sam Axe", () => {
 
   it("notices wear the Navy paper look during the flashback, and the wash is cheap to paint", () => {
     dismissAllNotices();
-    document.body.classList.add("flashback");
+    document.body.classList.add("fb-paper");
     notify("Mission complete", "Paid.", "good");
     expect(document.getElementById("ndlg")!.classList.contains("inquiry")).toBe(true);
-    dismissAllNotices(); document.body.classList.remove("flashback");
+    dismissAllNotices(); document.body.classList.remove("fb-paper");
     notify("Plain", "x", "good");
     expect(document.getElementById("ndlg")!.classList.contains("inquiry")).toBe(false);
     dismissAllNotices();
@@ -2080,7 +2080,7 @@ describe("The Fall of Sam Axe", () => {
   });
 
   it("closing an Open Case counts its episode as seen, and cases closed earlier are counted when a save loads", () => {
-    for (const a of ARCS.filter(x => x.id !== "samfall")) expect(MISSIONS.some(m => m.ep === a.ep), a.title).toBe(true);
+    for (const a of ARCS.filter(x => x.ep)) expect(MISSIONS.some(m => m.ep === a.ep), a.title).toBe(true);
     S.episodesDone = {}; S.arcsDone = {};
     const arc = ARCS.find(x => x.id === "looseends")!;
     advanceArc(arc.id, 0); advanceArc(arc.id, 1); advanceArc(arc.id, 2);
@@ -2204,7 +2204,7 @@ describe("The Fall of Sam Axe", () => {
     S.arcsDone = {}; expect(med.t(S)).toBe(false);
     for (const a of ARCS) S.arcsDone[a.id] = true;
     expect(med.t(S)).toBe(true);
-    expect(ARCS.length).toBe(6);
+    expect(ARCS.length).toBe(7);                                  // the five episode cases, Sam's story and Nigeria
   });
 
   it("client and villain names follow the wiki for the cases that were corrected", () => {
@@ -2491,6 +2491,37 @@ describe("The Fall of Sam Axe", () => {
     expect(S.samChoices[0]).toBe(1);
   });
 
+  it("Nigeria: offered after the Pilot case, told over a bar, every step once, ending at the airport", () => {
+    S.seasonGate = false; S.life = 5e4; S.allies.sam = true; S.episodesDone = {}; S.arcStep = {}; S.arcsDone = {}; dismissAllNotices();
+    const f = FLASHBACKS.find(x => x.id === "nigeria")!, arc = f.arc;
+    expect(arcAvailable(arc)).toBe(false);                               // not until the Pilot case is done (or Season 2 opens)
+    S.episodesDone["101"] = true;
+    expect(arcAvailable(arc)).toBe(true);
+    milestones();
+    expect(document.getElementById("nT")!.textContent).toBe("Sam wants a story");
+    dismissAllNotices();
+    // each step once, with its card
+    const cards: string[] = [], steps: number[] = [];
+    for (let guard = 0; guard < 30 && !S.arcsDone.nigeria; guard++) {
+      dismissAllNotices();
+      const before = S.arcStep.nigeria ?? 0;
+      startArc("nigeria");
+      while (document.getElementById("evt")!.style.display === "flex") { cards.push(document.getElementById("evtT")!.textContent!); document.querySelectorAll<HTMLButtonElement>("#evtO button")[0].click(); dismissAllNotices(); }
+      if (S.boss) { expect(S.boss.id).toBe("warlord"); winBoss(); steps.push(before); continue; }
+      const a = S.active.find(x => x.arc?.id === "nigeria")!; a.chance = 1; resolveMission(a); steps.push(before);
+    }
+    expect(steps).toEqual([0, 1, 2, 3, 4]);
+    expect(cards.length).toBe(6);                                        // three acts, two in-betweens, one scene before the run
+    expect(cards.some(c => /The Last Mile/.test(c))).toBe(true);
+    expect(S.arcsDone.nigeria).toBe(true);
+        expect(document.body.classList.contains("fb-paper")).toBe(false);    // Sam's paper look is Sam's alone
+    // it's on the menu, and the foe has a place
+    expect(panelHTML("options")).toContain('data-modal="nigeria"');
+    expect(panelHTML("nigeria")).toContain("How you told it");
+    expect(panelHTML("rogue")).toContain("The Warlord");
+    dismissAllNotices();
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);
@@ -2770,7 +2801,9 @@ describe("A new Season, a new hold on you", () => {
     milestones();
     expect(S.seasonOpen).toBe(2);
     expect(S.grip).toBe(100);
-    expect(document.getElementById("nM")!.textContent).toMatch(/grip on you starts over: Carla/);
+    const msgs: string[] = [];
+    while (noticeOpen()) { msgs.push(document.getElementById("nM")!.textContent!); dismissNotice(); }
+    expect(msgs.join(" | ")).toMatch(/grip on you starts over: Carla/);
   });
 
   it("mid-season, wins still wear it down and keep it down", () => {

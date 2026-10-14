@@ -35,7 +35,7 @@ import { menuNew } from "./badges";
 import { narration, type NarrationEntry, type NarrationTag } from "./fx";
 import { EPILOGUE_CLOSE, EPILOGUE_TITLE, epilogueEntries } from "../data/epilogue";
 
-export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "heatinfo" | "med" | "rep" | "fosa" | "recap";
+export type TabId = "faq" | "list" | "ops" | "upg" | "mis" | "crew" | "gad" | "cov" | "fav" | "rogue" | "story" | "file" | "stats" | "auto" | "options" | "settings" | "narrator" | "heatinfo" | "med" | "rep" | "fosa" | "nigeria" | "recap";
 
 /** Everyday play: always visible as cards. */
 export const SECTIONS: [TabId, string][] = [
@@ -644,7 +644,7 @@ function faq(): string {
 const VIEWS: Record<TabId, () => string> = {
   faq,
   list: theList,
-  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, fosa: () => flashbackPage(flashbackById("samfall")!), narrator, heatinfo: heatInfo, story, med: medals, rep: reinstate, recap,
+  ops, upg: upgrades, mis: missions, crew, gad: gadgets, cov: covers, fav: favors, rogue: rogues, file, stats: statsView, auto: automation, options, settings, fosa: () => flashbackPage(flashbackById("samfall")!), nigeria: () => flashbackPage(flashbackById("nigeria")!), narrator, heatinfo: heatInfo, story, med: medals, rep: reinstate, recap,
 };
 
 export const panelHTML = (tab: TabId): string => { portraitScope(tab); return VIEWS[tab](); };

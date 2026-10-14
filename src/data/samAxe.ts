@@ -137,6 +137,7 @@ export const SAM_FLASHBACK: FlashbackDef = {
   nod: { label: "Remember Mike at the bowling alley", portrait: "michaelpre", ...BOWLING },
   bosses: FLASHBACK_BOSSES,
   speed: 0.5,
+  paper: true,
   menuId: "fosa",
   menuTitle: "The Fall of Sam Axe",
   pausedTitle: "Sam is telling his story.",

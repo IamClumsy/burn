@@ -1,5 +1,6 @@
 import type { Arc, Boss, ChoiceFx, GameState } from "../types";
 import { SAM_FLASHBACK } from "./samAxe";
+import { NIGERIA_FLASHBACK } from "./nigeria";
 
 /**
  * A flashback is an Open Case told by someone in the crew: an inquiry-style frame, a choice before each act, short
@@ -31,6 +32,8 @@ export interface FlashbackDef {
   bosses: Boss[];
   /** Multiplies how long each step takes: everything else is paused while it runs. */
   speed: number;
+  /** Cards and notices use the Navy-paper look while it runs (Sam's inquiry); otherwise they keep the game's own. */
+  paper: boolean;
   /** The menu page. */
   menuId: string;
   menuTitle: string;
@@ -49,6 +52,6 @@ export interface FlashbackDef {
   bossLine?: string;
 }
 
-export const FLASHBACKS: FlashbackDef[] = [SAM_FLASHBACK];
+export const FLASHBACKS: FlashbackDef[] = [SAM_FLASHBACK, NIGERIA_FLASHBACK];
 
 export const flashbackById = (id: string): FlashbackDef | undefined => FLASHBACKS.find(f => f.id === id);

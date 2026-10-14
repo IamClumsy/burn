@@ -66,7 +66,7 @@ export function startArc(id: string): void {
         fb.choices[st.act!] = k;
         if (o.fx.favors && !fb.replay) S.favors += o.fx.favors;
         return o.result;
-      }]), res => launchStep(a, step, res, title), { inquiry: true });
+      }]), res => launchStep(a, step, res, title), { inquiry: f.paper });
       return;
     }
     // the steps between acts get a card too, once each
@@ -76,7 +76,7 @@ export function startArc(id: string): void {
       showChoice(`${f.title} · ${beat.title}`, `${beat.inquiry} ${beat.prompt}`, beat.options.map((o, k): [string, () => string] => [o.label, () => {
         fb.choices["beat" + step] = k + 1; // 0 would read as "not told yet"
         return o.result;
-      }]), () => launchStep(a, step), { inquiry: true });
+      }]), () => launchStep(a, step), { inquiry: f.paper });
       return;
     }
   }
@@ -93,7 +93,7 @@ function launchStep(a: Arc, step: number, prior?: string, priorTitle?: string): 
       if (priorTitle) dropNotice(priorTitle); // its result is in this scene, so it needn't pop up again
       const b = f.bridge;
       showChoice(`${f.title} · ${b.title}`, `${prior}\n\n${b.scene}`, [[b.go, () => { fbState(a.id).choices.bridge = 1; return b.result; }]],
-        () => launchStep(a, step), { inquiry: true });
+        () => launchStep(a, step), { inquiry: f.paper });
       return;
     }
     startFlashbackBoss(st.boss, a.id, step);

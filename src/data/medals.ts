@@ -41,6 +41,7 @@ export const MEDALS: Medal[] = [
   {id:"a32",n:"Series Finale",    d:"Complete a mission from every episode", t:s=>Object.keys(s.episodesDone).length>=MISSIONS.length},
   {id:"a33",n:"Fully Staffed",    d:"Max out every operation",  t:s=>GENS.every(g=>(s.gens[g.id]||0)>=OP_CAP)},
   {id:"a34",n:"La Barbilla",      d:"Close The Fall of Sam Axe",  t:s=>!!s.arcsDone.samfall},
+  {id:"a38",n:"First Contact",     d:"Tell Sam and Jesse how you met Fiona",  t:s=>!!s.arcsDone.firstcontact},
   {id:"a37",n:"Another Round",     d:"Tell Sam what happened in Nigeria",  t:s=>!!s.arcsDone.nigeria},
   {id:"a36",n:"For Madeline",     d:"Remember Madeline",  t:s=>s.madelineGone},
   {id:"a35",n:"For Nate",         d:"Remember Nate",  t:s=>s.nateGone},

@@ -14,7 +14,7 @@ What's built is listed at the bottom. This is what's left, roughly in the order 
 
 ## 3. More to do mid-game
 
-- **More flashbacks:** The Fall of Sam Axe set the pattern (a case with an Admiral's inquiry, choices, a showdown, its own look and a replay page in the menu). Other one-off stories could reuse it.
+- **More flashbacks:** The Fall of Sam Axe set the pattern (a case with an Admiral's inquiry, choices, a showdown, its own look and a replay page in the menu), and Nigeria and First Contact reuse it as data. Other one-off stories can do the same.
 - **Photos on mission cards:** show the client and the villain next to each episode, using the portraits already in the game.
 - **More random events:** Nate's excuses, Madeline's phone tree, a Sam story, a Barry rate-card moment. Each is a few lines of text.
 - **More cast:** Beatriz and Amanda as characters, Diego Garza and Max as flavor, more one-episode villains as Rogues.

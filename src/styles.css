@@ -248,6 +248,13 @@
   .builtslot .built{margin-bottom:0}
   .dstamp.lifted{color:var(--good);border-color:var(--good)}
 
+  /* First Contact: Dublin at night, told at a bar. Variables and one static gradient, like the other flashback looks. */
+  body.fb-firstcontact{--bg:#0e1a17; --panel:#142622; --panel2:#1b332e; --line:#2f5a4c;
+    --text:#e6f4ec; --dim:#8fb2a2; --pink:#ff8fa8; --orange:#f2b36a; --gold:#e8d58a;
+    --sea:#7fc4b0; --good:#7fe0a8; --bad:#e8706a}
+  body.fb-firstcontact::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:25;
+    background:radial-gradient(ellipse at 50% 0%,#7fc4b022 0%,#0000 55%),radial-gradient(ellipse at center,#0000 50%,#04100c80 100%)}
+
   /* Nigeria: bleached and hot, told over a bar. Only variables and one static gradient, like the other flashback look. */
   body.fb-nigeria{--bg:#1d1408; --panel:#2a1c0b; --panel2:#35240f; --line:#6e4f1f;
     --text:#fff0d2; --dim:#c9b184; --pink:#ffa43c; --orange:#ffb84a; --gold:#ffd77a;

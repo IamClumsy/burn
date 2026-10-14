@@ -2204,7 +2204,7 @@ describe("The Fall of Sam Axe", () => {
     S.arcsDone = {}; expect(med.t(S)).toBe(false);
     for (const a of ARCS) S.arcsDone[a.id] = true;
     expect(med.t(S)).toBe(true);
-    expect(ARCS.length).toBe(7);                                  // the five episode cases, Sam's story and Nigeria
+    expect(ARCS.length).toBe(8);                                  // the five episode cases, Sam's story, Nigeria and First Contact
   });
 
   it("client and villain names follow the wiki for the cases that were corrected", () => {
@@ -2519,6 +2519,32 @@ describe("The Fall of Sam Axe", () => {
     expect(panelHTML("options")).toContain('data-modal="nigeria"');
     expect(panelHTML("nigeria")).toContain("How you told it");
     expect(panelHTML("rogue")).toContain("Boris");
+    dismissAllNotices();
+  });
+
+  it("First Contact: offered once Jesse has joined, told by both of them, five steps with no showdown", () => {
+    S.seasonGate = false; S.life = 4e8; S.allies.fiona = true; S.episodesDone = {}; S.arcStep = {}; S.arcsDone = { nigeria: true, samfall: true }; dismissAllNotices();
+    const f = FLASHBACKS.find(x => x.id === "firstcontact")!, arc = f.arc;
+    expect(arcAvailable(arc)).toBe(false);                               // not until Jesse's episode is done (or Season 5 opens)
+    S.episodesDone["402"] = true;
+    expect(arcAvailable(arc)).toBe(true);
+    milestones();
+    expect(document.getElementById("nT")!.textContent).toBe("Jesse wants a story");
+    dismissAllNotices();
+    const cards: string[] = [], steps: number[] = [];
+    for (let guard = 0; guard < 30 && !S.arcsDone.firstcontact; guard++) {
+      dismissAllNotices();
+      const before = S.arcStep.firstcontact ?? 0;
+      startArc("firstcontact");
+      while (document.getElementById("evt")!.style.display === "flex") { cards.push(document.getElementById("evtT")!.textContent!); document.querySelectorAll<HTMLButtonElement>("#evtO button")[0].click(); dismissAllNotices(); }
+      expect(S.boss).toBeFalsy();
+      const a = S.active.find(x => x.arc?.id === "firstcontact")!; a.chance = 1; resolveMission(a); steps.push(before);
+    }
+    expect(steps).toEqual([0, 1, 2, 3, 4]);
+    expect(cards.length).toBe(5);                                        // three acts and two in-betweens
+    expect(S.arcsDone.firstcontact).toBe(true);
+    expect(panelHTML("options")).toContain('data-modal="firstcontact"');
+    expect(panelHTML("firstcontact")).toContain("How you told it");
     dismissAllNotices();
   });
 

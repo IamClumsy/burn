@@ -89,6 +89,7 @@ export function scheduleErrand(ms?: number): void {
 
 export function spawnErrand(): void {
   // Only once they're watching, and never over another decision.
+  if (S.cleanRecord) { scheduleErrand(600000); return; } // the Organization has stood down
   if (S.att < TIERS[1].min || choiceBusy() || S.boss || inFlashback()) { scheduleErrand(S.boss || inFlashback() ? 20000 : 45000); return; }
   const e = pick(ERRANDS), who = handlerFor(S.life);
   const fee = capFee((cps() * 200 + 500) / KEEP_RATE);

@@ -24,6 +24,7 @@ export function bossWeight(b: Boss): number {
 }
 
 export function spawnBoss(): void {
+  if (S.cleanRecord) { S.bossCd = 600; return; } // everyone on The List is crossed off: no more encounters
   const pool = BOSSES.filter(b => grossLife() >= b.at && (!b.needs || S.allies[b.needs]));
   if (!pool.length) { S.bossCd = 60; return; }
   const next = pool.find(x => !S.bossKills[x.id]); // the pool is in List order, which is story order

@@ -114,13 +114,13 @@ export function heatMult(): number {
 /** The noise your operations make: each one counts more the further down the list it is. */
 export const opsNoise = (): number => GENS.reduce((a, g, i) => a + owned(g.id) * (1 + i * 0.3), 0);
 /** Heat built per second by your operations, before the world cools you down. */
-export const heatGain = (): number => opsNoise() * 0.012 * heatMult();
+export const heatGain = (): number => (S.cleanRecord ? 0 : opsNoise() * 0.012 * heatMult()); // once the burn is lifted nobody is watching
 export const HEAT_COOLING = 1.2;
 /** Net heat change per second (negative means you're cooling). */
 export const heatNet = (): number => heatGain() - HEAT_COOLING;
 
 /** Attention built per second: more the hotter you are, scaled by your story choices and how loose their grip is. */
-export const attGain = (): number => (S.fx.sub > 0 ? 0 : (0.05 + S.heat * 0.004) * choiceMult("att") * gripAtt());
+export const attGain = (): number => (S.fx.sub > 0 || S.cleanRecord ? 0 : (0.05 + S.heat * 0.004) * choiceMult("att") * gripAtt());
 /** Attention shed per second: only when you're lying low (heat under 20%). */
 export const attCooling = (): number => (S.heat < 20 ? 0.25 : 0);
 export const attNet = (): number => attGain() - attCooling();

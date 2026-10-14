@@ -29,7 +29,7 @@ export const FAQ: FaqSection[] = [
   ]},
   {title: "Heat and the Organization", items: [
     {q: "What is heat?",
-     a: () => "Heat is how much attention your activity draws. Jobs, operations and missions raise it. At 100% you're burned again: you lose half your cash and heat drops back to 30. Lay Low cuts it, and Madeline or the Hands-Off Handler upgrade can do it for you."},
+     a: () => "Heat is how much attention your activity draws. Jobs, operations and missions raise it. At 100% you're burned again: you lose half your cash and heat drops back to 30. Lay Low cuts it, and Madeline or the Hands-Off Handler upgrade can do it for you. Once the burn is lifted, heat and the Organization's attention stop for good: nobody is watching any more."},
     {q: "Why is my heat going up when I'm not doing anything?",
      a: () => "Your operations make noise all the time, and the Organization's attention makes that noise count for more. The thin bar under each meter shows the net change right now: red to the right and ▲ when it's building, green to the left and ▼ when it's cooling. Tap the little i next to Heat or Attention (or either of those bars) for the exact numbers: heat built and cooled per second, every multiplier that applies, and how long until a burn or an ambush at the current rate."},
     {q: "What is the Organization's attention?",

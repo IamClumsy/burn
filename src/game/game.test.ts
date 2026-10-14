@@ -2367,6 +2367,26 @@ describe("The Fall of Sam Axe", () => {
     expect(await newerBuildAvailable(page("NEW") as any, "")).toBe(false);                       // development: no built script to compare
   });
 
+  it("once the burn is lifted, heat and the Organization's attention stop, and nobody comes after you", () => {
+    S.life = 1e12; S.gens = { inf: 200, tape: 200, sam: 200, fi: 200, mad: 200, safe: 200, spook: 200, burn: 200 } as any;
+    S.cleanRecord = false; S.heat = 0; S.att = 0;
+    expect(heatGain()).toBeGreaterThan(0);
+    expect(attGain()).toBeGreaterThan(0);
+    S.cleanRecord = true; S.heat = 80; S.att = 90; S.boss = null;
+    expect(heatGain()).toBe(0);
+    expect(attGain()).toBe(0);
+    tick(0.1);
+    expect(S.heat).toBe(0);
+    expect(S.att).toBe(0);
+    const burns = S.stats.burns;
+    for (let i = 0; i < 50; i++) tick(0.1);
+    expect(S.stats.burns).toBe(burns);                       // can't be burned
+    S.bossCd = 0; spawnBoss();
+    expect(S.boss).toBeNull();                               // no more encounters
+    dismissAllNotices();
+    S.cleanRecord = false;
+  });
+
   it("the Depth Perception mission is the one where Beatriz turns up", () => {
     const m = MISSIONS.find(x => x.ep === "516")!;
     expect(m.n).toMatch(/Sam's Old Friend/);

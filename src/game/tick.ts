@@ -129,6 +129,7 @@ export function tick(dt: number): void {
   S.heat = Math.max(0, S.heat + heatNet() * dt);
   S.att = Math.max(0, Math.min(100, S.att + attNet() * dt));
 
+  if (S.cleanRecord) { S.heat = 0; S.att = 0; } // the burn is lifted: heat and the Organization's attention stop for good
   if (S.layCd > 0) S.layCd = Math.max(0, S.layCd - dt);
   if (S.coverCd > 0) S.coverCd = Math.max(0, S.coverCd - dt);
   for (const k in S.fx) if (S.fx[k] > 0) S.fx[k] = Math.max(0, S.fx[k] - dt);

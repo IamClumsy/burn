@@ -24,7 +24,7 @@ import { versionLine } from "../version";
 import { devFundsOn, devUnlocked } from "../dev";
 import { FAVORS_PER_DAY, bossGapText } from "../data/pacing";
 import { DOSSIER, GRIP_PERKS } from "../data/org";
-import { arcAvailable, arcStep, stepDur } from "../game/arcs";
+import { arcAvailable, arcSlotOpen, arcStep, stepDur } from "../game/arcs";
 import { FLASHBACKS, flashbackById, type FlashbackDef } from "../data/flashbacks";
 import { fbState } from "../flashbackState";
 import { CONTACTS, contactFace, contactFor } from "../data/contacts";
@@ -161,7 +161,7 @@ function missions(): string {
       return `<div class="box"><b>${a.title}</b> <span class="chip">Step ${k + 1} of ${a.steps.length}</span>
         <div class="small">${a.blurb}</div>
         <div class="small" style="color:var(--text)">Next: ${st.n} · ${stepDur(a, st.dur)}s · +${st.heat} heat${S.allies[a.ally] ? "" : ""}</div>
-        <div class="btns"><button data-act="arc" data-arg="${a.id}" ${slotOpen(allyFree(a.ally)) ? "" : "disabled"}>Start this step</button>${nodFor(a.id, k)}</div></div>`;
+        <div class="btns"><button data-act="arc" data-arg="${a.id}" ${arcSlotOpen(a) ? "" : "disabled"}>Start this step</button>${nodFor(a.id, k)}</div></div>`;
     }).join("");
   }
   if (S.active.length) {

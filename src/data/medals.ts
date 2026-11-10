@@ -1,4 +1,4 @@
-import type { Medal } from "../types";
+import type { GameState, Medal } from "../types";
 import { ALLIES } from "./allies";
 import { BOSSES } from "./bosses";
 import { STORY } from "./story";
@@ -6,6 +6,10 @@ import { ARCS } from "./arcs";
 import { MISSIONS } from "./missions";
 import { GENS, OP_CAP } from "./ops";
 import { totalOps } from "../calc";
+
+/** Full Docket is the whole caseload: every Open Case and every episode, so it can't come before the last Season. */
+export const fullDocket = (s: GameState): boolean =>
+  ARCS.every(a => s.arcsDone[a.id]) && MISSIONS.every(m => !m.ep || !!s.episodesDone[m.ep]);
 
 export const MEDALS: Medal[] = [
   {id:"a1", n:"First Job",        d:"Take a job",                 t:s=>s.stats.clicks>=1},
@@ -32,7 +36,7 @@ export const MEDALS: Medal[] = [
   {id:"a23",n:"A Real Hero",     d:"Return $1B to the people you help",   t:s=>s.stats.returned>=1e9},
   {id:"a24",n:"A Necessary Evil", d:"Buy 10 favors from your contacts: Seymour, your intel man, and Barry", t:s=>s.stats.seymourFavors+s.stats.simonFavors+s.stats.barryFavors>=10},
   {id:"a25",n:"Open and Shut",    d:"Close a multi-step case", t:s=>Object.keys(s.arcsDone).length>=1},
-  {id:"a26",n:"Full Docket",      d:"Close every Open Case (every multi-step case, not every episode)", t:s=>ARCS.every(a=>s.arcsDone[a.id])},
+  {id:"a26",n:"Full Docket",      d:"Close every Open Case and finish every episode", t:fullDocket},
   {id:"a27",n:"Slipping Away",    d:"Wear the Organization's grip down to 50%", t:s=>s.grip<=50},
   {id:"a28",n:"Clean Record",     d:"Complete the List and lift the burn", t:s=>s.cleanRecord},
   {id:"a29",n:"Handled",          d:"Take on 5 errands for a handler", t:s=>s.stats.errands>=5},

@@ -2147,6 +2147,24 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
   });
 
+  it("jobs on hold during Sam's story don't block a step or keep Sam away from it", () => {
+    S.life = 5e8; S.allies.sam = true; S.samOffered = true; S.board = []; S.active = []; dismissAllNotices();
+    S.arcStep[SAM_ARC_ID] = 4; S.samChoices = { 0: 0, 1: 0, beat1: 1, beat2: 1 };    // mid-story, so other jobs are on hold
+    const job = (uid: number, sent: string | null) => ({ uid, n: "Job " + uid, dur: 60, succ: 0.5, heat: 1, rm: 1, fav: 1, ally: "sam", kid: false, elder: false, send: !!sent, sent, left: 30, chance: 0.5, reward: 100 });
+    S.active = [job(9001, "sam"), job(9002, null), job(9003, null), job(9004, null)];   // every slot full, Sam on one of them
+    expect(inFlashback()).toBe(true);
+    expect(panelHTML("mis")).not.toMatch(/data-act="arc" data-arg="samfall" disabled/);  // the step can still start
+    startArc("samfall");
+    expect(document.getElementById("evtT")!.textContent).toMatch(/Satellite Phone/);    // and its card shows
+    answer(0);
+    const a = S.active.find(x => x.arc?.id === "samfall")!;
+    expect(a.sent).toBe("sam");                                                         // Sam is along for his own story
+    expect(a.chance).toBeGreaterThan(SAM_ARC.steps[4].succ + 0.2);                      // with his +25%
+    a.chance = 1; resolveMission(a);
+    expect(S.arcStep.samfall).toBe(5);                                                  // and it moves on, once
+    S.active = []; dismissAllNotices();
+  });
+
   it("a failed Sam step is retried without a second question, and says so", () => {
     S.life = 5e8; S.allies.sam = true; S.samOffered = true; dismissAllNotices();
     S.arcStep[SAM_ARC_ID] = 4; S.samChoices = { 0: 0, 1: 0, beat1: 1, beat2: 1 };
@@ -2164,12 +2182,12 @@ describe("The Fall of Sam Axe", () => {
     S.active = [];
   });
 
-  it("no ally helps on a case where they are the client", () => {
+  it("no ally helps on a case where they are the client (by first name or full name)", () => {
     const notes = EP_NOTES as Record<string, { client?: string }>;
-    const names: Record<string, string> = { barry: "Barry", nate: "Nate", sam: "Sam", fiona: "Fiona", madeline: "Madeline", jesse: "Jesse" };
     for (const m of MISSIONS) {
       const client = notes[m.ep!]?.client ?? "";
-      expect(client, `${m.n} (${m.ep}): ${m.ally} helps their own case`).not.toBe(names[m.ally]);
+      const first = ALLIES.find(a => a.id === m.ally)!.name.split(" ")[0];
+      expect(client.split(/ and |, | /), `${m.n} (${m.ep}): ${m.ally} helps their own case`).not.toContain(first);
     }
   });
 
@@ -2198,13 +2216,56 @@ describe("The Fall of Sam Axe", () => {
     dismissAllNotices();
   });
 
-  it("the Full Docket medal is for the six Open Cases, and says so", () => {
+  it("the Full Docket medal needs every Open Case and every episode, so it can't come in Season 6", () => {
     const med = MEDALS.find(m => m.n === "Full Docket")!;
     expect(med.d).toMatch(/Open Case/);
-    S.arcsDone = {}; expect(med.t(S)).toBe(false);
+    S.arcsDone = {}; S.episodesDone = {}; expect(med.t(S)).toBe(false);
     for (const a of ARCS) S.arcsDone[a.id] = true;
+    for (const m of MISSIONS) if (seasonOf(m.ep!) <= 6) S.episodesDone[m.ep!] = true;
+    expect(med.t(S)).toBe(false);                                 // every Open Case closed, but Season 7 still to go
+    for (const m of MISSIONS) S.episodesDone[m.ep!] = true;
     expect(med.t(S)).toBe(true);
     expect(ARCS.length).toBe(8);                                  // the five episode cases, Sam's story, Nigeria and First Contact
+  });
+
+  it("a save that got Full Docket early loses it on load, and one that earned it keeps it", () => {
+    const early = { ...fresh(), ach: ["a1", "a26"], arcsDone: Object.fromEntries(ARCS.map(a => [a.id, true])) } as GameState;
+    localStorage.setItem("burnedMiamiIdle_v2", JSON.stringify(early)); window.name = "";
+    loadGame();
+    expect(S.ach).toEqual(["a1"]);
+    const earned = { ...early, episodesDone: Object.fromEntries(MISSIONS.map(m => [m.ep!, true])) } as GameState;
+    localStorage.setItem("burnedMiamiIdle_v2", JSON.stringify(earned));
+    loadGame();
+    expect(S.ach).toContain("a26");
+    localStorage.removeItem("burnedMiamiIdle_v2"); dismissAllNotices();
+  });
+
+  it("a save from before the Season gate joins it: Seasons it reached stay open, the next one waits", () => {
+    const life = 4.5e10;                                          // enough money for Season 7
+    const done = Object.fromEntries(MISSIONS.filter(m => seasonOf(m.ep!) <= 5).map(m => [m.ep!, true]));
+    const oldSave = { ...fresh(), life, episodesDone: done, seasonOpen: 6 } as Partial<GameState>;
+    delete oldSave.seasonGate;                                    // older saves have no such field
+    setState(merge(oldSave));
+    expect(S.seasonGate).toBe(true);
+    expect(openSeasons()).toBe(6);                                // Season 6 was already open, so it stays open
+    expect(waitingOn()).toBe(6);                                  // but Season 7 waits for every Season 6 case
+    const letOff = { ...fresh(), life: 9e9, episodesDone: Object.fromEntries(MISSIONS.filter(m => seasonOf(m.ep!) <= 4).map(m => [m.ep!, true])), seasonOpen: 5, seasonGate: false } as Partial<GameState>;
+    setState(merge(letOff));
+    expect(openSeasons()).toBe(5);                                // Season 5 isn't finished, so the money alone no longer opens Season 6
+    milestones();
+    expect(S.seasonOpen).toBe(5);
+    S.seasonGate = false; dismissAllNotices();
+  });
+
+  it("an old save in the middle of Season 5 can't have Season 6 open just by finishing Sam's story", () => {
+    const done = Object.fromEntries(MISSIONS.filter(m => +m.ep! <= 516).map(m => [m.ep!, true]));
+    const oldSave = { ...fresh(), life: 9e9, episodesDone: done, seasonOpen: 5, arcsDone: { samfall: true } } as Partial<GameState>;
+    delete oldSave.seasonGate;
+    setState(merge(oldSave));
+    milestones();
+    expect(openSeasons()).toBe(5);                                // 517 and 518 are still to come
+    expect(S.seasonOpen).toBe(5);
+    S.seasonGate = false; dismissAllNotices();
   });
 
   it("client and villain names follow the wiki for the cases that were corrected", () => {

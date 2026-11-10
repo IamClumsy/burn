@@ -1,6 +1,6 @@
 import { S } from "../state";
 import { seasonOf } from "../data/missions";
-import { allyFree, finaleHeldBack, missionReward, openSeasons, slotOpen, succChance } from "../calc";
+import { allyFree, allyHere, finaleHeldBack, missionReward, openSeasons, slotOpen, succChance } from "../calc";
 import { ARCS } from "../data/arcs";
 import { beep, chime } from "../audio";
 import { say as sayTag, toast } from "../ui/fx";
@@ -26,6 +26,18 @@ export const arcAvailable = (a: Arc): boolean => {
   return S.life >= a.at && (!a.ep || openSeasons() >= seasonOf(a.ep)) && (!a.ep || !finaleHeldBack(a.ep)) && (!S.arcsDone[a.id] || replaying) && !S.active.some(m => m.arc?.id === a.id) &&
     (!a.needsEp || !!S.episodesDone[a.needsEp] || openSeasons() >= (a.orSeason ?? 99)) && (!a.season || openSeasons() >= a.season);
 };
+
+/**
+ * Whether the case's ally can go along on its next step. In a flashback the teller is always with you: every other job is
+ * on hold while it's told, so a job they were helping with doesn't keep them away (it used to, and a step ran without them).
+ */
+export const arcHelpFree = (a: Arc): boolean => flashbackById(a.id) ? allyHere(a.ally) : allyFree(a.ally);
+/**
+ * Whether the next step has a slot. A flashback's step doesn't need one: the jobs on hold while it's told would otherwise
+ * fill every slot and leave the step (and its question card) unable to start.
+ */
+export const arcSlotOpen = (a: Arc): boolean =>
+  flashbackById(a.id) ? !S.active.some(m => m.arc?.id === a.id) : slotOpen(allyFree(a.ally));
 
 /** Hear a flashback again from the menu once it's been told: the case starts over, with new answers and no second helping of rewards. */
 export function replayFlashback(id: string): void {
@@ -53,7 +65,7 @@ export const rememberBowling = (): void => rememberNod("samfall");
 /** Start the next step of a case. Your ally for that case joins automatically if they're free. */
 export function startArc(id: string): void {
   const a = ARCS.find(x => x.id === id);
-  if (!a || !arcAvailable(a) || !slotOpen(allyFree(a.ally))) return;
+  if (!a || !arcAvailable(a) || !arcSlotOpen(a)) return;
   const step = arcStep(a), st = a.steps[step];
   const f = flashbackById(id);
   if (f) {
@@ -85,7 +97,7 @@ export function startArc(id: string): void {
 
 function launchStep(a: Arc, step: number, prior?: string, priorTitle?: string): void {
   const st = a.steps[step];
-  if (!slotOpen(allyFree(a.ally)) || arcAvailable(a) === false) return;
+  if (!arcSlotOpen(a) || arcAvailable(a) === false) return;
   const f = flashbackById(a.id);
   if (st.boss) { // a showdown instead of a mission
     if (S.boss) { say("Finish the case you're on first. The road will still be there."); return; }
@@ -102,7 +114,7 @@ function launchStep(a: Arc, step: number, prior?: string, priorTitle?: string): 
   const replaying = !!f && fbState(a.id).replay;
   const base: Mission = {
     uid: S.uid++, n: `${a.title}: ${st.n}`, dur: stepDur(a, st.dur), succ: st.succ, heat: st.heat, rm: st.rm, fav: replaying ? 0 : 1,
-    ally: a.ally, kid: false, send: allyFree(a.ally), arc: { id: a.id, step },
+    ally: a.ally, kid: false, send: arcHelpFree(a), arc: { id: a.id, step },
   };
   const sent = base.send ? a.ally : null;
   S.active.push({ ...base, sent, left: base.dur, chance: succChance(base), reward: missionReward(base) });

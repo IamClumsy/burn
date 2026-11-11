@@ -150,7 +150,7 @@ export interface GameState {
   /** Every flashback other than Sam's keeps its answers, offer and replay here, by id. */
   fb: Dict<FlashbackState>;
   /** Has Sam offered to tell The Fall of Sam Axe yet? */
-  /** New games only: Season 2 waits for every Season 1 case. Older saves skip it. */ seasonGate: boolean; /** Nate has died, in "Shock Wave". */ nateGone: boolean; /** Madeline has died, in "Reckoning". */ madelineGone: boolean; samOffered: boolean; samReplay: boolean; backupNudged: boolean; intel: number;
+  /** Each Season waits for every case of the one before it. Older saves join it on load, keeping the Seasons they reached. */ seasonGate: boolean; /** Nate has died, in "Shock Wave". */ nateGone: boolean; /** Madeline has died, in "Reckoning". */ madelineGone: boolean; samOffered: boolean; samReplay: boolean; backupNudged: boolean; intel: number;
   /** The Organization's grip on you: starts at 100 and is worn down by wins. */
   grip: number;
   /** Names of people on the List that you know about (from wins or Simon's tips). */

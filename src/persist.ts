@@ -1,6 +1,7 @@
 import { S, SAVE_KEY, fresh, merge, setState } from "./state";
 import { returnFromAway } from "./game/offline";
 import { ARCS } from "./data/arcs";
+import { fullDocket } from "./data/medals";
 import { setSaveStatus } from "./saveStatus";
 import type { GameState } from "./types";
 
@@ -47,9 +48,15 @@ export function loadGame(): void {
   const saved = readSave();
   if (!saved) { setState(fresh()); return; }
   setState(merge(saved));
-  for (const a of ARCS) if (a.ep && S.arcsDone[a.id]) S.episodesDone[a.ep] = true; // cases closed before this was tracked
+  repairSave();
   const away = (Date.now() - S.last) / 1000;
   if (away > 30) returnFromAway(away);
+}
+
+/** Fix-ups for older saves, run after a load or an import. */
+function repairSave(): void {
+  for (const a of ARCS) if (a.ep && S.arcsDone[a.id]) S.episodesDone[a.ep] = true; // cases closed before this was tracked
+  if (S.ach.includes("a26") && !fullDocket(S)) S.ach = S.ach.filter(id => id !== "a26"); // Full Docket used to come early, in Season 6
 }
 
 export function wipeSave(): void {
@@ -70,6 +77,7 @@ export function exportSave(): void {
 export function importSave(code: string): boolean {
   try {
     setState(merge(JSON.parse(decodeURIComponent(escape(atob(code.trim()))))));
+    repairSave();
     save();
     return true;
   } catch { return false; }

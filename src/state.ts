@@ -1,5 +1,6 @@
 import type { GameState } from "./types";
 import { BOSS_FIRST } from "./data/pacing";
+import { seasonsOpen } from "./data/missions";
 
 export const SAVE_KEY = "burnedMiamiIdle_v2";
 
@@ -55,7 +56,6 @@ export function payClient(gross: number): { keep: number; returned: number } {
 export function merge(saved: Partial<GameState>): GameState {
   const f = fresh();
   const o = Object.assign(f, saved);
-  if (saved.seasonGate === undefined) o.seasonGate = false; // a save from before the rule keeps the Seasons it has
   o.stats = Object.assign(fresh().stats, saved.stats || {});
   o.junk = Object.assign(fresh().junk, saved.junk || {});
   o.favorLog = Object.assign(fresh().favorLog, saved.favorLog || {});
@@ -73,5 +73,11 @@ export function merge(saved: Partial<GameState>): GameState {
     if (typeof d[k] === "number" && (typeof r[k] !== "number" || !Number.isFinite(r[k] as number))) r[k] = d[k];
   }
   for (const k of ["cash", "life", "run"] as const) o[k] = Math.min(NUM_CAP, Math.max(0, o[k]));
+  // A save from before the Season gate (or one that was let off it) joins the gate now. Every Season it has already
+  // reached stays open, but the next one waits for the Season before it to be finished, as in a new game.
+  if (o.seasonGate !== true) {
+    o.seasonGate = true;
+    if (typeof saved.seasonOpen !== "number") o.seasonOpen = seasonsOpen(o.life); // a save too old to say which Season it reached
+  }
   return o;
 }
